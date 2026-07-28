@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">
+  <defs>
+    <linearGradient id="riftBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#050205"/><stop offset="40%" stop-color="#0a0510"/>
+      <stop offset="70%" stop-color="#100520"/><stop offset="100%" stop-color="#0a0515"/>
+    </linearGradient>
+    <radialGradient id="voidGlow" cx="0.5" cy="0.4" r="0.35">
+      <stop offset="0%" stop-color="#8800ff" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#8800ff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="runeGlow" cx="0.5" cy="0.3" r="0.25">
+      <stop offset="0%" stop-color="#aa44ff" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#aa44ff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="voidBlur"><feGaussianBlur stdDeviation="3"/></filter>
+  </defs>
+  <rect width="600" height="400" fill="url(#riftBg)"/>
+  <rect width="600" height="400" fill="url(#voidGlow)"/>
+  <rect width="600" height="400" fill="url(#runeGlow)"/>
+  <!-- Void rift -->
+  <ellipse cx="300" cy="160" rx="100" ry="120" fill="#0a0520" opacity="0.5" filter="url(#voidBlur)"/>
+  <ellipse cx="300" cy="160" rx="60" ry="80" fill="#1a0540" opacity="0.3" filter="url(#voidBlur)"/>
+  <!-- Floating ruins -->
+  <g fill="#0a0a15" opacity="0.6">
+    <rect x="180" y="220" width="20" height="60" transform="rotate(-15, 190, 250)"/>
+    <rect x="380" y="200" width="15" height="50" transform="rotate(10, 387, 225)"/>
+    <rect x="250" y="280" width="30" height="8"/>
+    <rect x="400" y="260" width="25" height="6"/>
+  </g>
+  <!-- Impossible geometry hints -->
+  <g stroke="#8800ff" stroke-width="1" fill="none" opacity="0.2">
+    <polygon points="300,100 340,140 300,180 260,140"/>
+    <polygon points="260,140 280,160 260,180"/>
+    <polygon points="340,140 320,160 340,180"/>
+  </g>
+  <!-- Floating particles -->
+  <g opacity="0.4">
+    <circle cx="250" cy="200" r="1.5" fill="#aa44ff"/>
+    <circle cx="350" cy="180" r="1" fill="#aa44ff"/>
+    <circle cx="280" cy="250" r="1.5" fill="#8800ff"/>
+    <circle cx="320" cy="230" r="1" fill="#8800ff"/>
+    <circle cx="300" cy="300" r="1.5" fill="#aa44ff"/>
+    <circle cx="380" cy="250" r="1" fill="#cc66ff"/>
+    <circle cx="220" cy="270" r="0.8" fill="#cc66ff"/>
+  </g>
+  <!-- Small figure -->
+  <g fill="#050510" opacity="0.7">
+    <ellipse cx="300" cy="310" rx="4" ry="10"/>
+    <circle cx="300" cy="300" r="4"/>
+  </g>
+  <!-- Ground -->
+  <rect x="0" y="340" width="600" height="60" fill="#050510"/>
+</svg>

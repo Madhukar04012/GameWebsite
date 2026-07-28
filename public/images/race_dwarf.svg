@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">
+  <defs>
+    <linearGradient id="dwarfBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#050505"/><stop offset="40%" stop-color="#0a0505"/>
+      <stop offset="70%" stop-color="#1a0a05"/><stop offset="100%" stop-color="#2a1005"/>
+    </linearGradient>
+    <radialGradient id="forgeGlow" cx="0.4" cy="0.7" r="0.3">
+      <stop offset="0%" stop-color="#ff6622" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#ff6622" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#dwarfBg)"/>
+  <rect width="600" height="400" fill="url(#forgeGlow)"/>
+  <!-- Underground cavern ceiling -->
+  <path d="M0 0 Q100 30 200 20 Q300 40 400 15 Q500 35 600 20 L600 0Z" fill="#050505"/>
+  <!-- Massive forge structures -->
+  <g fill="#0a0a0f" opacity="0.8">
+    <rect x="100" y="150" width="80" height="120"/>
+    <rect x="180" y="170" width="60" height="100"/>
+    <rect x="350" y="140" width="100" height="130"/>
+    <rect x="450" y="160" width="70" height="110"/>
+  </g>
+  <!-- Machinery -->
+  <g fill="#0d0d12" opacity="0.6">
+    <circle cx="140" cy="200" r="30"/>
+    <circle cx="140" cy="200" r="15"/>
+    <rect x="225" y="180" width="40" height="8"/>
+    <rect x="230" y="195" width="35" height="6"/>
+    <circle cx="400" cy="220" r="25"/>
+    <circle cx="400" cy="220" r="12"/>
+  </g>
+  <!-- Lava river -->
+  <path d="M0 380 Q100 370 200 375 Q300 380 400 370 Q500 365 600 375 L600 400 L0 400Z" fill="#1a0505"/>
+  <path d="M0 385 Q100 378 200 382 Q300 385 400 378 Q500 373 600 382 L600 400 L0 400Z" fill="#ff4422" opacity="0.2"/>
+  <!-- Lava glow -->
+  <path d="M0 360 Q100 355 200 358 Q300 362 400 355 Q500 350 600 358 L600 400 L0 400Z" fill="#ff6622" opacity="0.05"/>
+  <!-- Small dwarf figure -->
+  <g fill="#050508" opacity="0.7">
+    <rect x="300" y="280" width="6" height="15"/>
+    <circle cx="303" cy="276" r="4"/>
+  </g>
+</svg>

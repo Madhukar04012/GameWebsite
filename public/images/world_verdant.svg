@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="verdantSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#050a08"/><stop offset="30%" stop-color="#0a1a10"/>
+      <stop offset="60%" stop-color="#0a2a15"/><stop offset="100%" stop-color="#1a3a20"/>
+    </linearGradient>
+    <linearGradient id="sunRays" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#d4af37" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#d4af37" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="fogVerdant" x1="0" y1="0.5" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a5a3a" stop-opacity="0"/><stop offset="70%" stop-color="#2a5a3a" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#2a5a3a" stop-opacity="0.15"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#verdantSky)"/>
+  <rect width="800" height="600" fill="url(#sunRays)"/>
+  <!-- Giant trees background -->
+  <g fill="#051008" opacity="0.7">
+    <rect x="80" y="100" width="30" height="350"/>
+    <rect x="180" y="60" width="35" height="390"/>
+    <rect x="350" y="80" width="40" height="370"/>
+    <rect x="550" y="50" width="45" height="400"/>
+    <rect x="680" y="90" width="35" height="360"/>
+  </g>
+  <!-- Tree canopies -->
+  <g fill="#051008" opacity="0.8">
+    <ellipse cx="95" cy="100" rx="60" ry="40"/>
+    <ellipse cx="197" cy="60" rx="70" ry="45"/>
+    <ellipse cx="370" cy="80" rx="75" ry="50"/>
+    <ellipse cx="572" cy="50" rx="80" ry="45"/>
+    <ellipse cx="697" cy="90" rx="65" ry="40"/>
+  </g>
+  <!-- Tree canopy overlay for depth -->
+  <g fill="#0a1a10" opacity="0.4">
+    <ellipse cx="300" cy="120" rx="100" ry="60"/>
+    <ellipse cx="500" cy="100" rx="120" ry="55"/>
+  </g>
+  <!-- Ruined temple -->
+  <g fill="#0d1510" opacity="0.7">
+    <rect x="330" y="320" width="15" height="80"/>
+    <rect x="450" y="310" width="15" height="90"/>
+    <rect x="330" y="310" width="135" height="10"/>
+  </g>
+  <g fill="#0a120d" opacity="0.6">
+    <rect x="350" y="330" width="10" height="60"/>
+    <rect x="380" y="325" width="10" height="65"/>
+    <rect x="410" y="335" width="10" height="55"/>
+  </g>
+  <!-- Light rays -->
+  <g opacity="0.05">
+    <polygon points="370,0 340,600 370,600" fill="#d4af37"/>
+    <polygon points="400,0 420,600 450,600" fill="#d4af37"/>
+  </g>
+  <!-- Travelers -->
+  <g fill="#0a150d" opacity="0.6">
+    <ellipse cx="385" cy="410" rx="3" ry="5"/><ellipse cx="398" cy="412" rx="2.5" ry="4.5"/>
+    <ellipse cx="410" cy="408" rx="2" ry="4"/>
+  </g>
+  <!-- Ground -->
+  <rect x="0" y="440" width="800" height="160" fill="#050a08"/>
+  <rect x="0" y="420" width="800" height="180" fill="url(#fogVerdant)"/>
+</svg>

@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a0a1a"/>
+      <stop offset="30%" stop-color="#1a1a3a"/>
+      <stop offset="55%" stop-color="#2a1a0a"/>
+      <stop offset="75%" stop-color="#d4af37"/>
+      <stop offset="100%" stop-color="#f0d060"/>
+    </linearGradient>
+    <linearGradient id="skyTop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#050510"/>
+      <stop offset="60%" stop-color="#0d0d2a"/>
+      <stop offset="100%" stop-color="#1a1a3a"/>
+    </linearGradient>
+    <linearGradient id="fog" x1="0" y1="0.6" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d4af37" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#d4af37" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#d4af37" stop-opacity="0.15"/>
+    </linearGradient>
+    <linearGradient id="mountain1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a3a"/>
+      <stop offset="100%" stop-color="#0a0a1a"/>
+    </linearGradient>
+    <linearGradient id="mountain2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a2a4a"/>
+      <stop offset="100%" stop-color="#151530"/>
+    </linearGradient>
+    <linearGradient id="islandTop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3a3a2a"/>
+      <stop offset="30%" stop-color="#2a3a1a"/>
+      <stop offset="100%" stop-color="#1a1a0a"/>
+    </linearGradient>
+    <linearGradient id="islandBottom" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a0a"/>
+      <stop offset="100%" stop-color="#0a0a05"/>
+    </linearGradient>
+    <linearGradient id="waterfall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.6"/>
+      <stop offset="50%" stop-color="#a0c0ff" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.1"/>
+    </linearGradient>
+    <radialGradient id="sunGlow" cx="0.5" cy="0.6" r="0.3">
+      <stop offset="0%" stop-color="#ffd060" stop-opacity="0.3"/>
+      <stop offset="50%" stop-color="#d4af37" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#d4af37" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blur1"><feGaussianBlur stdDeviation="2"/></filter>
+    <filter id="blur2"><feGaussianBlur stdDeviation="4"/></filter>
+    <filter id="blur3"><feGaussianBlur stdDeviation="8"/></filter>
+  </defs>
+
+  <!-- Sky -->
+  <rect width="1920" height="1080" fill="url(#sky)"/>
+
+  <!-- Stars -->
+  <g fill="#ffffff" opacity="0.6">
+    <circle cx="200" cy="80" r="1.5"/><circle cx="450" cy="120" r="1"/><circle cx="700" cy="50" r="1.5"/>
+    <circle cx="1100" cy="90" r="1"/><circle cx="1400" cy="60" r="1.5"/><circle cx="1600" cy="130" r="1"/>
+    <circle cx="300" cy="200" r="1"/><circle cx="850" cy="160" r="0.8"/><circle cx="1500" cy="180" r="1.2"/>
+    <circle cx="100" cy="250" r="0.8"/><circle cx="500" cy="40" r="1.2"/><circle cx="1750" cy="100" r="0.8"/>
+  </g>
+
+  <!-- Sky gradient top layer -->
+  <rect width="1920" height="500" fill="url(#skyTop)"/>
+
+  <!-- Distant mountains -->
+  <path d="M0 650 Q100 450 250 500 Q350 400 500 460 Q600 380 750 440 Q850 350 1000 420 Q1100 370 1200 430 Q1350 340 1500 410 Q1600 380 1750 450 Q1850 400 1920 480 L1920 700 L0 700Z" fill="#151530" opacity="0.5"/>
+  <path d="M0 680 Q150 500 300 550 Q400 470 550 520 Q650 440 800 500 Q950 420 1100 490 Q1250 430 1400 500 Q1550 450 1700 520 Q1800 480 1920 550 L1920 700 L0 700Z" fill="#1a1a3a" opacity="0.6"/>
+
+  <!-- Sun / golden horizon glow -->
+  <circle cx="960" cy="580" r="200" fill="url(#sunGlow)"/>
+  <rect x="0" y="550" width="1920" height="150" fill="url(#fog)"/>
+
+  <!-- Mid mountains -->
+  <path d="M0 720 Q80 550 200 600 Q350 500 500 580 Q600 520 750 590 Q900 500 1000 570 Q1150 510 1300 580 Q1450 520 1600 590 Q1750 540 1920 600 L1920 800 L0 800Z" fill="#1a2a1a"/>
+  <path d="M0 750 Q100 600 250 650 Q400 570 550 640 Q700 560 850 630 Q1000 570 1150 640 Q1300 580 1450 650 Q1600 590 1800 660 Q1900 620 1920 650 L1920 800 L0 800Z" fill="#2a3a2a" opacity="0.7"/>
+
+  <!-- Floating island 1 (left) -->
+  <g transform="translate(250, 300)">
+    <path d="M0 0 Q50 -30 100 -20 Q150 -40 200 -15 Q220 0 210 30 Q200 60 180 80 Q150 100 120 90 Q80 100 40 80 Q10 60 0 30Z" fill="url(#islandTop)"/>
+    <path d="M40 80 Q80 120 120 90 Q150 130 180 80 Q150 110 120 140 Q80 130 40 80Z" fill="url(#islandBottom)" opacity="0.8"/>
+    <path d="M60 20 L70 60 L80 25" stroke="#2a5a2a" stroke-width="2" fill="none" opacity="0.6"/>
+    <path d="M100 15 L110 50 L120 20" stroke="#2a5a2a" stroke-width="2" fill="none" opacity="0.6"/>
+    <path d="M140 25 L145 55 L155 30" stroke="#2a5a2a" stroke-width="2" fill="none" opacity="0.6"/>
+  </g>
+
+  <!-- Floating island 2 (center-right) -->
+  <g transform="translate(1400, 250)">
+    <path d="M0 0 Q60 -40 120 -30 Q170 -50 230 -20 Q250 0 240 35 Q220 70 190 90 Q160 110 130 100 Q90 110 50 90 Q15 70 0 35Z" fill="url(#islandTop)"/>
+    <path d="M50 90 Q90 140 130 100 Q160 150 190 90 Q160 130 130 160 Q90 150 50 90Z" fill="url(#islandBottom)" opacity="0.8"/>
+    <path d="M60 30 L75 75 L85 35" stroke="#2a5a2a" stroke-width="2" fill="none" opacity="0.6"/>
+    <path d="M120 20 L130 65 L145 25" stroke="#2a5a2a" stroke-width="3" fill="none" opacity="0.6"/>
+    <path d="M170 30 L175 60 L185 35" stroke="#2a5a2a" stroke-width="2" fill="none" opacity="0.6"/>
+  </g>
+
+  <!-- City silhouette on mid mountain -->
+  <g fill="#0a0a15" opacity="0.8">
+    <rect x="750" y="530" width="8" height="30"/><rect x="762" y="520" width="6" height="40"/>
+    <rect x="772" y="535" width="10" height="25"/><rect x="786" y="510" width="6" height="50"/>
+    <rect x="796" y="525" width="8" height="35"/><rect x="808" y="540" width="5" height="20"/>
+    <rect x="818" y="515" width="7" height="45"/><rect x="830" y="530" width="9" height="30"/>
+  </g>
+  <!-- Cathedral spire -->
+  <g fill="#0a0a15" opacity="0.9">
+    <polygon points="850,540 850,480 855,470 860,480 860,540"/>
+    <rect x="845" y="475" width="20" height="5"/>
+  </g>
+
+  <!-- Waterfall from island 1 -->
+  <path d="M280 380 Q285 450 282 520 Q280 550 278 600 Q275 650 280 700" stroke="url(#waterfall)" stroke-width="4" fill="none" opacity="0.4" filter="url(#blur1)"/>
+
+  <!-- Waterfall from island 2 -->
+  <path d="M1520 340 Q1525 400 1522 460 Q1520 490 1518 540 Q1515 590 1520 640" stroke="url(#waterfall)" stroke-width="3" fill="none" opacity="0.3" filter="url(#blur1)"/>
+
+  <!-- Foreground silhouettes - cliff with tiny figures -->
+  <path d="M0 900 Q50 820 120 840 Q200 780 300 810 Q380 770 450 800 Q500 780 550 810 L550 1080 L0 1080Z" fill="#050508"/>
+  <path d="M1370 1080 L1370 800 Q1450 770 1550 800 Q1650 760 1750 790 Q1850 770 1920 810 L1920 1080Z" fill="#050508"/>
+
+  <!-- Tiny adventurers on cliff -->
+  <g fill="#0a0a15">
+    <ellipse cx="420" cy="795" rx="3" ry="6"/>
+    <ellipse cx="435" cy="790" rx="2.5" ry="5"/>
+    <ellipse cx="448" cy="793" rx="2" ry="4"/>
+    <ellipse cx="460" cy="788" rx="3" ry="5.5"/>
+  </g>
+
+  <!-- Flying creatures (silhouettes) -->
+  <path d="M600 250 Q610 240 620 250 Q615 245 610 248 Q605 245 600 250Z" fill="#0a0a1a" opacity="0.5"/>
+  <path d="M580 270 Q590 260 600 270 Q595 265 590 268 Q585 265 580 270Z" fill="#0a0a1a" opacity="0.4"/>
+  <path d="M620 260 Q628 252 636 260 Q632 256 628 258 Q624 256 620 260Z" fill="#0a0a1a" opacity="0.45"/>
+
+  <!-- Atmospheric fog layers -->
+  <rect x="0" y="600" width="1920" height="300" fill="url(#fog)" opacity="0.3"/>
+  <rect x="0" y="750" width="1920" height="150" fill="#050508" opacity="0.4"/>
+
+  <!-- Golden light rays -->
+  <g opacity="0.08">
+    <polygon points="960,580 400,1080 500,1080" fill="#d4af37"/>
+    <polygon points="960,580 800,1080 900,1080" fill="#d4af37"/>
+    <polygon points="960,580 1400,1080 1500,1080" fill="#d4af37"/>
+    <polygon points="960,580 1600,1080 1700,1080" fill="#d4af37"/>
+  </g>
+
+  <!-- Vignette overlay -->
+  <rect width="1920" height="1080" fill="url(#vignette)" opacity="0"/>
+</svg>

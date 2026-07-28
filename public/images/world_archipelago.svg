@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="archSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a0a20"/><stop offset="30%" stop-color="#0a1530"/>
+      <stop offset="60%" stop-color="#1a1a3a"/><stop offset="85%" stop-color="#d4af37" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#0a0a20"/>
+    </linearGradient>
+    <radialGradient id="sunDisk" cx="0.5" cy="0.8" r="0.25">
+      <stop offset="0%" stop-color="#d4af37" stop-opacity="0.15"/>
+      <stop offset="50%" stop-color="#d4af37" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#d4af37" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="cloudSea" x1="0" y1="0.7" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/><stop offset="50%" stop-color="#d4af37" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#a0a0c0" stop-opacity="0.08"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#archSky)"/>
+  <rect width="800" height="600" fill="url(#sunDisk)"/>
+  <!-- Cloud ocean -->
+  <g fill="#0a0a1a" opacity="0.4">
+    <ellipse cx="400" cy="480" rx="450" ry="80"/>
+    <ellipse cx="200" cy="500" rx="300" ry="60"/>
+    <ellipse cx="600" cy="510" rx="350" ry="70"/>
+  </g>
+  <!-- Floating island 1 -->
+  <g transform="translate(180, 200)">
+    <path d="M0 0 Q40 -25 80 -20 Q120 -30 160 -15 Q180 0 170 20 Q160 40 130 50 Q100 60 70 55 Q30 60 10 40 Q-5 25 0 0Z" fill="#0a0a15" opacity="0.8"/>
+    <path d="M20 30 Q50 60 80 50 Q100 70 130 50 Q100 80 70 75 Q40 70 20 30Z" fill="#050508" opacity="0.6"/>
+    <!-- Sky temple -->
+    <g fill="#0d0d1a" opacity="0.7">
+      <rect x="40" y="-10" width="6" height="20"/><rect x="52" y="-15" width="5" height="25"/>
+      <rect x="62" y="-8" width="8" height="18"/><rect x="74" y="-12" width="5" height="22"/>
+      <polygon points="52,-15 55,-25 58,-15"/>
+      <polygon points="62,-8 65,-18 68,-8"/>
+    </g>
+  </g>
+  <!-- Floating island 2 -->
+  <g transform="translate(550, 150)">
+    <path d="M0 0 Q30 -20 70 -15 Q100 -25 130 -10 Q145 0 140 15 Q130 30 100 40 Q70 45 40 40 Q15 35 5 20Z" fill="#0a0a15" opacity="0.8"/>
+    <path d="M15 25 Q40 50 70 40 Q90 55 110 40 Q90 65 60 60 Q30 55 15 25Z" fill="#050508" opacity="0.6"/>
+    <g fill="#0d0d1a" opacity="0.7">
+      <rect x="30" y="5" width="5" height="15"/><rect x="40" y="0" width="6" height="20"/>
+      <rect x="50" y="5" width="4" height="15"/><polygon points="40,0 43,-8 46,0"/>
+    </g>
+  </g>
+  <!-- Floating island 3 (small) -->
+  <g transform="translate(350, 100)">
+    <path d="M0 0 Q20 -12 40 -8 Q55 -15 70 -5 Q80 5 70 15 Q55 22 40 20 Q20 22 5 15Z" fill="#0a0a15" opacity="0.6"/>
+  </g>
+  <!-- Waterfalls from islands -->
+  <path d="M220 250 Q225 300 222 350 Q220 380 218 420" stroke="#a0c0ff" stroke-width="2" fill="none" opacity="0.15"/>
+  <path d="M590 190 Q595 240 592 290 Q590 320 588 360" stroke="#a0c0ff" stroke-width="2" fill="none" opacity="0.12"/>
+  <!-- Flying creatures -->
+  <g fill="#0a0a1a" opacity="0.4">
+    <path d="M300 180 Q308 172 316 180 Q312 176 308 178 Q304 176 300 180Z"/>
+    <path d="M280 200 Q286 194 292 200 Q289 197 286 198 Q283 197 280 200Z"/>
+    <path d="M320 170 Q327 163 334 170 Q330 167 326 168 Q322 167 320 170Z"/>
+  </g>
+  <!-- Clouds -->
+  <g fill="#0a0a1a" opacity="0.3">
+    <ellipse cx="150" cy="350" rx="80" ry="20"/>
+    <ellipse cx="650" cy="300" rx="70" ry="15"/>
+    <ellipse cx="450" cy="380" rx="60" ry="18"/>
+  </g>
+  <!-- Vignette -->
+  <rect x="0" y="500" width="800" height="100" fill="#050508" opacity="0.3"/>
+</svg>

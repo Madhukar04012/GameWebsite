@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 800">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#050510"/>
+      <stop offset="40%" stop-color="#0a0a20"/>
+      <stop offset="70%" stop-color="#1a0a10"/>
+      <stop offset="100%" stop-color="#0a0505"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0" y1="0.5" x2="1" y2="0.5">
+      <stop offset="0%" stop-color="#4488ff" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#4488ff" stop-opacity="0.1"/>
+      <stop offset="1" stop-color="#4488ff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="fireGlow" x1="0.5" y1="0.3" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#4488ff" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#4488ff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glowBlur"><feGaussianBlur stdDeviation="6"/></filter>
+    <filter id="bigBlur"><feGaussianBlur stdDeviation="12"/></filter>
+  </defs>
+  <rect width="1920" height="800" fill="url(#bg)"/>
+  <rect width="1920" height="800" fill="url(#glow)"/>
+
+  <!-- Ruined pillars -->
+  <g fill="#151520" opacity="0.9">
+    <rect x="200" y="200" width="40" height="500"/>
+    <rect x="350" y="280" width="30" height="420"/>
+    <rect x="500" y="150" width="50" height="550"/>
+    <rect x="1400" y="180" width="45" height="520"/>
+    <rect x="1550" y="260" width="35" height="440"/>
+    <rect x="1700" y="160" width="55" height="540"/>
+  </g>
+  <!-- Broken pillars -->
+  <g fill="#1a1a25">
+    <rect x="220" y="250" width="35" height="200" transform="rotate(-15, 220, 250)"/>
+    <rect x="480" y="180" width="40" height="150" transform="rotate(12, 480, 180)"/>
+    <rect x="1650" y="300" width="30" height="180" transform="rotate(-8, 1650, 300)"/>
+  </g>
+
+  <!-- Broken throne -->
+  <g fill="#1a1a22">
+    <rect x="900" y="500" width="120" height="40" rx="5"/>
+    <rect x="910" y="460" width="15" height="40"/>
+    <rect x="995" y="470" width="12" height="30" transform="rotate(-25, 995, 470)"/>
+    <rect x="920" y="410" width="90" height="55" rx="4"/>
+    <path d="M920 410 Q960 370 1010 410Z" fill="#1a1a22"/>
+  </g>
+
+  <!-- Ancient king figure on throne -->
+  <g fill="#0a0a15">
+    <ellipse cx="960" cy="480" rx="40" ry="55"/>
+    <circle cx="960" cy="425" r="22"/>
+    <!-- Crown -->
+    <polygon points="945,410 950,395 955,405 960,390 965,405 970,395 975,410" fill="#2a2a35"/>
+  </g>
+
+  <!-- Blue fire effects -->
+  <g filter="url(#bigBlur)">
+    <ellipse cx="960" cy="540" rx="60" ry="30" fill="#4488ff" opacity="0.3"/>
+    <ellipse cx="960" cy="530" rx="40" ry="25" fill="#66aaff" opacity="0.2"/>
+  </g>
+  <g filter="url(#glowBlur)">
+    <ellipse cx="940" cy="535" rx="15" ry="20" fill="#4488ff" opacity="0.5"/>
+    <ellipse cx="970" cy="540" rx="12" ry="18" fill="#4488ff" opacity="0.4"/>
+    <ellipse cx="955" cy="520" rx="10" ry="15" fill="#88bbff" opacity="0.3"/>
+  </g>
+
+  <!-- Light rays through ruined ceiling -->
+  <g opacity="0.06">
+    <polygon points="960,0 800,800 850,800" fill="#d4af37"/>
+    <polygon points="960,0 1050,800 1100,800" fill="#d4af37"/>
+  </g>
+
+  <!-- Floating dust particles -->
+  <g fill="#aaaaaa" opacity="0.3">
+    <circle cx="400" cy="300" r="2"/><circle cx="600" cy="250" r="1.5"/><circle cx="750" cy="350" r="1"/>
+    <circle cx="1000" cy="280" r="1.5"/><circle cx="1200" cy="320" r="2"/><circle cx="1400" cy="260" r="1"/>
+    <circle cx="500" cy="400" r="1"/><circle cx="1100" cy="450" r="1.5"/><circle cx="850" cy="200" r="0.8"/>
+  </g>
+
+  <!-- Floor rubble -->
+  <g fill="#0d0d15">
+    <polygon points="300,700 350,680 400,720 350,750"/>
+    <polygon points="600,700 650,690 700,730 630,760"/>
+    <polygon points="1300,720 1360,690 1400,730 1350,760"/>
+    <polygon points="1600,700 1640,680 1680,710 1630,740"/>
+  </g>
+
+  <!-- Fog at bottom -->
+  <rect x="0" y="600" width="1920" height="200" fill="#050510" opacity="0.4"/>
+</svg>

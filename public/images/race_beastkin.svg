@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">
+  <defs>
+    <linearGradient id="beastBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#050510"/><stop offset="50%" stop-color="#0a1020"/>
+      <stop offset="80%" stop-color="#0a2030"/><stop offset="100%" stop-color="#0a1520"/>
+    </linearGradient>
+    <radialGradient id="moonGlow" cx="0.7" cy="0.2" r="0.3">
+      <stop offset="0%" stop-color="#aabbcc" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#aabbcc" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#beastBg)"/>
+  <rect width="600" height="400" fill="url(#moonGlow)"/>
+  <!-- Moon -->
+  <circle cx="450" cy="80" r="30" fill="#aabbcc" opacity="0.15"/>
+  <circle cx="450" cy="80" r="28" fill="#aabbcc" opacity="0.1"/>
+  <!-- Stars -->
+  <g fill="#ffffff" opacity="0.3">
+    <circle cx="100" cy="40" r="1"/><circle cx="200" cy="60" r="0.8"/><circle cx="350" cy="30" r="1.2"/>
+    <circle cx="550" cy="50" r="0.8"/><circle cx="150" cy="100" r="0.6"/><circle cx="500" cy="90" r="0.7"/>
+  </g>
+  <!-- Massive trees -->
+  <g fill="#050a10" opacity="0.8">
+    <rect x="80" y="100" width="25" height="200"/>
+    <rect x="160" y="80" width="30" height="220"/>
+    <rect x="450" y="90" width="28" height="210"/>
+  </g>
+  <!-- Canopy -->
+  <g fill="#050a10" opacity="0.6">
+    <ellipse cx="92" cy="80" rx="60" ry="35"/>
+    <ellipse cx="175" cy="60" rx="70" ry="40"/>
+    <ellipse cx="464" cy="70" rx="65" ry="38"/>
+  </g>
+  <!-- Ruined shrine -->
+  <g fill="#0a1015" opacity="0.6">
+    <rect x="250" y="280" width="8" height="30"/>
+    <rect x="260" y="270" width="6" height="40"/>
+    <rect x="270" y="285" width="10" height="25"/>
+    <rect x="248" y="270" width="34" height="5"/>
+  </g>
+  <!-- Wolf spirit silhouettes -->
+  <g fill="#0a1018" opacity="0.5">
+    <!-- Wolf 1 -->
+    <path d="M320 300 Q330 285 340 290 Q345 288 350 292 Q355 290 360 295 Q365 298 362 305 Q358 310 350 310 Q340 310 330 308 Q322 306 320 300Z"/>
+    <!-- Wolf 2 -->
+    <path d="M280 310 Q288 298 296 302 Q300 300 304 304 Q308 302 312 306 Q316 309 314 314 Q310 318 304 318 Q296 318 288 316 Q282 314 280 310Z" opacity="0.4"/>
+  </g>
+  <!-- Hunter figure -->
+  <g fill="#050a10" opacity="0.7">
+    <ellipse cx="340" cy="280" rx="4" ry="11"/>
+    <circle cx="340" cy="268" r="4"/>
+    <!-- Spear -->
+    <rect x="348" y="255" width="1.5" height="25"/>
+    <polygon points="348,255 350,248 352,255"/>
+  </g>
+  <!-- Ground -->
+  <rect x="0" y="340" width="600" height="60" fill="#050510"/>
+  <!-- Mist -->
+  <rect x="0" y="300" width="600" height="100" fill="#050a10" opacity="0.2"/>
+</svg>

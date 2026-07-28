@@ -1,0 +1,167 @@
+@import "tailwindcss";
+
+/* ────────────────────────────── Design Tokens ────────────────────────────── */
+
+@theme {
+  /* ── Colors ── */
+  --color-background: #050505;
+  --color-surface: #101010;
+  --color-card: #161616;
+  --color-card-hover: #1c1c1c;
+  --color-border: #2a2a2a;
+  --color-border-light: #333;
+
+  --color-primary: #d4af37;
+  --color-primary-hover: #e0c24a;
+  --color-primary-muted: rgba(212, 175, 55, 0.12);
+  --color-primary-glow: rgba(212, 175, 55, 0.25);
+
+  --color-text-primary: #fafafa;
+  --color-text-secondary: #a0a0a0;
+  --color-text-muted: #666;
+
+  /* ── Backward-compat aliases (migrate to -text-secondary / -primary) ── */
+  --color-gray: #a0a0a0;
+  --color-white: #fafafa;
+  --color-primary-gold: #d4af37;
+
+  --color-accent-blue: #5daeff;
+  --color-accent-red: #ef4444;
+  --color-accent-green: #22c55e;
+  --color-accent-purple: #a855f7;
+
+  --color-error: #ef4444;
+  --color-error-bg: rgba(239, 68, 68, 0.12);
+  --color-success: #22c55e;
+  --color-success-bg: rgba(34, 197, 94, 0.12);
+
+  /* ── Fonts (values set via next/font CSS vars in layout.tsx) ── */
+  --font-heading: var(--font-bebas-neue), sans-serif;
+  --font-subheading: var(--font-cinzel), serif;
+  --font-body: var(--font-inter), sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+  /* ── Spacing (step = 4px) ── */
+  --spacing-px: 1px;
+  --spacing-0: 0;
+  --spacing-0\.5: 0.125rem;  /* 2px */
+  --spacing-1: 0.25rem;      /* 4px */
+  --spacing-2: 0.5rem;       /* 8px */
+  --spacing-3: 0.75rem;      /* 12px */
+  --spacing-4: 1rem;         /* 16px */
+  --spacing-5: 1.25rem;      /* 20px */
+  --spacing-6: 1.5rem;       /* 24px */
+  --spacing-8: 2rem;         /* 32px */
+  --spacing-10: 2.5rem;      /* 40px */
+  --spacing-12: 3rem;        /* 48px */
+  --spacing-16: 4rem;        /* 64px */
+  --spacing-20: 5rem;        /* 80px */
+  --spacing-24: 6rem;        /* 96px */
+  --spacing-32: 8rem;        /* 128px */
+
+  /* ── Border Radius ── */
+  --radius-sm: 0.25rem;      /* 4px  */
+  --radius-md: 0.5rem;       /* 8px  */
+  --radius-lg: 0.75rem;      /* 12px */
+  --radius-xl: 1rem;         /* 16px */
+  --radius-full: 9999px;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 12px 48px rgba(0, 0, 0, 0.6);
+  --shadow-gold: 0 4px 20px rgba(212, 175, 55, 0.2);
+  --shadow-gold-lg: 0 8px 32px rgba(212, 175, 55, 0.3);
+
+  /* ── Animation ── */
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ────────────────────────────── CSS Custom Properties ────────────────────── */
+
+:root {
+  /* Container */
+  --container-max: 1280px;
+  --container-padding: 1.5rem;
+
+  /* Z-index scale */
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-navbar: 300;
+  --z-overlay: 400;
+  --z-modal: 500;
+  --z-toast: 600;
+
+  /* Selection */
+  --selection-bg: rgba(212, 175, 55, 0.3);
+  --selection-text: #fafafa;
+}
+
+/* ────────────────────────────── Base Styles ──────────────────────────────── */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ── Selection ── */
+::selection {
+  background-color: var(--selection-bg);
+  color: var(--selection-text);
+}
+
+/* ── Focus ring ── */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* ────────────────────────────── Utility Classes ──────────────────────────── */
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

@@ -1,0 +1,18 @@
+{
+  "name": "legend",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev": "npm run dev -w @legend/website",
+    "dev:game": "npm run dev -w @legend/game",
+    "dev:server": "npm run dev -w @legend/server",
+    "build": "npm run build -w @legend/website",
+    "build:game": "npm run build -w @legend/game",
+    "build:server": "npm run build -w @legend/server",
+    "lint": "npm run lint -w @legend/website"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}

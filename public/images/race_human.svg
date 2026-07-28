@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">
+  <defs>
+    <linearGradient id="humanBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a0a1a"/><stop offset="50%" stop-color="#1a1a2a"/><stop offset="100%" stop-color="#d4af37" stop-opacity="0.15"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#humanBg)"/>
+  <!-- City silhouette -->
+  <g fill="#0d0d18" opacity="0.8">
+    <rect x="50" y="200" width="10" height="60"/><rect x="65" y="190" width="8" height="70"/>
+    <rect x="78" y="195" width="12" height="65"/><rect x="95" y="185" width="7" height="75"/>
+    <rect x="107" y="200" width="10" height="60"/><rect x="122" y="195" width="9" height="65"/>
+  </g>
+  <!-- Army silhouettes -->
+  <g fill="#050508" opacity="0.7">
+    <rect x="200" y="300" width="8" height="20"/><rect x="212" y="302" width="6" height="18"/>
+    <rect x="222" y="298" width="8" height="22"/><rect x="235" y="300" width="7" height="20"/>
+    <rect x="247" y="304" width="6" height="16"/><rect x="258" y="299" width="8" height="21"/>
+    <rect x="271" y="302" width="7" height="18"/><rect x="283" y="298" width="9" height="22"/>
+    <rect x="297" y="300" width="7" height="20"/><rect x="309" y="301" width="8" height="19"/>
+    <rect x="322" y="303" width="6" height="17"/><rect x="333" y="299" width="8" height="21"/>
+  </g>
+  <!-- Knight leader on cliff -->
+  <g fill="#050508" opacity="0.85">
+    <rect x="150" y="240" width="8" height="40"/>
+    <circle cx="154" cy="235" r="7"/>
+    <rect x="145" y="245" width="18" height="3"/>
+    <!-- Sword -->
+    <rect x="160" y="235" width="2" height="20"/>
+    <rect x="159" y="255" width="4" height="2"/>
+  </g>
+  <!-- Banner -->
+  <g fill="#0d0d18" opacity="0.6">
+    <rect x="165" y="220" width="1.5" height="60"/>
+    <rect x="166" y="220" width="12" height="8"/>
+  </g>
+  <!-- Ground -->
+  <rect x="0" y="340" width="600" height="60" fill="#050508"/>
+</svg>
