@@ -1,4 +1,4 @@
-import { useRef, useMemo, useEffect } from "react";
+import { useRef, useMemo } from "react";
 import { PerspectiveCamera, OrbitControls, Text } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import * as THREE from "three";
@@ -18,6 +18,7 @@ import { N8AO } from "@react-three/postprocessing";
 import { PlayerSpawn } from "../world/PlayerSpawn";
 import type { PlayerAPI } from "../systems/PlayerEntity";
 import { useDebugStore } from "../store/debugStore";
+import { useGraphicsStore } from "../store/graphicsStore";
 import { PLAYER_SPAWN, SOUTH_GATE_POSITION, WORLD_SIZE } from "@legend/shared";
 
 /**
@@ -30,7 +31,6 @@ import { PLAYER_SPAWN, SOUTH_GATE_POSITION, WORLD_SIZE } from "@legend/shared";
  * state via PlayerEntity apiRef) rather than owning it; gameplay systems live
  * in packages/engine.
  */
-// Warm gold-washed horizon fog (matches the sun direction in Environment).
 // Warm gold-washed horizon fog (matches the sun direction in Environment).
 const SUN_COLOR = "#ffe5b4";
 const FOG_COLOR = "#87ceeb";
@@ -59,6 +59,7 @@ function GroundedEnvironment() {
 export function Scene() {
   const playerRef = useRef<PlayerAPI | null>(null);
   const debug = useDebugStore();
+  const { shadowMapSize, bloom, ssao } = useGraphicsStore();
 
   return (
     <group>
@@ -71,7 +72,7 @@ export function Scene() {
       <GroundedEnvironment />
 
       {/* Lighting block (toggleable via debug.lighting). */}
-      {debug.lighting && <SceneLighting />}
+      {debug.lighting && <SceneLighting shadowMapSize={shadowMapSize} />}
 
       {/* Debug grid + spawn markers (dev only). */}
       {debug.grid && <gridHelper args={[WORLD_SIZE, 80, "#d4af37", "#1a3b66"]} />}
@@ -128,7 +129,7 @@ export function Scene() {
       {!debug.physics && (
         <EffectComposer disableNormalPass={false} multisampling={4}>
           <N8AO aoRadius={8} intensity={2.5} distanceFalloff={0.2} color="#1a1a2e" />
-          <Bloom luminanceThreshold={0.85} luminanceSmoothing={0.75} intensity={0.8} mipmapBlur />
+          <Bloom luminanceThreshold={ssao ? 0.85 : 10} luminanceSmoothing={0.75} intensity={0.8} mipmapBlur />
           <Vignette eskil={false} offset={0.1} darkness={0.5} />
         </EffectComposer>
       )}
@@ -136,7 +137,7 @@ export function Scene() {
   );
 }
 
-function SceneLighting() {
+function SceneLighting({ shadowMapSize }: { shadowMapSize: number }) {
   return (
     <>
       <ambientLight intensity={0.4} color="#87ceeb" />
@@ -146,8 +147,8 @@ function SceneLighting() {
         intensity={2.2}
         color={SUN_COLOR}
         castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
+        shadow-mapSize-width={shadowMapSize}
+        shadow-mapSize-height={shadowMapSize}
         shadow-camera-near={0.5}
         shadow-camera-far={160}
         shadow-camera-left={-60}

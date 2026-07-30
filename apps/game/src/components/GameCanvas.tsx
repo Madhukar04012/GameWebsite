@@ -2,6 +2,7 @@ import { Canvas } from "@react-three/fiber";
 import { ACESFilmicToneMapping, PCFSoftShadowMap, SRGBColorSpace } from "three";
 import { Scene } from "./Scene";
 import { useGameStore } from "../store/gameStore";
+import { useGraphicsStore } from "../store/graphicsStore";
 import { GamePhase } from "@legend/engine";
 import { Suspense } from "react";
 import { LoadingScreen } from "../systems/LoadingScreen";
@@ -14,6 +15,7 @@ import { DebugTools } from "../systems/DebugTools";
 
 export function GameCanvas() {
   const phase = useGameStore((s) => s.phase);
+  const dpr = useGraphicsStore((s) => s.dpr);
   const showGame = phase === GamePhase.PLAYING || phase === GamePhase.SPAWNING;
   const showCinematic = phase === GamePhase.CINEMATIC;
 
@@ -31,12 +33,14 @@ export function GameCanvas() {
           outputColorSpace: SRGBColorSpace,
           logarithmicDepthBuffer: true,
         }}
-        dpr={[1, 2]}
+        dpr={dpr}
         onCreated={({ gl }) => {
+          /* Read store outside hook context via getState() */
+          const gfx = useGraphicsStore.getState();
           gl.shadowMap.type = PCFSoftShadowMap;
+          gl.shadowMap.enabled = true;
           gl.toneMappingExposure = 1.15;
-          gl.physicallyCorrectLights = true;
-          console.log("[Scene] Canvas ready — peak graphics mode");
+          console.log(`[Scene] Canvas ready — quality: ${gfx.quality}, dpr: ${gfx.dpr}`);
         }}
       >
         <Suspense fallback={null}>
@@ -53,4 +57,3 @@ export function GameCanvas() {
     </div>
   );
 }
-
