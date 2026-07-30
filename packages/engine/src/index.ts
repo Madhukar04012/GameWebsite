@@ -28,6 +28,16 @@ export type { MonsterData, MonsterState, MonsterKind } from "./systems/MonsterCo
 export { rollDamage, inRange, DEFAULT_WEAPON } from "./systems/CombatController.js";
 export type { WeaponStats } from "./systems/CombatController.js";
 export {
+  worldToChunk,
+  chunkKey,
+  lodForDistance,
+  parseChunkKey,
+  chunksInView,
+  diffChunks,
+  DEFAULT_STREAMING_CONFIG,
+} from "./systems/WorldStreaming.js";
+export type { ChunkCoord, LodBand, ChunkWithLod, StreamingDiff, StreamingConfig } from "./systems/WorldStreaming.js";
+export {
   createDefaultSave,
   loadSave,
   writeSave,
