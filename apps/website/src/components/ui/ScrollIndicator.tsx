@@ -1,11 +1,17 @@
 "use client";
 
-import { motion, useScroll, useSpring } from "framer-motion";
+import { useState } from "react";
+import { motion, useScroll, useSpring, useMotionValueEvent } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 export function ScrollIndicator() {
   const { scrollYProgress } = useScroll();
   const reduced = useReducedMotion();
+  const [showButton, setShowButton] = useState(false);
+
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    setShowButton(latest > 0.3);
+  });
 
   const scaleY = useSpring(scrollYProgress, {
     stiffness: 100,
@@ -29,7 +35,8 @@ export function ScrollIndicator() {
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         className="fixed bottom-8 right-8 z-50 w-10 h-10 rounded-full bg-primary/10 border border-primary/30 backdrop-blur-md flex items-center justify-center text-primary hover:bg-primary hover:text-background transition-colors"
         initial={{ opacity: 0, scale: 0.5 }}
-        animate={{ opacity: scrollYProgress.get() > 0.3 ? 1 : 0, scale: scrollYProgress.get() > 0.3 ? 1 : 0.5 }}
+        animate={{ opacity: showButton ? 1 : 0, scale: showButton ? 1 : 0.5 }}
+        style={{ pointerEvents: showButton ? "auto" : "none" }}
         aria-label="Scroll to top"
       >
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">

@@ -17,6 +17,7 @@ export function LoadingScreen({ onFinish, minDuration = 2000 }: LoadingScreenPro
     // Generate particle positions after mount (window is available)
     const w = typeof window !== "undefined" ? window.innerWidth : 800;
     const h = typeof window !== "undefined" ? window.innerHeight : 600;
+        // eslint-disable-next-line react-hooks/set-state-in-effect
     setParticles(
       Array.from({ length: 15 }, () => ({
         x: Math.random() * w,

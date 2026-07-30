@@ -1,535 +1,333 @@
-You are now the Lead Frontend Engineer and Creative Director for LEGEND, a AAA MMORPG.
+# LEGEND Browser MMORPG
+# Performance Optimization & Code Refactoring Audit
 
-The current website is approximately 40% complete.
+You are the Principal Engine Programmer, Senior Graphics Engineer, Senior React Performance Engineer, and Three.js Optimization Specialist.
 
-DO NOT redesign the existing UI.
+Your mission is NOT to add new gameplay features.
 
-Instead, evolve it into a cinematic, interactive, premium experience.
+Your mission is to optimize the entire project so it becomes production-ready before additional world content is added.
 
-Think like Riot Games, Blizzard, CD Projekt Red, Wuthering Waves, Diablo IV, and Apple.
+The current prototype already experiences lag on hardware that should run it smoothly.
 
-Your mission is to make the website feel alive.
+Find the root causes and fix them.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+---
 
-CURRENT PROJECT
+# Objective
 
-Framework
-- Next.js 16
-- React 19
-- TypeScript
-- Tailwind CSS v4
-- Framer Motion
-- Lenis Smooth Scroll
+Perform a complete optimization pass across the entire repository.
 
-Already Finished
+Think like an engine programmer working on a commercial MMORPG.
 
-✓ Home
-✓ World
-✓ Rankings
-✓ News
-✓ Races
-✓ About
-✓ Login
+Do not assume any implementation is correct.
 
-Shared Components
+Profile, analyze, optimize, and refactor.
 
-✓ Button
-✓ Card
-✓ Section
-✓ Container
-✓ Navbar
-✓ Footer
+---
 
-Do NOT rebuild these.
+# Part 1 - Performance Audit
 
-Improve them.
+Inspect every subsystem.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Review:
 
-MISSION
+- Rendering
+- React
+- React Three Fiber
+- Three.js
+- Rapier
+- Zustand
+- Socket.io
+- Vite
+- Scene Graph
+- Camera
+- Physics
+- UI
 
-Transform the website into something that feels like the official website of a real AAA MMORPG.
+Identify:
 
-The user should feel like they are entering another world.
+- unnecessary renders
+- expensive hooks
+- large allocations
+- memory leaks
+- duplicate updates
+- excessive React state
+- object creation every frame
+- garbage collection pressure
 
-Every scroll should tell a story.
+---
 
-Every interaction should feel premium.
+# Part 2 - React Optimization
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Review every component.
 
-PHASE 4
+Check:
 
-IMMERSIVE EXPERIENCE
+- unnecessary rerenders
+- unstable props
+- unstable callbacks
+- missing memoization
+- missing React.memo
+- expensive computations
+- context overuse
 
-Implement everything below.
+Use:
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- React.memo
+- useMemo
+- useCallback
 
-1. CINEMATIC HERO
+only where beneficial.
 
-Upgrade the homepage hero.
+Do not over-optimize.
 
-Current
+---
 
-Static image.
+# Part 3 - React Three Fiber
 
-Target
+Review every frame update.
 
-Living cinematic scene.
+Look for:
 
-Implement
+- object creation inside useFrame
+- new Vector3 every frame
+- new Euler every frame
+- new Quaternion every frame
+- unnecessary raycasts
+- unnecessary physics sync
+- expensive JSX trees
 
-✓ Slow Ken Burns zoom
-✓ Mouse parallax
-✓ Animated fog layers
-✓ Floating particles
-✓ Moving clouds
-✓ Soft lighting
-✓ Atmospheric gradient overlays
-✓ Scroll indicator animation
-✓ Sequential title animation
-✓ Button entrance animation
-✓ Smooth hero fade-in
+Everything inside useFrame should be allocation-free.
 
-The hero should immediately impress visitors.
+---
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Part 4 - Three.js Renderer
 
-2. SCROLL STORYTELLING
+Review renderer configuration.
 
-Every section should reveal naturally.
+Optimize:
 
-Use Framer Motion.
+Pixel Ratio
 
-Implement
+Limit max DPR to 1.5 or 2.
 
-Fade Up
+Enable:
 
-Fade Left
+- ACES tone mapping
+- Correct color space
+- Efficient shadow settings
 
-Fade Right
+Disable unnecessary expensive renderer features.
 
-Scale
+---
 
-Blur Reveal
+# Part 5 - Scene Graph
 
-Opacity Reveal
+Review every mesh.
 
-Stagger Animation
+Check:
 
-Cards should appear one after another.
+- draw calls
+- mesh count
+- material count
+- geometry reuse
+- shadow casting
+- shadow receiving
 
-Do NOT animate everything at once.
+Merge where appropriate.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Reuse geometry.
 
-3. WORLD SECTION
+Reuse materials.
 
-Transform world cards.
+---
 
-Current
+# Part 6 - Instancing
 
-Image
+Find repeated meshes.
 
-↓
+Convert repeated objects into:
 
-Title
+THREE.InstancedMesh
 
-Target
+Examples:
 
-Image
+- trees
+- rocks
+- crates
+- fences
+- grass
+- lamps
 
-↓
+Never render hundreds of identical meshes individually.
 
-Gradient Overlay
+---
 
-↓
+# Part 7 - Physics
 
-Animated Lighting
+Review Rapier.
 
-↓
+Check:
 
-Hover Zoom
+- unnecessary rigid bodies
+- sleeping bodies
+- collider complexity
+- update frequency
+- collision filtering
 
-↓
+Use the simplest collider possible.
 
-Hover Glow
+---
 
-↓
+# Part 8 - Camera
 
-Floating Dust
+Optimize:
 
-↓
+- smoothing
+- interpolation
+- update frequency
 
-Lore Preview
+Avoid recalculating expensive vectors.
 
-↓
+---
 
-Explore Region →
+# Part 9 - Asset Loading
 
-Hover should feel expensive.
+Review:
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- textures
+- models
+- fonts
+- shaders
 
-4. RACES PAGE
+Implement:
 
-Upgrade every race card.
+- lazy loading
+- asset caching
+- preload strategy
 
-Hover should
+Fix the current font loading issue.
 
-✓ Zoom artwork
-✓ Animate stat bars
-✓ Highlight passive
-✓ Reveal additional lore
-✓ Slight 3D tilt
-✓ Soft gold border glow
+---
 
-Cards should feel collectible.
+# Part 10 - Memory
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Find:
 
-5. NEWS PAGE
+- memory leaks
+- event listener leaks
+- socket leaks
+- renderer leaks
+- texture leaks
+- geometry leaks
 
-Upgrade article cards.
+Dispose resources correctly.
 
-Add
+---
 
-Featured Image
+# Part 11 - GPU Optimization
 
-Category Badge
+Reduce:
 
-Read Time
+- draw calls
+- overdraw
+- shadow cost
+- transparent objects
+- material switches
 
-Author
+Target:
 
-Publish Date
+RTX 3050 Laptop GPU
 
-Hover Image Zoom
+Integrated Intel UHD Graphics
 
-Read More Animation
+Both should remain playable.
 
-Featured Article Layout
+---
 
-Latest Patch Banner
+# Part 12 - CPU Optimization
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Reduce:
 
-6. RANKINGS
+- JavaScript work
+- React work
+- physics work
+- allocations
+- state updates
 
-Current
+Target:
 
-Table
+Stable frame time.
 
-Upgrade
+---
 
-Hero Banner
+# Part 13 - Debug Tools
 
-↓
+Add a development-only performance overlay.
 
-Top 3 Champions
+Display:
 
-↓
+FPS
 
-Leaderboard
+Frame Time
 
-Top 3 cards include
+Draw Calls
 
-Player Artwork
+Triangles
 
-Guild
+Textures
 
-Rank
+Geometries
 
-Season
+GPU Memory Estimate
 
-Achievements
+Physics Bodies
 
-Animated Gold/Silver/Bronze Borders
+React Renders
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Socket Ping
 
-7. ABOUT PAGE
+Only in development mode.
 
-Current
+---
 
-Static page
+# Part 14 - Build Optimization
 
-Upgrade
+Review:
 
-Animated Timeline
+Vite
 
-Studio Journey
+Tree shaking
 
-Vision
+Code splitting
 
-World Philosophy
+Chunk sizes
 
-Statistics Counter
+Bundle size
 
-Mission Section
+Unused packages
 
-Background Artwork
+Dead code
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+---
 
-8. INTERACTIVE WORLD MAP
+# Deliverables
 
-Create a brand new section.
+Provide a report containing:
 
-Interactive fantasy world map.
+1. Performance score before optimization
+2. Performance score after optimization
+3. Every optimization made
+4. Files modified
+5. Memory improvements
+6. GPU improvements
+7. CPU improvements
+8. Remaining bottlenecks
+9. FPS estimate on:
+   - RTX 3050 Laptop GPU
+   - Intel UHD Graphics
+10. Recommended next optimization
 
-Six regions.
+Do NOT add new gameplay systems.
 
-Clickable.
-
-Hover reveals
-
-Region
-
-Population
-
-World Boss
-
-Guild
-
-Difficulty
-
-Lore
-
-Smooth zoom animation.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-9. MICRO INTERACTIONS
-
-Implement everywhere.
-
-Buttons
-
-Light Sweep
-
-Hover Glow
-
-Scale
-
-Ripple
-
-Cards
-
-Lift
-
-Tilt
-
-Glow
-
-Images
-
-Slow Zoom
-
-Navigation
-
-Blur
-
-Shrink
-
-Active Indicator
-
-Footer
-
-Fade
-
-Links
-
-Underline Animation
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-10. PREMIUM EFFECTS
-
-Add
-
-Ambient Dust
-
-Floating Particles
-
-Noise Texture
-
-Soft Light Rays
-
-Gradient Lighting
-
-Volumetric Fog
-
-Subtle Mouse Lighting
-
-Everything should remain lightweight.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-11. PAGE TRANSITIONS
-
-Implement
-
-Fade
-
-Blur
-
-Scale
-
-Crossfade
-
-Every page transition should feel cinematic.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-12. LOADING EXPERIENCE
-
-Replace default loading.
-
-Create
-
-LEGEND Logo
-
-Animated Progress
-
-Particles
-
-Fade In
-
-Fade Out
-
-No white flashes.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-13. PERFORMANCE
-
-Despite all animations
-
-Maintain
-
-Lighthouse
-
-95+
-
-Accessibility
-
-95+
-
-SEO
-
-100
-
-Best Practices
-
-100
-
-Lazy load heavy assets.
-
-Optimize animations.
-
-Respect prefers-reduced-motion.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-14. RESPONSIVE
-
-Everything must work on
-
-Desktop
-
-Laptop
-
-Tablet
-
-Mobile
-
-Animations should adapt gracefully.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-15. CODE QUALITY
-
-Use
-
-Reusable hooks
-
-Reusable animation variants
-
-No duplicate logic
-
-No duplicated CSS
-
-Reusable motion components
-
-Strict TypeScript
-
-Clean architecture
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-RULES
-
-❌ Do NOT redesign pages.
-
-❌ Do NOT remove features.
-
-❌ Do NOT replace the design system.
-
-❌ Do NOT introduce unnecessary libraries.
-
-❌ Do NOT create duplicated components.
-
-Only improve the existing project.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-IMPLEMENTATION STRATEGY
-
-Do NOT stop after planning.
-
-Immediately implement every improvement.
-
-Work incrementally.
-
-After each implementation
-
-Verify
-
-No TypeScript errors
-
-No ESLint errors
-
-No runtime errors
-
-No hydration issues
-
-No console warnings
-
-Continue until every task is complete.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-FINAL DELIVERABLE
-
-Return
-
-1. Files Modified
-
-2. New Components
-
-3. New Hooks
-
-4. New Animations
-
-5. Performance Improvements
-
-6. Accessibility Improvements
-
-7. Bugs Fixed
-
-8. Remaining Recommendations
-
-The final result should feel like the official website of a modern AAA MMORPG built by a world-class game studio.
+Focus entirely on making the engine efficient, scalable, and ready for future world expansion.

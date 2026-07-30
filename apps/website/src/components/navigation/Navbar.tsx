@@ -89,10 +89,12 @@ export function Navbar() {
             <LogIn className="w-3.5 h-3.5" />
             Login
           </Link>
-          <Button variant="primary" size="sm">
-            <Gamepad2 className="w-4 h-4" />
-            Play Now
-          </Button>
+          <Link href="/play">
+            <Button variant="primary" size="sm">
+              <Gamepad2 className="w-4 h-4" />
+              Play Now
+            </Button>
+          </Link>
         </div>
 
         {/* Mobile Hamburger */}
@@ -141,10 +143,12 @@ export function Navbar() {
                 <LogIn className="w-4 h-4" />
                 Login
               </Link>
-              <Button variant="primary" size="md" className="w-full mt-2">
-                <Gamepad2 className="w-4 h-4" />
-                Play Now
-              </Button>
+              <Link href="/play" onClick={() => setMobileOpen(false)}>
+                <Button variant="primary" size="md" className="w-full mt-2">
+                  <Gamepad2 className="w-4 h-4" />
+                  Play Now
+                </Button>
+              </Link>
             </div>
           </motion.div>
         )}

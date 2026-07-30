@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, type ReactNode } from "react";
+import { useRef, type ReactNode, type ElementType } from "react";
 import { motion, useInView, type TargetAndTransition } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
@@ -36,13 +36,14 @@ export function AnimatedSection({
   as: Tag = "div",
 }: AnimatedSectionProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once, margin: margin as any });
+  const isInView = useInView(ref, { once, margin: margin as never });
   const reduced = useReducedMotion();
 
   const initial = reduced ? ({} as TargetAndTransition) : variants[variant];
+  const MotionTag = motion[Tag] as ElementType;
 
   return (
-    <motion.div
+    <MotionTag
       ref={ref}
       initial={initial}
       animate={
@@ -53,7 +54,7 @@ export function AnimatedSection({
       transition={{ duration, delay, ease: [0.16, 1, 0.3, 1] }}
       className={className}
     >
-      <Tag>{children}</Tag>
-    </motion.div>
+      {children}
+    </MotionTag>
   );
 }

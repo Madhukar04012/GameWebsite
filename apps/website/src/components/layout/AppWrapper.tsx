@@ -12,11 +12,14 @@ interface AppWrapperProps {
 
 export function AppWrapper({ children }: AppWrapperProps) {
   const [loading, setLoading] = useState(true);
-  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const reduced = useReducedMotion();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Mark mounted after hydration to avoid SSR/client mismatch.
+    // The set-in-effect here is the standard mount-flag pattern.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
