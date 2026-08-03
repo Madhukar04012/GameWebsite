@@ -10,7 +10,9 @@ import { CapitalKingdom } from "../world/CapitalKingdom";
 import { FlowerFields } from "../world/FlowerFields";
 import { Harbor } from "../world/Harbor";
 import { Terrain } from "../world/Terrain";
-import { Environment } from "../world/Environment";
+import { DayNightCycle } from "../world/DayNightCycle";
+import { River } from "../world/River";
+import { WeatherController } from "../world/WeatherController";
 import { Vegetation } from "../world/Vegetation";
 import { DustMotes } from "../world/DustMotes";
 import { Biomes } from "../world/Biomes";
@@ -20,7 +22,9 @@ import { EffectComposer, Bloom, Vignette, Noise, ToneMapping, BrightnessContrast
 import { PlayerSpawn } from "../world/PlayerSpawn";
 import type { PlayerAPI } from "../systems/PlayerEntity";
 import { useDebugStore } from "../store/debugStore";
-import { useQualitySettings, useGraphicsStore } from "../systems/GraphicsScalability";
+import { useQualitySettings } from "../systems/GraphicsScalability";
+import { EffectPlayer } from "../systems/EffectPlayer";
+import { AudioController } from "../systems/AudioController";
 import { PLAYER_SPAWN, SOUTH_GATE_POSITION, WORLD_SIZE } from "@legend/shared";
 
 /**
@@ -33,9 +37,6 @@ import { PLAYER_SPAWN, SOUTH_GATE_POSITION, WORLD_SIZE } from "@legend/shared";
  * state via PlayerEntity apiRef) rather than owning it; gameplay systems live
  * in packages/engine.
  */
-// Warm gold-washed horizon fog (matches the sun direction in Environment).
-const SUN_COLOR = "#ffe5b4";
-const FOG_COLOR = "#87ceeb";
 
 /**
  * Offline grounded IBL — RoomEnvironment renders an interior probe in-memory
@@ -65,16 +66,12 @@ export function Scene() {
 
   return (
     <group>
-      {/* Atmospheric scene fog — warm gold-tinted haze so distance reads as
-          golden hour, not a hard clip. Exponential falloff for soft depth. */}
-      <color attach="background" args={[FOG_COLOR]} />
-      <fogExp2 attach="fog" args={[FOG_COLOR, 0.0065]} />
-
-      <Environment />
+      {/* Grounded IBL probe for PBR materials (offline — no network fetch). */}
       <GroundedEnvironment />
 
-      {/* Lighting block (toggleable via debug.lighting). */}
-      {debug.lighting && <SceneLighting />}
+      {/* DayNightCycle — dynamic sky, sun, stars, fog, and lighting driven by
+          in-game time (worldStore). Replaces the static Environment + SceneLighting. */}
+      <DayNightCycle />
 
       {/* Debug grid + spawn markers (dev only). */}
       {debug.grid && <gridHelper args={[WORLD_SIZE, 80, "#d4af37", "#1a3b66"]} />}
@@ -82,6 +79,7 @@ export function Scene() {
 
       {/* Terrain heightfield replaces the flat plane. */}
       <Terrain />
+      <River />
 
       <CapitalKingdom showLabels={debug.labels} />
       <FlowerFields />
@@ -95,6 +93,13 @@ export function Scene() {
           the Capital Kingdom. Self-contained: ground, instanced props, and
           atmospheric effects. Rendered last so they overlay base terrain. */}
       <Biomes />
+
+      {/* Weather effects (rain / lightning / fog / wind) driven by worldStore. */}
+      <WeatherController />
+
+      {/* Pooled particle effects + procedural ambient audio, mounted once. */}
+      <EffectPlayer />
+      <AudioController />
 
       {/* Explicit default camera so ThirdPersonCamera has a known starting view
           before the player apiRef is populated. OrbitControls for debug. */}
@@ -148,34 +153,5 @@ export function Scene() {
         return <EffectComposer enableNormalPass={false} multisampling={settings.multisampling}>{children}</EffectComposer>;
       })()}
     </group>
-  );
-}
-
-function SceneLighting() {
-  return (
-    <>
-      <ambientLight intensity={0.4} color="#87ceeb" />
-      {/* Warm "god ray" directional sun matching the Sky sun direction. */}
-      <directionalLight
-        position={[40, 50, -20]}
-        intensity={2.2}
-        color={SUN_COLOR}
-        castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-        shadow-camera-near={0.5}
-        shadow-camera-far={160}
-        shadow-camera-left={-60}
-        shadow-camera-right={60}
-        shadow-camera-top={60}
-        shadow-camera-bottom={-60}
-        shadow-bias={-0.0004}
-        shadow-normalBias={0.02}
-      />
-      {/* Warm sky / cool purple-blue ground bounce for richer ambient fill. */}
-      <hemisphereLight args={["#ffe5b4", "#6b6b9e", 1.2]} />
-      {/* Cool sapphire rim light from opposite side for dramatic depth. */}
-      <directionalLight position={[-30, 18, -25]} intensity={1.5} color="#87ceeb" />
-    </>
   );
 }
