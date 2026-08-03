@@ -143,11 +143,11 @@ export function Scene() {
       {!debug.physics && settings.postProcessing && (() => {
         const children = [];
         if (settings.ssao) children.push(<SSAO key="ssao" radius={8} intensity={2.5} distanceFalloff={0.2} color={new THREE.Color("#1a1a2e")} />);
-        if (settings.bloom) children.push(<Bloom key="bloom" luminanceThreshold={0.85} luminanceSmoothing={0.75} intensity={0.8} mipmapBlur />);
+        if (settings.bloom) children.push(<Bloom key="bloom" luminanceThreshold={0.9} luminanceSmoothing={0.75} intensity={0.6} mipmapBlur />);
         if (settings.vignette) children.push(<Vignette key="vignette" eskil={false} offset={0.1} darkness={0.5} />);
         if (settings.ssao) children.push(<Noise key="noise" intensity={0.15} size={1} opacity={0.4} />);
         if (settings.ssao) children.push(<ChromaticAberration key="ca" offset={[0.0008, 0.0012]} />);
-        children.push(<ToneMapping key="tm" mode={THREE.ACESFilmicToneMapping} exposure={1.15} />);
+        children.push(<ToneMapping key="tm" mode={THREE.ACESFilmicToneMapping} exposure={1.0} />);
         children.push(<BrightnessContrast key="bc" brightness={-0.02} contrast={0.05} />);
         children.push(<HueSaturation key="hs" saturation={0.08} />);
         return <EffectComposer enableNormalPass={false} multisampling={settings.multisampling}>{children}</EffectComposer>;
