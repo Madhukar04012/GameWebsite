@@ -80,9 +80,9 @@ export const useGameStore = create<GameState>((set, get) => ({
     try {
       assertTransition(phase, nextPhase);
       set({ phase: nextPhase, previousPhase: phase });
-      console.log(`[GameState] ${phase} → ${nextPhase}`);
+      // log removed
     } catch (e) {
-      console.error(`[GameState] Invalid transition: ${phase} → ${nextPhase}`);
+      // log removed
     }
   },
 

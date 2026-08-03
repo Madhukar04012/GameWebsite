@@ -59,23 +59,23 @@ export function NetworkClient() {
     _socket = socket;
 
     socket.on("connect", () => {
-      console.log("[Network] Connected:", socket.id);
+      // log removed
       setConnection({ status: "connected", playerId: socket.id, error: null });
       socket.emit("player:join", { name: playerName });
     });
 
     socket.on("disconnect", () => {
-      console.log("[Network] Disconnected");
+      // log removed
       setConnection({ status: "disconnected", error: "Disconnected from server" });
     });
 
     socket.on("connect_error", (err: Error) => {
-      console.error("[Network] Error:", err.message);
+      // log removed
       setConnection({ status: "disconnected", error: err.message });
     });
 
     socket.on("world:state", (players: ServerPlayer[]) => {
-      console.log(`[Network] World state: ${players.length} players`);
+      // log removed
       const map: Record<string, RemotePlayerData> = {};
       for (const p of players) {
         if (p.id === socket.id) continue;
@@ -85,13 +85,13 @@ export function NetworkClient() {
     });
 
     socket.on("player:joined", (player: ServerPlayer) => {
-      console.log("[Network] Player joined:", player.name);
+      // log removed
       if (player.id === socket.id) return;
       upsertRemotePlayer(toRemote(player));
     });
 
     socket.on("player:left", (playerId: string) => {
-      console.log("[Network] Player left:", playerId);
+      // log removed
       removeRemotePlayer(playerId);
     });
 

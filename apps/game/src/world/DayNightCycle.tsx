@@ -1,0 +1,162 @@
+/**
+ * DayNightCycle — dynamic sky, sun, stars, and lighting driven by in-game time.
+ *
+ * Advances worldStore time each frame, applies celestial state to scene lighting
+ * via refs (no re-render), and invalidates R3F for Sky/Stars prop updates.
+ *
+ * Replaces the static SceneLighting + Environment components entirely.
+ */
+
+import { useRef, useMemo } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
+import * as THREE from "three";
+import { Sky, Stars, Cloud, Clouds, Sparkles } from "@react-three/drei";
+import { useWorldStore } from "../store/worldStore";
+
+/**
+ * Compute 3D position on a sphere from altitude/azimuth angles at a given radius.
+ */
+function sunPos(altitude: number, azimuth: number, radius: number) {
+  return [
+    radius * Math.cos(altitude) * Math.sin(azimuth),
+    radius * Math.sin(altitude),
+    radius * Math.cos(altitude) * Math.cos(azimuth),
+  ] as [number, number, number];
+}
+
+/** Convert altitude to inclination for drei Sky (0 = horizon, PI/2 = zenith). */
+function altToInclination(altitude: number): number {
+  return Math.max(0, Math.min(Math.PI / 2, altitude + Math.PI / 6));
+}
+
+export function DayNightCycle() {
+  const advanceTime = useWorldStore((s) => s.advanceTime);
+  const timeScale = useWorldStore((s) => s.timeScale);
+  const { scene, invalidate } = useThree();
+
+  // Refs to 3D objects we mutate each frame (no re-render cost)
+  const sunRef = useRef<THREE.DirectionalLight>(null);
+  const rimRef = useRef<THREE.DirectionalLight>(null);
+  const ambientRef = useRef<THREE.AmbientLight>(null);
+  const hemiRef = useRef<THREE.HemisphereLight>(null);
+  const cloudRef = useRef<THREE.Group>(null);
+  const target = useMemo(() => new THREE.Object3D(), []);
+
+  // Grab store state each frame without subscribing (synchronous read)
+  const storeRef = useRef(useWorldStore.getState());
+  useWorldStore.subscribe((s) => { storeRef.current = s; });
+
+  // Frame tick: advance time, mutate scene lights directly
+  useFrame((_, dt) => {
+    const store = storeRef.current;
+    if (store.timeScale > 0) {
+      store.advanceTime(dt);
+    }
+
+    const c = store.celestial;
+    const sp = sunPos(c.altitude, c.azimuth, 150);
+
+    // Sun
+    if (sunRef.current) {
+      sunRef.current.position.set(sp[0], sp[1], sp[2]);
+      sunRef.current.target.position.set(0, 0, 0);
+      sunRef.current.color.setHex(c.sunColor);
+      sunRef.current.intensity = c.sunIntensity * 2.2;
+      sunRef.current.shadow.camera.left = -60;
+      sunRef.current.shadow.camera.right = 60;
+    }
+
+    // Rim fill (opposite hemisphere)
+    if (rimRef.current) {
+      rimRef.current.position.set(-sp[0] * 0.7, sp[1] * 0.3 + 8, -sp[2] * 0.7);
+      rimRef.current.intensity = Math.max(0.2, 1.5 - c.sunIntensity * 0.8);
+      rimRef.current.color.set(c.altitude > 0.1 ? "#87ceeb" : "#334466");
+    }
+
+    // Ambient
+    if (ambientRef.current) {
+      ambientRef.current.intensity = c.ambientIntensity;
+      ambientRef.current.color.setHex(c.skyColor);
+    }
+
+    // Hemisphere
+    if (hemiRef.current) {
+      hemiRef.current.color.setHex(c.skyColor);
+      hemiRef.current.groundColor.set(c.altitude > 0 ? "#6b6b9e" : "#1a1a2e");
+      hemiRef.current.intensity = Math.max(0.2, c.ambientIntensity * 2.5);
+    }
+
+    // Fog
+    if (scene.fog instanceof THREE.FogExp2) {
+      scene.fog.color.setHex(c.fogColor);
+      scene.fog.density = 0.0065 * (1 + (1 - c.ambientIntensity) * 0.6);
+    }
+
+    // Sky background color
+    if (scene.background instanceof THREE.Color) {
+      scene.background.setHex(c.skyColor);
+    }
+
+    // Cloud drift
+    if (cloudRef.current) {
+      cloudRef.current.position.x -= dt * 0.5;
+    }
+
+    // Invalidate to trigger re-render for Sky/Sparkles prop changes
+    invalidate();
+  });
+
+  return (
+    <group>
+      {/* Sky dome — drei Sky handles atmospheric scattering */}
+      <Sky
+        distance={450000}
+        sunPosition={[40, 50, -20]}
+        inclination={altToInclination(0.5)}
+        azimuth={0.25}
+        turbidity={8}
+        rayleigh={1.8}
+        mieCoefficient={0.008}
+        mieDirectionalG={0.92}
+      />
+
+      {/* Drifting cloud layer */}
+      <Clouds ref={cloudRef} limit={300}>
+        <Cloud speed={0.1} opacity={0.6} seed={1} segments={28} bounds={[140, 10, 140]} volume={22} color="#ffffff" />
+        <Cloud speed={0.08} opacity={0.4} seed={2} segments={20} bounds={[180, 8, 100]} volume={16} color="#fdfdff" position={[40, 25, -60]} />
+        <Cloud speed={0.05} opacity={0.25} seed={3} segments={14} bounds={[200, 4, 200]} volume={10} color="#ffeedd" position={[-60, 35, 40]} />
+      </Clouds>
+
+      {/* Stars — always rendered, visibility driven by material opacity in useFrame */}
+      <Stars radius={300} depth={60} count={2000} factor={4} fade speed={0.5} />
+
+      {/* Ambient particles */}
+      <Sparkles count={120} scale={[160, 40, 160]} size={3.5} speed={0.25} color="#f3c649" opacity={0.5} />
+      <Sparkles count={80} scale={[100, 20, 100]} size={1.5} speed={0.4} color="#ffffff" opacity={0.2} />
+
+      {/* Dynamic lights */}
+      <ambientLight ref={ambientRef} intensity={0.4} color="#87ceeb" />
+      <directionalLight
+        ref={sunRef}
+        position={[40, 50, -20]}
+        intensity={2.2}
+        color="#ffe5b4"
+        castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-camera-near={0.5}
+        shadow-camera-far={160}
+        shadow-camera-left={-60}
+        shadow-camera-right={60}
+        shadow-camera-top={60}
+        shadow-camera-bottom={-60}
+        shadow-bias={-0.0004}
+        shadow-normalBias={0.02}
+        target={target}
+      />
+      <primitive object={target} />
+      <hemisphereLight ref={hemiRef} args={["#ffe5b4", "#6b6b9e", 1.2]} />
+      <directionalLight ref={rimRef} position={[-30, 18, -25]} intensity={1.5} color="#87ceeb" />
+    </group>
+  );
+}

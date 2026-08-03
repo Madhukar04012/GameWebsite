@@ -47,12 +47,14 @@ export function DustMotes({ count = 2000 }: { count?: number }) {
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
+          args={[positions, 3] as [Float32Array, number]}
           count={count}
           array={positions}
           itemSize={3}
         />
         <bufferAttribute
           attach="attributes-aPhase"
+          args={[phases, 1] as [Float32Array, number]}
           count={count}
           array={phases}
           itemSize={1}

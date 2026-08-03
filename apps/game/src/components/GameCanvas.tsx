@@ -40,7 +40,7 @@ export function GameCanvas() {
           gl.shadowMap.type = PCFSoftShadowMap;
           gl.shadowMap.enabled = true;
           gl.toneMappingExposure = 1.15;
-          console.log(`[Scene] Canvas ready — quality: ${gfx.quality}, dpr: ${gfx.dpr}`);
+          // log removed
         }}
       >
         <Suspense fallback={null}>

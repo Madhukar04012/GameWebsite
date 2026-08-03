@@ -29,8 +29,9 @@ async function bootGame() {
         </ErrorBoundary>
       </React.StrictMode>
     );
-  } catch (err: any) {
-    errLog(`[BOOT FAIL] ${err?.message || err}\n${err?.stack || ""}`);
+  } catch (err: unknown) {
+    const error = err as Error;
+    errLog(`[BOOT FAIL] ${error?.message || String(error)}\n${error?.stack || ""}`);
   }
 }
 

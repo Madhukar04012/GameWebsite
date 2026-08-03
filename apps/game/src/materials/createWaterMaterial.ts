@@ -24,6 +24,12 @@ export interface WaterMaterialOptions {
   sunColor?: THREE.ColorRepresentation;
   /** World Z of the shoreline (where foam appears). */
   shoreZ?: number;
+  /** Shore normal direction (perpendicular to shoreline line).
+   *  When set, enables foam along a line defined by normal & center offset
+   *  instead of the default Z-only band. Backward compatible: omit for Z-mode. */
+  shoreNormal?: [number, number];
+  /** Half-width of water body for perpendicular foam mode. Only used with shoreNormal. */
+  waterHalfWidth?: number;
   foamColor?: THREE.ColorRepresentation;
   fogColor?: THREE.ColorRepresentation;
   fogDensity?: number;
@@ -76,7 +82,9 @@ const FRAGMENT = /* glsl */ `
   uniform vec3 uSunDir;
   uniform vec3 uSunColor;
   uniform vec3 uFoam;
-  uniform vec2 uShore; // (shoreZ, foamWidth)
+  uniform vec2 uShore; // (shoreZ or centerOffset, foamWidth)
+  uniform vec2 uShoreNormal; // (nx, nz) — zero = legacy Z-mode
+  uniform float uWaterHalfWidth; // water half-width for normal-mode foam
   uniform vec2 uSeed;
   uniform vec3 uFogColor;
   uniform float uFogDensity;
@@ -103,8 +111,16 @@ const FRAGMENT = /* glsl */ `
     vec3 col = mix(uDeep, uSky, fres);
     col += uSunColor * spec * 0.6;
 
-    // Foam near the shoreline (small world Z band) + on wave crests.
-    float shoreDist = abs(vWorldPos.z - uShore.x);
+    // Foam near the shoreline + on wave crests.
+    // Two modes: Z-axis band (legacy) or perpendicular-distance band (shoreNormal set).
+    float shoreDist;
+    if (length(uShoreNormal) > 0.001) {
+      float perpDist = dot(vWorldPos.xz, uShoreNormal);
+      float edgeDist = abs(perpDist - uShore.x) - uWaterHalfWidth;
+      shoreDist = max(0.0, edgeDist);
+    } else {
+      shoreDist = abs(vWorldPos.z - uShore.x);
+    }
     float foamBand = smoothstep(uShore.y, 0.0, shoreDist);
     float crest = smoothstep(0.13, 0.20, vWave);
     float foam = clamp(foamBand * 0.7 + crest * 0.3, 0.0, 1.0);
@@ -126,12 +142,14 @@ export function createWaterMaterial(opts: WaterMaterialOptions = {}): THREE.Shad
     uniforms: {
       uTime: { value: 0 },
       uSeed: { value: [0, 0] as [number, number] },
-      uDeep: { value: new THREE.Color(opts.deepColor ?? 0x005b8a) }, // vibrant deep blue
-      uSky: { value: new THREE.Color(opts.skyColor ?? 0x87ceeb) }, // bright sky blue
+      uDeep: { value: new THREE.Color(opts.deepColor ?? 0x005b8a) },
+      uSky: { value: new THREE.Color(opts.skyColor ?? 0x87ceeb) },
       uSunDir: { value: new THREE.Vector3(...(opts.sunDirection ?? [0.6, 0.5, -0.4])).normalize() },
-      uSunColor: { value: new THREE.Color(opts.sunColor ?? 0xffe5b4) }, // warmer sun
+      uSunColor: { value: new THREE.Color(opts.sunColor ?? 0xffe5b4) },
       uFoam: { value: new THREE.Color(opts.foamColor ?? 0xffffff) },
       uShore: { value: [opts.shoreZ ?? 0, 2.5] as [number, number] },
+      uShoreNormal: { value: opts.shoreNormal ? new THREE.Vector2(opts.shoreNormal[0], opts.shoreNormal[1]) : new THREE.Vector2(0, 0) },
+      uWaterHalfWidth: { value: opts.waterHalfWidth ?? 0 },
       uFogColor: { value: new THREE.Color(opts.fogColor ?? 0x87ceeb) },
       uFogDensity: { value: opts.fogDensity ?? 0.0065 },
     },

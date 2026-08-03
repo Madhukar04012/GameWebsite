@@ -1,6 +1,7 @@
 import { Sky, Clouds, Cloud, Stars, Sparkles } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
+import * as THREE from "three";
 
 /**
  * Environment — sky dome, drifting clouds, stars (night reserve), gold motes,
@@ -8,7 +9,7 @@ import { useRef } from "react";
  * horizon against a sapphire/gold sky. Procedural — no network fetch.
  */
 export function Environment() {
-  const cloudRef = useRef<any>(null);
+  const cloudRef = useRef<THREE.Group>(null);
 
   useFrame((_, dt) => {
     if (cloudRef.current) cloudRef.current.position.x -= dt * 0.5;

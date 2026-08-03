@@ -31,7 +31,7 @@ const players = new Map<string, PlayerData>();
 
 /* ── Socket.io ── */
 io.on("connection", (socket) => {
-  console.log(`[connect] ${socket.id}`);
+  /* ── Player joins the world ── */
 
   /* ── Player joins the world ── */
   socket.on("player:join", (data: { name: string }) => {
@@ -51,7 +51,7 @@ io.on("connection", (socket) => {
     // Tell everyone else about the new player
     socket.broadcast.emit("player:joined", player);
 
-    console.log(`[join] ${player.name} (${socket.id}) — ${players.size} online`);
+    // console log removed
   });
 
   /* ── Movement sync ── */
@@ -92,12 +92,12 @@ io.on("connection", (socket) => {
     if (player) {
       io.emit("player:left", socket.id);
       players.delete(socket.id);
-      console.log(`[leave] ${player.name} — ${players.size} online`);
+      // console log removed
     }
   });
 });
 
 /* ── Start ── */
 httpServer.listen(config.port, () => {
-  console.log(`⚔️  LEGEND server listening on port ${config.port}`);
+  // Server started
 });

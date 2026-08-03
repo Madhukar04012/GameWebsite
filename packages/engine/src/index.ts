@@ -54,3 +54,35 @@ export type {
 } from "./systems/SaveSystem.js";
 export { heightAt, normalAt, groundTypeAt } from "./systems/TerrainSystem.js";
 export type { GroundType, RegionDef } from "./systems/TerrainSystem.js";
+export {
+  computeCelestialState,
+} from "./systems/DayNightCycle.js";
+export type { CelestialState } from "./systems/DayNightCycle.js";
+export {
+  createWeatherState,
+  updateWeather,
+  windAmplitude,
+} from "./systems/WeatherSystem.js";
+export type { WeatherState, WeatherPreset, WindStrength } from "./systems/WeatherSystem.js";
+export {
+  createEffect,
+  createHitSpark,
+  createMagicBurst,
+  createFootstep,
+  pruneEffects,
+} from "./systems/EffectSystem.js";
+export type { EffectKind, ParticleSpawn, EffectConfig } from "./systems/EffectSystem.js";
+export {
+  qualityIndex,
+  clampQuality,
+  suggestQuality,
+  budgetFor,
+  accumulateFrame,
+} from "./systems/PerformanceFramework.js";
+export type {
+  QualityLevel,
+  PerformanceMetrics,
+  PerformanceBudget,
+  FrameSample,
+} from "./systems/PerformanceFramework.js";
+export { QUALITY_LABELS } from "./systems/PerformanceFramework.js";

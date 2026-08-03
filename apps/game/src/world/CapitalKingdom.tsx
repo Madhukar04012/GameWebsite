@@ -3,6 +3,7 @@ import { CityDistrict } from "./CityDistrict";
 import { Walls } from "./Walls";
 import { Roads } from "./Roads";
 import { Props } from "./Props";
+import { CityLandmarks } from "./CityLandmarks";
 import { createCobbleMaterial } from "../materials/createCobbleMaterial";
 
 /**
@@ -31,6 +32,7 @@ export function CapitalKingdom({ showLabels = false }: { showLabels?: boolean })
       ))}
 
       <Props />
+      <CityLandmarks />
     </group>
   );
 }
