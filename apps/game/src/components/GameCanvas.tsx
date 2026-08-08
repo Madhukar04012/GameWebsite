@@ -1,5 +1,5 @@
 import { Canvas } from "@react-three/fiber";
-import { ACESFilmicToneMapping, PCFSoftShadowMap, SRGBColorSpace } from "three";
+import { ACESFilmicToneMapping, PCFShadowMap, PCFSoftShadowMap, BasicShadowMap, SRGBColorSpace } from "three";
 import { Scene } from "./Scene";
 import { useGameStore } from "../store/gameStore";
 import { useGraphicsStore } from "../store/graphicsStore";
@@ -16,6 +16,8 @@ import { DebugTools } from "../systems/DebugTools";
 export function GameCanvas() {
   const phase = useGameStore((s) => s.phase);
   const dpr = useGraphicsStore((s) => s.dpr);
+  const antialias = useGraphicsStore((s) => s.antialias);
+  const shadows = useGraphicsStore((s) => s.quality !== "low");
   const showGame = phase === GamePhase.PLAYING || phase === GamePhase.SPAWNING;
   const showCinematic = phase === GamePhase.CINEMATIC;
 
@@ -23,11 +25,11 @@ export function GameCanvas() {
     <div style={{ position: "relative", width: "100%", height: "100%", background: "#050505" }}>
       <NetworkClient />
       <Canvas
-        shadows
+        shadows={shadows}
         camera={{ position: [0, 5, 10], fov: 60 }}
         style={{ width: "100%", height: "100%", display: "block" }}
         gl={{
-          antialias: true,
+          antialias,
           toneMapping: ACESFilmicToneMapping,
           toneMappingExposure: 1.15,
           outputColorSpace: SRGBColorSpace,
@@ -37,7 +39,9 @@ export function GameCanvas() {
         onCreated={({ gl }) => {
           /* Read store outside hook context via getState() */
           const gfx = useGraphicsStore.getState();
-          gl.shadowMap.type = PCFSoftShadowMap;
+          const shadowType = gfx.quality === "ultra" || gfx.quality === "high" ? PCFSoftShadowMap :
+                             gfx.quality === "medium" ? PCFShadowMap : BasicShadowMap;
+          gl.shadowMap.type = shadowType;
           gl.shadowMap.enabled = true;
           gl.toneMappingExposure = 1.15;
           // log removed

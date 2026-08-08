@@ -18,7 +18,7 @@ export function CityDistrict({ district, showLabel = false }: CityDistrictProps)
     <group>
       {/* Buildings */}
       {district.buildings.map((b, i) => (
-        <CityBuilding key={`${district.name}-${i}`} def={b} color={b.color ?? district.color} />
+        <CityBuilding key={`${district.name}-${i}`} def={b} color={b.color ?? district.color} district={district.name} />
       ))}
 
       {/* District label (floating text — debug) */}

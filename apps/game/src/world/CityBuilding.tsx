@@ -2,42 +2,32 @@ import { useMemo } from "react";
 import { heightAt } from "@legend/engine";
 import type { BuildingDef } from "@legend/shared";
 import { createStoneMaterial } from "../materials/createStoneMaterial";
+import { createWoodMaterial } from "../materials/createWoodMaterial";
+import { getDistrictMaterials } from "../materials/createDistrictMaterials";
+import { createGlassMaterial } from "../materials/createGlassMaterial";
+import { createMetalMaterial } from "../materials/createMetalMaterial";
 
 interface CityBuildingProps {
   def: BuildingDef;
   color: string;
+  /** District name for material palette selection. */
+  district?: string;
 }
 
 /**
- * Modular placeholder building. Dispatches a roof silhouette by `def.roof`
- * for readable blockout silhouettes (castle dome/tower, gable houses, market
- * flats). Sits on terrain height so hills don't clip the base.
+ * Modular placeholder building with district-specific materials.
+ * Dispatches roof silhouette by `def.roof`. Adds glass windows,
+ * metal grilles, wooden shutters, and detailed doors.
  */
-export function CityBuilding({ def, color = "#cccccc" }: CityBuildingProps) {
+export function CityBuilding({ def, color = "#cccccc", district = "residential" }: CityBuildingProps) {
   const { x, z, w, d, h, roof = "gable" } = def;
   const roofH = Math.max(0.5, h * 0.28);
   const baseY = useMemo(() => heightAt(x, z), [x, z]);
 
-  // One procedural stone material per building (lit/shadowed PBR preserved).
-  const wallMat = useMemo(
-    () => createStoneMaterial({ stoneColor: color, roughness: 0.8, metalness: 0.1, seed: [x, z] }),
-    [color, x, z],
-  );
-  const roofMat = useMemo(
-    () =>
-      createStoneMaterial({
-        roof: true,
-        stoneColor: darken(color, 0.2),
-        roughness: 0.6,
-        metalness: 0.35,
-        seed: [x + 0.7, z + 0.3],
-      }),
-    [color, x, z],
-  );
-
-  const woodMat = useMemo(
-    () => createStoneMaterial({ stoneColor: "#3a2318", roughness: 0.95, metalness: 0, seed: [x + 0.1, z + 0.2] }),
-    [x, z],
+  // District material palette (memo-stable per district)
+  const { wall, roof: roofMat, wood, glass, banner, metal, accent } = useMemo(
+    () => getDistrictMaterials(district),
+    [district],
   );
 
   const beamW = 0.15;
@@ -48,67 +38,132 @@ export function CityBuilding({ def, color = "#cccccc" }: CityBuildingProps) {
     [w / 2, d / 2],
   ];
 
+  // Window positions (front + sides) — scaled to building size
+  const windowPositions = useMemo(() => {
+    const positions: [number, number, number][] = [];
+    const cols = Math.max(1, Math.floor(w / 1.8));
+    const rows = Math.max(1, Math.floor(h / 1.8));
+    const spacingX = w / (cols + 1);
+    const spacingY = h / (rows + 1);
+    for (let row = 1; row <= rows; row++) {
+      for (let col = 1; col <= cols; col++) {
+        const wx = -w / 2 + col * spacingX;
+        const wy = row * spacingY;
+        // Front face
+        positions.push([wx, wy, d / 2 + 0.02]);
+        // Back face
+        positions.push([wx, wy, -d / 2 - 0.02]);
+      }
+    }
+    // Side faces (if deep enough)
+    if (d > 3) {
+      const sideCols = Math.max(1, Math.floor(d / 2));
+      const sideSpacing = d / (sideCols + 1);
+      for (let row = 1; row <= rows; row++) {
+        for (let col = 1; col <= sideCols; col++) {
+          const wz = -d / 2 + col * sideSpacing;
+          const wy = row * spacingY;
+          // Left face
+          positions.push([-w / 2 - 0.02, wy, wz]);
+          // Right face
+          positions.push([w / 2 + 0.02, wy, wz]);
+        }
+      }
+    }
+    return positions;
+  }, [w, d, h]);
+
   return (
     <group position={[x, baseY, z]}>
-      <mesh position={[0, h / 2, 0]} castShadow receiveShadow material={wallMat}>
+      {/* Main wall volume */}
+      <mesh position={[0, h / 2, 0]} castShadow receiveShadow material={wall}>
         <boxGeometry args={[w, h, d]} />
       </mesh>
-      
+
       {/* Corner wooden beams */}
       {corners.map((c, i) => (
-        <mesh key={`corner-${i}`} position={[c[0], h / 2, c[1]]} castShadow receiveShadow material={woodMat}>
+        <mesh key={`corner-${i}`} position={[c[0], h / 2, c[1]]} castShadow receiveShadow material={wood}>
           <boxGeometry args={[beamW, h + 0.1, beamW]} />
         </mesh>
       ))}
-      
+
       {/* Horizontal mid-beam for taller buildings */}
       {h >= 3 && (
-        <mesh position={[0, h / 2, 0]} castShadow receiveShadow material={woodMat}>
+        <mesh position={[0, h / 2, 0]} castShadow receiveShadow material={wood}>
           <boxGeometry args={[w + 0.1, beamW, d + 0.1]} />
         </mesh>
       )}
-      {/* Gold rune cornice line along the roof base. */}
-      <mesh position={[0, h, 0]} castShadow>
+
+      {/* Gold cornice line at roof base — use accent metal if available, else gold */}
+      <mesh position={[0, h, 0]} castShadow material={accent}>
+        {!accent && (
+          <meshStandardMaterial color="#d4af37" emissive="#d4af37" emissiveIntensity={0.6} />
+        )}
         <boxGeometry args={[w * 1.02, 0.15, d * 1.02]} />
-        <meshStandardMaterial color="#d4af37" emissive="#d4af37" emissiveIntensity={0.6} />
       </mesh>
+
+      {/* Roof */}
       <Roof kind={roof} w={w} d={d} h={h} roofH={roofH} material={roofMat} />
+
+      {/* Main Door — wood with metal grille */}
       {h > 1.5 && (
         <group>
-          {/* Main Door */}
-          <mesh position={[0, 0.6, d / 2 + 0.01]}>
-            <planeGeometry args={[0.6, 1.2]} />
-            <meshStandardMaterial color="#2a1710" />
+          {/* Door frame */}
+          <mesh position={[0, 0.9, d / 2 + 0.02]} castShadow receiveShadow material={wood}>
+            <boxGeometry args={[0.7, 1.8, 0.08]} />
           </mesh>
-          {/* Simple Barrel Prop next to door if building is wide enough */}
-          {w > 2.5 && (
-            <mesh position={[0.6, 0.35, d / 2 + 0.2]} castShadow receiveShadow>
-              <cylinderGeometry args={[0.2, 0.2, 0.5, 8]} />
-              <meshStandardMaterial color="#5c3a21" roughness={0.9} />
-            </mesh>
-          )}
-          {/* Simple Crate Prop */}
-          {w > 3.0 && (
-            <mesh position={[-0.8, 0.3, d / 2 + 0.3]} rotation={[0, 0.2, 0]} castShadow receiveShadow>
-              <boxGeometry args={[0.6, 0.6, 0.6]} />
-              <meshStandardMaterial color="#6a4a2a" roughness={1.0} />
-            </mesh>
-          )}
+          {/* Door panels */}
+          <mesh position={[0, 0.9, d / 2 + 0.06]} castShadow material={wood}>
+            <boxGeometry args={[0.55, 0.85, 0.04]} />
+          </mesh>
+          <mesh position={[0, 0.9, d / 2 + 0.06]} rotation={[0, 0, 0]}>
+            <planeGeometry args={[0.5, 0.8]} />
+            <meshStandardMaterial color="#1a1008" />
+          </mesh>
+          {/* Metal grille on upper door */}
+          <mesh position={[0, 1.55, d / 2 + 0.08]} castShadow material={metal}>
+            <boxGeometry args={[0.5, 0.3, 0.02]} />
+          </mesh>
+          {/* Door handle */}
+          <mesh position={[0.25, 0.9, d / 2 + 0.09]} castShadow material={metal}>
+            <cylinderGeometry args={[0.03, 0.03, 0.06, 6]} />
+          </mesh>
         </group>
       )}
-      
-      {/* Glowing Windows on Upper Floors */}
-      {h >= 3 && (
-        <group>
-          <mesh position={[-0.4, h * 0.7, d / 2 + 0.01]}>
-            <planeGeometry args={[0.4, 0.5]} />
-            <meshStandardMaterial color="#ffe5b4" emissive="#ffe5b4" emissiveIntensity={1.5} />
+
+      {/* Glazed Windows with frames and shutters */}
+      {windowPositions.map(([wx, wy, wz], i) => (
+        <group key={`window-${i}`} position={[wx, wy, wz]}>
+          {/* Window frame */}
+          <mesh position={[0, 0, 0]} castShadow receiveShadow material={wood}>
+            <boxGeometry args={[0.55, 0.65, 0.06]} />
           </mesh>
-          <mesh position={[0.4, h * 0.7, d / 2 + 0.01]}>
-            <planeGeometry args={[0.4, 0.5]} />
-            <meshStandardMaterial color="#ffe5b4" emissive="#ffe5b4" emissiveIntensity={1.5} />
+          {/* Glass panes */}
+          <mesh position={[0, 0, 0.04]} material={glass}>
+            <planeGeometry args={[0.45, 0.55]} />
+          </mesh>
+          {/* Metal grille (district-specific) */}
+          <mesh position={[0, 0, 0.07]} castShadow material={metal}>
+            <boxGeometry args={[0.45, 0.06, 0.02]} />
+          </mesh>
+          <mesh position={[0, 0, 0.07]} castShadow material={metal}>
+            <boxGeometry args={[0.06, 0.5, 0.02]} />
+          </mesh>
+          {/* Wooden shutters (closed at night would be animated) */}
+          <mesh position={[-0.32, 0, 0.05]} rotation={[0, Math.PI / 2, 0]} material={wood}>
+            <boxGeometry args={[0.03, 0.6, 0.5]} />
+          </mesh>
+          <mesh position={[0.32, 0, 0.05]} rotation={[0, -Math.PI / 2, 0]} material={wood}>
+            <boxGeometry args={[0.03, 0.6, 0.5]} />
           </mesh>
         </group>
+      ))}
+
+      {/* Roof chimney for taller buildings */}
+      {h >= 4 && roof !== "flat" && (
+        <mesh position={[-w * 0.3, h + roofH * 0.6, d * 0.3]} castShadow receiveShadow material={wall}>
+          <boxGeometry args={[0.6, roofH * 0.8, 0.6]} />
+        </mesh>
       )}
     </group>
   );
@@ -120,15 +175,24 @@ function Roof({
   switch (kind) {
     case "flat":
       return (
-        <mesh position={[0, h + 0.1, 0]} castShadow receiveShadow material={material}>
-          <boxGeometry args={[w * 0.98, 0.22, d * 0.98]} />
-        </mesh>
+        <>
+          <mesh position={[0, h + 0.1, 0]} castShadow receiveShadow material={material}>
+            <boxGeometry args={[w * 0.98, 0.22, d * 0.98]} />
+          </mesh>
+          {/* Flat roof parapet */}
+          <mesh position={[0, h + 0.45, d * 0.45]} castShadow material={material}>
+            <boxGeometry args={[w * 0.9, 0.5, 0.3]} />
+          </mesh>
+          <mesh position={[0, h + 0.45, -d * 0.45]} castShadow material={material}>
+            <boxGeometry args={[w * 0.9, 0.5, 0.3]} />
+          </mesh>
+        </>
       );
     case "tower":
       return (
         <>
           <mesh position={[0, h + roofH / 2, 0]} castShadow material={material}>
-            <coneGeometry args={[Math.min(w, d) * 0.75, roofH * 1.2, 6]} />
+            <coneGeometry args={[Math.min(w, d) * 0.75, roofH * 1.2, 8]} />
           </mesh>
           <mesh position={[0.22, h + roofH + 0.45, 0]}>
             <planeGeometry args={[0.4, 0.25]} />
@@ -144,16 +208,29 @@ function Roof({
       );
     case "dome":
       return (
-        <mesh position={[0, h, 0]} castShadow material={material}>
-          <sphereGeometry args={[Math.min(w, d) * 0.55, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2]} />
-        </mesh>
+        <>
+          <mesh position={[0, h, 0]} castShadow material={material}>
+            <sphereGeometry args={[Math.min(w, d) * 0.55, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
+          </mesh>
+          {/* Dome lantern */}
+          <mesh position={[0, h + Math.min(w, d) * 0.55, 0]} castShadow material={material}>
+            <sphereGeometry args={[0.25, 8, 6]} />
+          </mesh>
+        </>
       );
     case "gable":
     default:
       return (
-        <mesh position={[0, h + roofH / 2, 0]} rotation={[0, Math.PI / 4, 0]} castShadow material={material}>
-          <coneGeometry args={[Math.max(w, d) * 1.05, roofH * 1.5, 4]} />
-        </mesh>
+        <>
+          <mesh position={[0, h + roofH / 2, 0]} rotation={[0, Math.PI / 4, 0]} castShadow material={material}>
+            <coneGeometry args={[Math.max(w, d) * 1.05, roofH * 1.5, 4]} />
+          </mesh>
+          {/* Gable end decoration */}
+          <mesh position={[0, h + roofH * 0.85, d * 0.52]} castShadow>
+            <planeGeometry args={[w * 0.4, roofH * 0.3]} />
+            <meshStandardMaterial color="#d4af37" emissive="#d4af37" emissiveIntensity={0.4} side={2} />
+          </mesh>
+        </>
       );
   }
 }

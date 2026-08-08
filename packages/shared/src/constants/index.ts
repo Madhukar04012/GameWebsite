@@ -288,7 +288,18 @@ export const VEGETATION_PATCHES: VegPatch[] = [
 ];
 
 /* ── Surrounding biomes ── */
-export type BiomeKind = "plains" | "ashen_barrens" | "mistmire_bog" | "sunstone_desert" | "frostfang_ridge";
+export type BiomeKind =
+  | "plains"
+  | "royal_plains"
+  | "ancient_forest"
+  | "mistwood"
+  | "crystal_highlands"
+  | "frost_peaks"
+  | "ashen_mountains"
+  | "golden_desert"
+  | "emerald_coast"
+  | "shadow_marsh"
+  | "ancient_ruins";
 
 export interface BiomeDef {
   id: BiomeKind;
@@ -297,21 +308,47 @@ export interface BiomeDef {
   groundVariant: string;
   fogColor: string;
   ambientColor: string;
+  skyTint?: string;
+  waterTint?: string;
+  vegetationTint?: string;
 }
 
 export const BIOME_DEFS: BiomeDef[] = [
-  { id: "ashen_barrens", label: "Ashen Barrens", bounds: { minX: 80, maxX: 180, minZ: -80, maxZ: 80 }, groundVariant: "ashen", fogColor: "#4a3730", ambientColor: "#8a5a3a" },
-  { id: "mistmire_bog", label: "Mistmire Bog", bounds: { minX: -180, maxX: -80, minZ: -80, maxZ: 80 }, groundVariant: "bog", fogColor: "#2a3a2a", ambientColor: "#3a5a3a" },
-  { id: "sunstone_desert", label: "Sunstone Desert", bounds: { minX: 50, maxX: 180, minZ: 50, maxZ: 80 }, groundVariant: "desert", fogColor: "#d4b87a", ambientColor: "#c4a060" },
-  { id: "frostfang_ridge", label: "Frostfang Ridge", bounds: { minX: -80, maxX: 80, minZ: 80, maxZ: 180 }, groundVariant: "frost", fogColor: "#a8c8e0", ambientColor: "#b0d0f0" },
+  // Core / Capital region
+  { id: "royal_plains", label: "Royal Plains", bounds: { minX: -200, maxX: 200, minZ: -200, maxZ: -50 }, groundVariant: "world", fogColor: "#8fbc8f", ambientColor: "#a8d0a8", skyTint: "#87ceeb", waterTint: "#4a90d9", vegetationTint: "#6ab04c" },
+
+  // West biomes
+  { id: "ancient_forest", label: "Ancient Forest", bounds: { minX: -200, maxX: -50, minZ: -200, maxZ: 50 }, groundVariant: "grove", fogColor: "#2d5a2d", ambientColor: "#3d7a3d", skyTint: "#5a8a5a", waterTint: "#2d6a4d", vegetationTint: "#4a8a3a" },
+  { id: "mistwood", label: "Mistwood", bounds: { minX: -200, maxX: -50, minZ: 50, maxZ: 200 }, groundVariant: "bog", fogColor: "#5a5a7a", ambientColor: "#6a6a9a", skyTint: "#7a7a9a", waterTint: "#4a4a6a", vegetationTint: "#5a7a5a" },
+
+  // North biomes
+  { id: "crystal_highlands", label: "Crystal Highlands", bounds: { minX: -50, maxX: 50, minZ: 50, maxZ: 200 }, groundVariant: "frost", fogColor: "#b0d0f0", ambientColor: "#c0e0ff", skyTint: "#a0c8f0", waterTint: "#80b8f0", vegetationTint: "#90c0d0" },
+  { id: "frost_peaks", label: "Frost Peaks", bounds: { minX: -150, maxX: 150, minZ: 150, maxZ: 300 }, groundVariant: "frost", fogColor: "#a8c8e0", ambientColor: "#b0d0f0", skyTint: "#90b8e0", waterTint: "#70a8d0", vegetationTint: "#80a8c0" },
+
+  // East biomes
+  { id: "ashen_mountains", label: "Ashen Mountains", bounds: { minX: 80, maxX: 250, minZ: -100, maxZ: 100 }, groundVariant: "ashen", fogColor: "#4a3730", ambientColor: "#8a5a3a", skyTint: "#8a4a3a", waterTint: "#6a3a2a", vegetationTint: "#5a3a2a" },
+  { id: "golden_desert", label: "Golden Desert", bounds: { minX: 100, maxX: 300, minZ: -150, maxZ: 50 }, groundVariant: "desert", fogColor: "#d4b87a", ambientColor: "#c4a060", skyTint: "#f0d8a0", waterTint: "#c4a850", vegetationTint: "#b49040" },
+
+  // South biomes
+  { id: "emerald_coast", label: "Emerald Coast", bounds: { minX: -200, maxX: 200, minZ: -300, maxZ: -200 }, groundVariant: "world", fogColor: "#4ab8a0", ambientColor: "#6ac8b8", skyTint: "#6ad8e8", waterTint: "#2aa8a8", vegetationTint: "#4ab88a" },
+  { id: "shadow_marsh", label: "Shadow Marsh", bounds: { minX: -200, maxX: 0, minZ: -300, maxZ: -150 }, groundVariant: "bog", fogColor: "#2a3a2a", ambientColor: "#3a5a3a", skyTint: "#4a5a4a", waterTint: "#1a3a2a", vegetationTint: "#3a5a2a" },
+
+  // Central special
+  { id: "ancient_ruins", label: "Ancient Ruins", bounds: { minX: -100, maxX: 100, minZ: 50, maxZ: 150 }, groundVariant: "world", fogColor: "#7a6a5a", ambientColor: "#8a7a6a", skyTint: "#9a8a7a", waterTint: "#5a4a3a", vegetationTint: "#6a5a4a" },
 ];
 
 export const BIOME_ATMOSPHERE: Record<BiomeKind, { dustMotes: boolean; sparkleCount: number; fogDensity: number; windStrength: number }> = {
   plains: { dustMotes: true, sparkleCount: 0, fogDensity: 0.0065, windStrength: 0.5 },
-  ashen_barrens: { dustMotes: true, sparkleCount: 10, fogDensity: 0.012, windStrength: 0.8 },
-  mistmire_bog: { dustMotes: false, sparkleCount: 60, fogDensity: 0.02, windStrength: 0.3 },
-  sunstone_desert: { dustMotes: true, sparkleCount: 0, fogDensity: 0.005, windStrength: 0.6 },
-  frostfang_ridge: { dustMotes: true, sparkleCount: 40, fogDensity: 0.015, windStrength: 0.7 },
+  royal_plains: { dustMotes: true, sparkleCount: 0, fogDensity: 0.005, windStrength: 0.4 },
+  ancient_forest: { dustMotes: false, sparkleCount: 30, fogDensity: 0.015, windStrength: 0.3 },
+  mistwood: { dustMotes: false, sparkleCount: 50, fogDensity: 0.025, windStrength: 0.2 },
+  crystal_highlands: { dustMotes: true, sparkleCount: 60, fogDensity: 0.012, windStrength: 0.6 },
+  frost_peaks: { dustMotes: true, sparkleCount: 40, fogDensity: 0.018, windStrength: 0.8 },
+  ashen_mountains: { dustMotes: true, sparkleCount: 20, fogDensity: 0.015, windStrength: 0.7 },
+  golden_desert: { dustMotes: true, sparkleCount: 0, fogDensity: 0.006, windStrength: 0.6 },
+  emerald_coast: { dustMotes: true, sparkleCount: 25, fogDensity: 0.01, windStrength: 0.5 },
+  shadow_marsh: { dustMotes: false, sparkleCount: 40, fogDensity: 0.022, windStrength: 0.3 },
+  ancient_ruins: { dustMotes: true, sparkleCount: 35, fogDensity: 0.01, windStrength: 0.4 },
 };
 
 export function biomeAt(x: number, z: number): BiomeKind {

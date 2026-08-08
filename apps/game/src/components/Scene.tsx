@@ -150,7 +150,7 @@ export function Scene() {
         children.push(<ToneMapping key="tm" mode={THREE.ACESFilmicToneMapping} exposure={1.0} />);
         children.push(<BrightnessContrast key="bc" brightness={-0.02} contrast={0.05} />);
         children.push(<HueSaturation key="hs" saturation={0.08} />);
-        return <EffectComposer enableNormalPass={false} multisampling={settings.multisampling}>{children}</EffectComposer>;
+        return <EffectComposer enableNormalPass={false} multisampling={settings.multisampling} frameBufferType={THREE.HalfFloatType}>{children}</EffectComposer>;
       })()}
     </group>
   );

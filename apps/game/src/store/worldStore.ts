@@ -35,7 +35,7 @@ export const useWorldStore = create<WorldState>((set, get) => ({
   timeOfDay: 8, // start at 8 AM (pleasant golden morning)
   celestial: computeCelestialState(8),
   weather: createWeatherState("clear"),
-  timeScale: 0, // paused time by default (static golden hour)
+  timeScale: 60, // one real minute advances one in-game hour
   weatherTarget: null,
   windAmplitude: 0,
 

@@ -33,15 +33,16 @@ function RemotePlayer({ player }: { player: RemotePlayerData }) {
   useFrame(() => {
     const g = groupRef.current;
     if (!g) return;
-    // Lerp toward latest server position
+    // Lerp toward latest server position (including Y)
     const lerp = 0.15;
     g.position.x += (target.current.x - g.position.x) * lerp;
+    g.position.y += (target.current.y - g.position.y) * lerp;
     g.position.z += (target.current.z - g.position.z) * lerp;
     g.rotation.y = player.rotation;
   });
 
   return (
-    <group ref={groupRef} position={[player.position.x, 0, player.position.z]}>
+    <group ref={groupRef} position={[player.position.x, player.position.y, player.position.z]}>
       {/* Capsule */}
       <mesh ref={meshRef} position={[0, 0.5, 0]} castShadow>
         <capsuleGeometry args={[0.3, 0.6, 8, 16]} />

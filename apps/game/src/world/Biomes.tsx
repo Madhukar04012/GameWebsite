@@ -89,8 +89,8 @@ function BiomeSparkles({ biome }: { biome: BiomeKind }) {
         size={3}
         speed={0.4}
         color={
-          biome === "mistmire_bog" ? "#5a8a4a" :
-          biome === "frostfang_ridge" ? "#c0e0ff" :
+          biome === "mistwood" ? "#5a8a4a" :
+          biome === "frost_peaks" ? "#c0e0ff" :
           "#d4af37"
         }
         opacity={0.5}
@@ -101,7 +101,7 @@ function BiomeSparkles({ biome }: { biome: BiomeKind }) {
 
 /* ── Ashen Barrens — East ── */
 
-const ashenDef = BIOME_DEFS.find((b) => b.id === "ashen_barrens")!;
+const ashenDef = BIOME_DEFS.find((b) => b.id === "ashen_mountains")!;
 const ashenCx = (ashenDef.bounds.minX + ashenDef.bounds.maxX) / 2;
 const ashenCz = (ashenDef.bounds.minZ + ashenDef.bounds.maxZ) / 2;
 const ashenRadius = (ashenDef.bounds.maxX - ashenDef.bounds.minX) / 2.5;
@@ -153,14 +153,14 @@ function AshenBarrens() {
         ))}
       </Instances>
 
-      <BiomeSparkles biome="ashen_barrens" />
+      <BiomeSparkles biome="ashen_mountains" />
     </group>
   );
 }
 
 /* ── Mistmire Bog — West ── */
 
-const bogDef = BIOME_DEFS.find((b) => b.id === "mistmire_bog")!;
+const bogDef = BIOME_DEFS.find((b) => b.id === "mistwood")!;
 const bogCx = (bogDef.bounds.minX + bogDef.bounds.maxX) / 2;
 const bogCz = (bogDef.bounds.minZ + bogDef.bounds.maxZ) / 2;
 const bogRadius = (bogDef.bounds.maxX - bogDef.bounds.minX) / 2.5;
@@ -212,14 +212,14 @@ function MistmireBog() {
         ))}
       </Instances>
 
-      <BiomeSparkles biome="mistmire_bog" />
+      <BiomeSparkles biome="mistwood" />
     </group>
   );
 }
 
 /* ── Sunstone Desert — SE ── */
 
-const desertDef = BIOME_DEFS.find((b) => b.id === "sunstone_desert")!;
+const desertDef = BIOME_DEFS.find((b) => b.id === "golden_desert")!;
 const desertCx = (desertDef.bounds.minX + desertDef.bounds.maxX) / 2;
 const desertCz = (desertDef.bounds.minZ + desertDef.bounds.maxZ) / 2;
 const desertRadius = (desertDef.bounds.maxX - desertDef.bounds.minX) / 2.5;
@@ -301,7 +301,7 @@ function SunstoneDesert() {
 
 /* ── Frostfang Ridge — North ── */
 
-const frostDef = BIOME_DEFS.find((b) => b.id === "frostfang_ridge")!;
+const frostDef = BIOME_DEFS.find((b) => b.id === "frost_peaks")!;
 const frostCx = (frostDef.bounds.minX + frostDef.bounds.maxX) / 2;
 const frostCz = (frostDef.bounds.minZ + frostDef.bounds.maxZ) / 2;
 const frostRadius = (frostDef.bounds.maxZ - frostDef.bounds.minZ) / 2.5;
@@ -379,7 +379,7 @@ function FrostfangRidge() {
         return null;
       })()}
 
-      <BiomeSparkles biome="frostfang_ridge" />
+      <BiomeSparkles biome="frost_peaks" />
     </group>
   );
 }
@@ -387,10 +387,10 @@ function FrostfangRidge() {
 /* ── Exports ── */
 
 export const BIOME_WORLD_COMPONENTS = {
-  ashen_barrens: AshenBarrens,
-  mistmire_bog: MistmireBog,
-  sunstone_desert: SunstoneDesert,
-  frostfang_ridge: FrostfangRidge,
+  ashen_mountains: AshenBarrens,
+  mistwood: MistmireBog,
+  golden_desert: SunstoneDesert,
+  frost_peaks: FrostfangRidge,
 } as const;
 
 export function Biomes() {
