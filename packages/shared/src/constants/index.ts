@@ -101,6 +101,8 @@ export type DistrictName =
   | "inn"
   | "harbor";
 
+export type ArchFamily = "residential" | "commercial" | "craft" | "noble" | "civic";
+
 export interface BuildingDef {
   x: number;
   z: number;
@@ -109,8 +111,12 @@ export interface BuildingDef {
   h: number;
   color?: string;
   label?: string;
+  family?: ArchFamily;
+  subStyle?: string;
+  isCorner?: boolean;
+  facadeType?: "timber" | "plaster" | "stone" | "brick" | "mixed";
   /** Roof silhouette for blockout; dispatcher in CityBuilding. */
-  roof?: "gable" | "flat" | "tower" | "cone" | "dome";
+  roof?: "gable" | "flat" | "tower" | "cone" | "dome" | "double-gable" | "hip" | "mansard" | "shallow";
   /** Optional architectural metadata */
   floors?: number;
   hasBalcony?: boolean;
