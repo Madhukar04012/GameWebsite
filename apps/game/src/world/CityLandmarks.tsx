@@ -66,10 +66,28 @@ function RoyalHighPalace({ position }: { position: [number, number, number] }) {
         <boxGeometry args={[32, 3, 26]} />
       </mesh>
 
-      {/* Main Palace Keep */}
-      <mesh position={[0, 11, 0]} castShadow receiveShadow material={marble}>
-        <boxGeometry args={[20, 16, 16]} />
-      </mesh>
+      {/* Main Palace Keep (Hollowed for interior) */}
+      <group position={[0, 11, 0]}>
+        <mesh position={[0, 0, -7.5]} castShadow receiveShadow material={marble}>
+          <boxGeometry args={[20, 16, 1]} />
+        </mesh>
+        <mesh position={[-9.5, 0, 0]} castShadow receiveShadow material={marble}>
+          <boxGeometry args={[1, 16, 16]} />
+        </mesh>
+        <mesh position={[9.5, 0, 0]} castShadow receiveShadow material={marble}>
+          <boxGeometry args={[1, 16, 16]} />
+        </mesh>
+        <mesh position={[-6, 0, 7.5]} castShadow receiveShadow material={marble}>
+          <boxGeometry args={[8, 16, 1]} />
+        </mesh>
+        <mesh position={[6, 0, 7.5]} castShadow receiveShadow material={marble}>
+          <boxGeometry args={[8, 16, 1]} />
+        </mesh>
+        <mesh position={[0, 4, 7.5]} castShadow receiveShadow material={marble}>
+          <boxGeometry args={[4, 8, 1]} />
+        </mesh>
+      </group>
+      <RoyalPalaceInterior />
 
       {/* Upper Sovereign Royal Tier */}
       <mesh position={[0, 22, 0]} castShadow receiveShadow material={marble}>
@@ -100,14 +118,17 @@ function RoyalHighPalace({ position }: { position: [number, number, number] }) {
       )}
 
       {/* Grand Arched Entrance Portico */}
-      <mesh position={[0, 5, 8.8]} castShadow material={darkStone}>
-        <boxGeometry args={[10, 8, 3.5]} />
-      </mesh>
-      {/* Entrance Arch Portal */}
-      <mesh position={[0, 4.5, 10.6]} rotation={[0, 0, 0]}>
-        <planeGeometry args={[4, 6]} />
-        <meshStandardMaterial color="#0d0d18" />
-      </mesh>
+      <group position={[0, 5, 8.8]}>
+        <mesh position={[-4, 0, 0]} castShadow material={darkStone}>
+           <boxGeometry args={[2, 8, 3.5]} />
+        </mesh>
+        <mesh position={[4, 0, 0]} castShadow material={darkStone}>
+           <boxGeometry args={[2, 8, 3.5]} />
+        </mesh>
+        <mesh position={[0, 2.5, 0]} castShadow material={darkStone}>
+           <boxGeometry args={[6, 3, 3.5]} />
+        </mesh>
+      </group>
 
       {/* Emissive Rose Window */}
       <mesh position={[0, 16, 8.08]} material={new THREE.MeshStandardMaterial({ color: "#ffb703", emissive: "#fb8500", emissiveIntensity: 2.2 })}>
@@ -136,10 +157,28 @@ function RoyalHighPalace({ position }: { position: [number, number, number] }) {
 function CathedralOfLight({ position }: { position: [number, number, number] }) {
   return (
     <group position={position} rotation={[0, -Math.PI / 4, 0]}>
-      {/* Main Cathedral Nave */}
-      <mesh position={[0, 8, 0]} castShadow receiveShadow material={stone}>
-        <boxGeometry args={[12, 16, 24]} />
-      </mesh>
+      {/* Main Cathedral Nave (Hollowed for interior) */}
+      <group position={[0, 8, 0]}>
+        <mesh position={[0, 0, -11.5]} castShadow receiveShadow material={stone}>
+          <boxGeometry args={[12, 16, 1]} />
+        </mesh>
+        <mesh position={[-5.5, 0, 0]} castShadow receiveShadow material={stone}>
+          <boxGeometry args={[1, 16, 24]} />
+        </mesh>
+        <mesh position={[5.5, 0, 0]} castShadow receiveShadow material={stone}>
+          <boxGeometry args={[1, 16, 24]} />
+        </mesh>
+        <mesh position={[-4, 0, 11.5]} castShadow receiveShadow material={stone}>
+          <boxGeometry args={[4, 16, 1]} />
+        </mesh>
+        <mesh position={[4, 0, 11.5]} castShadow receiveShadow material={stone}>
+          <boxGeometry args={[4, 16, 1]} />
+        </mesh>
+        <mesh position={[0, 4, 11.5]} castShadow receiveShadow material={stone}>
+          <boxGeometry args={[4, 8, 1]} />
+        </mesh>
+      </group>
+      <CathedralInterior />
 
       {/* Steep Slate Roof */}
       <mesh position={[0, 18, 0]} rotation={[0, Math.PI / 4, 0]} castShadow material={darkStone}>
@@ -386,6 +425,82 @@ function GreatForgeHearth({ position }: { position: [number, number, number] }) 
         <cylinderGeometry args={[1.2, 1.8, 6, 8]} />
       </mesh>
       <Sparkles count={30} scale={[4, 8, 4]} position={[0, 8, 0]} size={4} speed={0.8} color="#ff7b00" />
+    </group>
+  );
+}
+
+function CathedralInterior() {
+  return (
+    <group position={[0, 0, 0]}>
+      {/* Central aisle */}
+      <mesh position={[0, 0.1, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <planeGeometry args={[4, 22]} />
+        <meshStandardMaterial color="#331111" />
+      </mesh>
+      
+      {/* Pews */}
+      {[-3, 3].map(px => (
+        <group key={`pews-${px}`}>
+          {[-8, -4, 0, 4, 8].map(pz => (
+            <mesh key={`pew-${pz}`} position={[px, 0.4, pz]} castShadow material={wood}>
+              <boxGeometry args={[4, 0.8, 1]} />
+            </mesh>
+          ))}
+        </group>
+      ))}
+
+      {/* Altar */}
+      <mesh position={[0, 1.2, -10]} castShadow material={marble}>
+        <boxGeometry args={[6, 2.4, 2]} />
+      </mesh>
+      
+      {/* Giant cross or symbol */}
+      <mesh position={[0, 6, -11.4]} material={gold}>
+        <boxGeometry args={[1, 6, 0.5]} />
+      </mesh>
+      <mesh position={[0, 6.5, -11.4]} material={gold}>
+        <boxGeometry args={[4, 1, 0.5]} />
+      </mesh>
+
+      {/* Interior lighting */}
+      <pointLight position={[0, 10, 0]} intensity={2} distance={30} color="#ffddaa" />
+      <pointLight position={[0, 4, -8]} intensity={1.5} distance={15} color="#ffaa55" />
+    </group>
+  );
+}
+
+function RoyalPalaceInterior() {
+  return (
+    <group position={[0, 3, 0]}>
+      {/* Royal carpet */}
+      <mesh position={[0, 0.05, 0]} rotation={[-Math.PI/2, 0, 0]}>
+        <planeGeometry args={[6, 14]} />
+        <meshStandardMaterial color="#aa0000" />
+      </mesh>
+      
+      {/* Throne platform */}
+      <mesh position={[0, 0.5, -6]} castShadow material={marble}>
+        <cylinderGeometry args={[3, 4, 1, 8]} />
+      </mesh>
+      
+      {/* Golden Throne */}
+      <mesh position={[0, 1.5, -6]} castShadow material={gold}>
+        <boxGeometry args={[2, 3, 1]} />
+      </mesh>
+      
+      {/* Interior pillars */}
+      {[-5, 5].map(x => (
+        <group key={`palace-pillars-${x}`}>
+          {[-4, 0, 4].map(z => (
+             <mesh key={`palace-pillar-${z}`} position={[x, 6, z]} material={marble}>
+               <cylinderGeometry args={[0.8, 1.0, 12]} />
+             </mesh>
+          ))}
+        </group>
+      ))}
+      
+      {/* Chandeliers */}
+      <pointLight position={[0, 10, 0]} intensity={2.5} distance={25} color="#ffddaa" />
     </group>
   );
 }
