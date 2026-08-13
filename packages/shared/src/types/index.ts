@@ -35,3 +35,5 @@ export type GameEvent =
   | { type: "chat"; message: ChatMessage }
   | { type: "damage"; targetId: string; amount: number }
   | { type: "heal"; targetId: string; amount: number };
+
+export * from "./npc";
