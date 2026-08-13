@@ -1,4 +1,3 @@
-import React from "react";
 import { createWoodMaterial } from "../../../materials/createWoodMaterial";
 import { createStoneMaterial } from "../../../materials/createStoneMaterial";
 import { useWorldStore } from "../../../store/worldStore";
@@ -41,7 +40,7 @@ export function ShopInterior({ w, d, storyH }: { w: number; d: number; storyH: n
       </group>
 
       {/* Main Light */}
-      <pointLight position={[0, storyH - 0.5, 0]} intensity={lightIntensity} distance={8} color="#ffd480" castShadow />
+      <pointLight position={[0, storyH - 0.5, 0]} intensity={lightIntensity} distance={8} color="#ffd480" />
     </group>
   );
 }

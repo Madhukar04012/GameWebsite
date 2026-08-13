@@ -132,7 +132,7 @@ function RoadStrip({ seg }: StripProps) {
 
 /** Blended intersection roundels */
 function IntersectionRoundels() {
-  const points = useMemo(() => {
+  const roundels = useMemo(() => {
     const map = new Map<string, { x: number; z: number; count: number }>();
     ROADS.forEach((r) => {
       [r.from, r.to].forEach((pt) => {
@@ -142,22 +142,24 @@ function IntersectionRoundels() {
         else map.set(key, { x: pt.x, z: pt.z, count: 1 });
       });
     });
-    return Array.from(map.values()).filter((p) => p.count > 1);
+    const intersections = Array.from(map.values()).filter((p) => p.count > 1);
+    return intersections.map((p) => {
+      const y = heightAt(p.x, p.z) + 0.05;
+      const n = normalAt(p.x, p.z);
+      const normalVec = new THREE.Vector3(n.x, n.y, n.z);
+      const upVec = new THREE.Vector3(0, 1, 0);
+      const quaternion = new THREE.Quaternion().setFromUnitVectors(upVec, normalVec);
+      const euler = new THREE.Euler().setFromQuaternion(quaternion);
+      return { x: p.x, z: p.z, y, rotation: [euler.x, euler.y, euler.z] as [number, number, number] };
+    });
   }, []);
 
   return (
     <>
-      {points.map((p, i) => {
-        const y = heightAt(p.x, p.z) + 0.05;
-        const n = normalAt(p.x, p.z);
-        const normalVec = new THREE.Vector3(n.x, n.y, n.z);
-        const upVec = new THREE.Vector3(0, 1, 0);
-        const quaternion = new THREE.Quaternion().setFromUnitVectors(upVec, normalVec);
-        const euler = new THREE.Euler().setFromQuaternion(quaternion);
-
+      {roundels.map((r, i) => {
         const radius = 6.5;
         return (
-          <group key={`intersection-${i}`} position={[p.x, y, p.z]} rotation={euler}>
+          <group key={`intersection-${i}`} position={[r.x, r.y, r.z]} rotation={r.rotation}>
             <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow material={INTERSECTION_MAT}>
               <circleGeometry args={[radius, 32]} />
             </mesh>

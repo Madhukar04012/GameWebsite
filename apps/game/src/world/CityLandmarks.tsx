@@ -19,6 +19,10 @@ const gold = createMetalMaterial({ kind: "gold", seed: [90, 1] });
 const bronze = createMetalMaterial({ kind: "bronze", seed: [90, 2] });
 const bannerCloth = createFabricMaterial({ kind: "banner", color: "#b22222", seed: [90, 4] });
 const blueBannerCloth = createFabricMaterial({ kind: "banner", color: "#1a3b66", seed: [90, 5] });
+const palaceRoseWindowMat = new THREE.MeshStandardMaterial({ color: "#ffb703", emissive: "#fb8500", emissiveIntensity: 2.2 });
+const bellArchDarkMat = new THREE.MeshStandardMaterial({ color: "#0a0a14" });
+const cathedralRoseWindowMat = new THREE.MeshStandardMaterial({ color: "#00b4d8", emissive: "#0077b6", emissiveIntensity: 2.4 });
+const forgeMoltenMat = new THREE.MeshStandardMaterial({ color: "#ff4800", emissive: "#ff5400", emissiveIntensity: 3.0 });
 
 /**
  * Flagship Capital Landmarks — iconic hero structures providing recognizable silhouettes
@@ -131,7 +135,7 @@ function RoyalHighPalace({ position }: { position: [number, number, number] }) {
       </group>
 
       {/* Emissive Rose Window */}
-      <mesh position={[0, 16, 8.08]} material={new THREE.MeshStandardMaterial({ color: "#ffb703", emissive: "#fb8500", emissiveIntensity: 2.2 })}>
+      <mesh position={[0, 16, 8.08]} material={palaceRoseWindowMat}>
         <circleGeometry args={[2.8, 24]} />
       </mesh>
 
@@ -195,14 +199,14 @@ function CathedralOfLight({ position }: { position: [number, number, number] }) 
             <coneGeometry args={[2.8, 9, 8]} />
           </mesh>
           {/* Bell Arch Openings */}
-          <mesh position={[0, 28, 2.3]} material={new THREE.MeshStandardMaterial({ color: "#0a0a14" })}>
+          <mesh position={[0, 28, 2.3]} material={bellArchDarkMat}>
             <planeGeometry args={[1.8, 3.5]} />
           </mesh>
         </group>
       ))}
 
       {/* Glowing Stained Glass Clerestory Rose Window */}
-      <mesh position={[0, 12, 12.08]} material={new THREE.MeshStandardMaterial({ color: "#00b4d8", emissive: "#0077b6", emissiveIntensity: 2.4 })}>
+      <mesh position={[0, 12, 12.08]} material={cathedralRoseWindowMat}>
         <circleGeometry args={[2.4, 24]} />
       </mesh>
 
@@ -417,7 +421,7 @@ function GreatForgeHearth({ position }: { position: [number, number, number] }) 
         <cylinderGeometry args={[2.5, 3.2, 5, 10]} />
       </mesh>
       {/* Glowing Molten Crucible Opening */}
-      <mesh position={[0, 1.8, 2.4]} material={new THREE.MeshStandardMaterial({ color: "#ff4800", emissive: "#ff5400", emissiveIntensity: 3.0 })}>
+      <mesh position={[0, 1.8, 2.4]} material={forgeMoltenMat}>
         <circleGeometry args={[1.1, 16]} />
       </mesh>
       {/* Brick Smoke Stack */}
