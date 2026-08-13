@@ -12,6 +12,8 @@
     "build:game": "npm run build -w @legend/game",
     "build:server": "npm run build -w @legend/server",
     "build:all": "npm run build:server && npm run build:game && npm run build",
+    "test:geography": "npm run test -w @legend/shared",
+    "test": "npm run test:geography",
     "lint": "npm run lint -w @legend/website"
   },
   "devDependencies": {

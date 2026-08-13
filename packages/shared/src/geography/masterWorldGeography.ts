@@ -11,7 +11,9 @@
 
 import type {
   RegionId,
+  SubregionId,
   RegionGeographyDef,
+  SubregionDef,
   LandformDef,
   WaterSpringDef,
   RiverDrainageDef,
@@ -27,7 +29,7 @@ export const WORLD_COORDINATE_CONTRACT = {
   axes: {
     north: "+Z (Highlands, Frostpeak Ridge, Glaciers)",
     south: "-Z (Coastal Slopes, Emerald Coast, Ocean Basin, South Gate at z=-46)",
-    east: "+X (Sunstone Plateau, Ashen Volcanic Crags, Desert)",
+    east: "+X (Sunstone Highlands, Ashen Volcanic Crags, Desert)",
     west: "-X (Whistling Woods, Willow Glades, Gloomwood Marsh)",
     elevation: "+Y (Height above sea level in meters)",
   },
@@ -35,7 +37,7 @@ export const WORLD_COORDINATE_CONTRACT = {
   cityPerimeterRadius: 50, // Capital Kingdom flat defensible plateau
 } as const;
 
-/* ── 2. Macro Regions ── */
+/* ── 2. Master Macro Regions ── */
 export const MASTER_REGIONS: Record<RegionId, RegionGeographyDef> = {
   capital_kingdom: {
     id: "capital_kingdom",
@@ -46,6 +48,7 @@ export const MASTER_REGIONS: Record<RegionId, RegionGeographyDef> = {
     baseElevation: 0.0,
     climate: "temperate",
     moisture: 0.5,
+    temperature: 20.0,
     dominantGround: "stone",
     fogColor: "#8fbc8f",
     ambientColor: "#ffffff",
@@ -61,6 +64,7 @@ export const MASTER_REGIONS: Record<RegionId, RegionGeographyDef> = {
     baseElevation: 22.0,
     climate: "arctic",
     moisture: 0.7,
+    temperature: -8.0,
     dominantGround: "snow",
     fogColor: "#b0d0f0",
     ambientColor: "#c0e0ff",
@@ -76,6 +80,7 @@ export const MASTER_REGIONS: Record<RegionId, RegionGeographyDef> = {
     baseElevation: 6.0,
     climate: "temperate",
     moisture: 0.65,
+    temperature: 16.0,
     dominantGround: "grass",
     fogColor: "#2d5a2d",
     ambientColor: "#3d7a3d",
@@ -91,6 +96,7 @@ export const MASTER_REGIONS: Record<RegionId, RegionGeographyDef> = {
     baseElevation: 15.0,
     climate: "arid",
     moisture: 0.15,
+    temperature: 34.0,
     dominantGround: "sand",
     fogColor: "#d4b87a",
     ambientColor: "#c4a060",
@@ -106,6 +112,7 @@ export const MASTER_REGIONS: Record<RegionId, RegionGeographyDef> = {
     baseElevation: -0.8,
     climate: "humid_marsh",
     moisture: 0.95,
+    temperature: 18.0,
     dominantGround: "grass",
     fogColor: "#2a3a2a",
     ambientColor: "#3a5a3a",
@@ -121,6 +128,7 @@ export const MASTER_REGIONS: Record<RegionId, RegionGeographyDef> = {
     baseElevation: 1.2,
     climate: "oceanic",
     moisture: 0.8,
+    temperature: 22.0,
     dominantGround: "grass",
     fogColor: "#4ab8a0",
     ambientColor: "#6ac8b8",
@@ -129,7 +137,200 @@ export const MASTER_REGIONS: Record<RegionId, RegionGeographyDef> = {
   },
 };
 
-/* ── 3. Major Landforms ── */
+/* ── 3. Subregions ── */
+export const MASTER_SUBREGIONS: Record<SubregionId, SubregionDef> = {
+  // Frostpeak Ridge subregions
+  frostpeak_foothills: {
+    id: "frostpeak_foothills",
+    name: "Frostpeak Foothills",
+    regionId: "frostpeak_ridge",
+    description: "Lower pine-covered rocky slopes transitioning from the temperate valley to northern mountain passes.",
+    center: { x: 0, z: 85 },
+    radius: 40,
+    elevationTarget: 14.0,
+  },
+  alpine_slopes: {
+    id: "alpine_slopes",
+    name: "Alpine Snow Slopes",
+    regionId: "frostpeak_ridge",
+    description: "Windswept snowfields and steep crags leading to the mountain citadels.",
+    center: { x: -30, z: 135 },
+    radius: 50,
+    elevationTarget: 26.0,
+  },
+  glacier_zone: {
+    id: "glacier_zone",
+    name: "Silvercrest Glacier Zone",
+    regionId: "frostpeak_ridge",
+    description: "Perpetual ice plateau feeding the headwater springs of the realm.",
+    center: { x: 30, z: 165 },
+    radius: 45,
+    elevationTarget: 34.0,
+  },
+  mountain_valleys: {
+    id: "mountain_valleys",
+    name: "Frostfall Mountain Valleys",
+    regionId: "frostpeak_ridge",
+    description: "Deep glacial gorges carrying meltwater streams down towards the lowlands.",
+    center: { x: 0, z: 130 },
+    radius: 35,
+    elevationTarget: 18.0,
+  },
+
+  // Whistling Woods subregions
+  ancient_canopy: {
+    id: "ancient_canopy",
+    name: "Heartwood Ancient Canopy",
+    regionId: "whistling_woods",
+    description: "Old-growth forest dominated by towering bioluminescent trees and singing winds.",
+    center: { x: -95, z: -25 },
+    radius: 45,
+    elevationTarget: 6.5,
+  },
+  forest_valley: {
+    id: "forest_valley",
+    name: "Whistling Forest Valley",
+    regionId: "whistling_woods",
+    description: "Fertile alluvial basin sheltered by surrounding ridges.",
+    center: { x: -130, z: 10 },
+    radius: 40,
+    elevationTarget: 5.0,
+  },
+  western_woodland: {
+    id: "western_woodland",
+    name: "Western Elder Woodland",
+    regionId: "whistling_woods",
+    description: "Dense pine and oak forest stretching toward the world's western border.",
+    center: { x: -160, z: -40 },
+    radius: 45,
+    elevationTarget: 7.0,
+  },
+  river_forest: {
+    id: "river_forest",
+    name: "Gorge Riverine Forest",
+    regionId: "whistling_woods",
+    description: "Riparian groves lining the cliff edges above the Royal Torrent River Gorge.",
+    center: { x: -55, z: -10 },
+    radius: 30,
+    elevationTarget: 3.5,
+  },
+
+  // Sunstone Highlands subregions
+  sandstone_plateau: {
+    id: "sandstone_plateau",
+    name: "Sunstone Sandstone Plateau",
+    regionId: "sunstone_highlands",
+    description: "High arid plateau carved with tiered sandstone ledges and ancient monoliths.",
+    center: { x: 110, z: -20 },
+    radius: 50,
+    elevationTarget: 16.0,
+  },
+  basalt_crags: {
+    id: "basalt_crags",
+    name: "Ashen Basalt Crags",
+    regionId: "sunstone_highlands",
+    description: "Hexagonal volcanic pillar fields and glowing magma fissures.",
+    center: { x: 150, z: 40 },
+    radius: 45,
+    elevationTarget: 22.0,
+  },
+  dry_basin: {
+    id: "dry_basin",
+    name: "Wyrm's Dry Wash Basin",
+    regionId: "sunstone_highlands",
+    description: "Arid desert depression housing the colossal dragon skeleton.",
+    center: { x: 80, z: -35 },
+    radius: 35,
+    elevationTarget: 12.0,
+  },
+  desert_approach: {
+    id: "desert_approach",
+    name: "Eastern Desert Approach",
+    regionId: "sunstone_highlands",
+    description: "Rolling sand dunes and date palm oases leading towards the southern coast.",
+    center: { x: 140, z: -70 },
+    radius: 40,
+    elevationTarget: 8.0,
+  },
+
+  // Gloomwood & Emerald Coast subregions
+  mistmire_marsh: {
+    id: "mistmire_marsh",
+    name: "Mistmire Sunken Fen",
+    regionId: "gloomwood_basin",
+    description: "Deep marshland shrouded in perpetual fog and glowing spore fungi.",
+    center: { x: -80, z: -110 },
+    radius: 40,
+    elevationTarget: -0.5,
+  },
+  swamp_forest: {
+    id: "swamp_forest",
+    name: "Gloomwood Weeping Swamp",
+    regionId: "gloomwood_basin",
+    description: "Twisted weeping willow groves growing in shallow brackish waters.",
+    center: { x: -120, z: -150 },
+    radius: 50,
+    elevationTarget: -1.0,
+  },
+  emerald_basin: {
+    id: "emerald_basin",
+    name: "Emerald Coastal Basin",
+    regionId: "emerald_coast",
+    description: "Sunlit coastal meadows and flower fields sloping towards the sea.",
+    center: { x: 50, z: -120 },
+    radius: 45,
+    elevationTarget: 2.0,
+  },
+  southern_estuary: {
+    id: "southern_estuary",
+    name: "Royal Torrent Estuary & Harbor",
+    regionId: "emerald_coast",
+    description: "Wide tidal delta where the river empties into the shimmering southern ocean.",
+    center: { x: 0, z: -180 },
+    radius: 40,
+    elevationTarget: 0.0,
+  },
+
+  // Capital Kingdom subregions
+  royal_palace_terrace: {
+    id: "royal_palace_terrace",
+    name: "Royal High Palace Terrace",
+    regionId: "capital_kingdom",
+    description: "Elevated citadel plateau commanding panoramic views across all five surrounding realms.",
+    center: { x: 0, z: -26 },
+    radius: 25,
+    elevationTarget: 2.0,
+  },
+  city_plateau: {
+    id: "city_plateau",
+    name: "Solaria Capital Plateau",
+    regionId: "capital_kingdom",
+    description: "The leveled defensible stone city plateau containing the ten civic districts.",
+    center: { x: 0, z: -4 },
+    radius: 45,
+    elevationTarget: 0.0,
+  },
+  river_approach: {
+    id: "river_approach",
+    name: "Western Moat & River Bridge",
+    regionId: "capital_kingdom",
+    description: "Stone embankments and arched bridges crossing the western river gorge.",
+    center: { x: -40, z: 0 },
+    radius: 20,
+    elevationTarget: 0.5,
+  },
+  sunblossom_meadows: {
+    id: "sunblossom_meadows",
+    name: "South Gate Sunblossom Meadows",
+    regionId: "capital_kingdom",
+    description: "Lush flowering plains directly outside the South Gate along the King's Highway.",
+    center: { x: 0, z: -65 },
+    radius: 30,
+    elevationTarget: 0.5,
+  },
+};
+
+/* ── 4. Major Landforms ── */
 export const MASTER_LANDFORMS: LandformDef[] = [
   {
     id: "frostpeak_crest",
@@ -178,7 +379,7 @@ export const MASTER_LANDFORMS: LandformDef[] = [
     regionId: "whistling_woods",
     center: { x: -40, z: -20 },
     radius: 120,
-    peakElevation: -3.5, // Depression depth
+    peakElevation: -3.5, // Canyon trough depth
     profile: "canyon",
   },
   {
@@ -201,9 +402,19 @@ export const MASTER_LANDFORMS: LandformDef[] = [
     peakElevation: -1.2,
     profile: "trough",
   },
+  {
+    id: "emerald_coastline_shelf",
+    name: "Emerald Coastline Shelf",
+    kind: "coastal_basin",
+    regionId: "emerald_coast",
+    center: { x: 60, z: -150 },
+    radius: 65,
+    peakElevation: 1.5,
+    profile: "trough",
+  },
 ];
 
-/* ── 4. Hydrology & Natural Drainage ── */
+/* ── 5. Hydrology & Natural Drainage (High North -> Low South) ── */
 export const MASTER_SPRINGS: WaterSpringDef[] = [
   { id: "glacier_spring_1", name: "Glacial Tear Spring", source: { x: -25, z: 175 }, elevation: 34.0, flowRate: 85 },
   { id: "glacier_spring_2", name: "Frostfall Headwaters", source: { x: 30, z: 165 }, elevation: 32.0, flowRate: 65 },
@@ -216,24 +427,26 @@ export const MASTER_DRAINAGE: RiverDrainageDef[] = [
     originRegion: "frostpeak_ridge",
     destinationRegion: "emerald_coast",
     waypoints: [
-      { x: 0, z: 180, width: 4.5, depth: 1.8 },
-      { x: -15, z: 120, width: 6.0, depth: 2.2 },
-      { x: -35, z: 60, width: 8.0, depth: 2.8 },
-      { x: -42, z: 0, width: 10.0, depth: 3.5 },
-      { x: -38, z: -60, width: 12.0, depth: 3.2 },
-      { x: -20, z: -120, width: 16.0, depth: 2.8 },
-      { x: 0, z: -180, width: 28.0, depth: 2.0 },
+      { x: 0, z: 180, width: 4.5, depth: 1.8, elevation: 30.0 },
+      { x: -15, z: 120, width: 6.0, depth: 2.2, elevation: 18.0 },
+      { x: -35, z: 60, width: 8.0, depth: 2.8, elevation: 10.0 },
+      { x: -42, z: 0, width: 10.0, depth: 3.5, elevation: 2.0 },
+      { x: -38, z: -60, width: 12.0, depth: 3.2, elevation: 0.0 },
+      { x: -20, z: -120, width: 16.0, depth: 2.8, elevation: -0.6 },
+      { x: 0, z: -180, width: 28.0, depth: 2.0, elevation: -1.2 },
     ],
   },
 ];
 
-/* ── 5. World Travel Corridors & Highways ── */
+/* ── 6. World Travel Corridors & Highways ── */
 export const MASTER_TRAVEL_CORRIDORS: TravelCorridorDef[] = [
   {
     id: "corridor_north_pass",
     name: "Northern Mountain Pass (Highland Switchback)",
     connects: ["capital_kingdom", "frostpeak_ridge"],
     difficulty: "dangerous",
+    approxWidth: 6.0,
+    terrainPreference: "rocky_switchback",
     pathNodes: [
       { x: 0, z: 40 },
       { x: 5, z: 75 },
@@ -248,6 +461,8 @@ export const MASTER_TRAVEL_CORRIDORS: TravelCorridorDef[] = [
     name: "Great Western Forest Highway",
     connects: ["capital_kingdom", "whistling_woods"],
     difficulty: "safe",
+    approxWidth: 8.0,
+    terrainPreference: "cobblestone",
     pathNodes: [
       { x: -46, z: -4 },
       { x: -75, z: -10 },
@@ -261,6 +476,8 @@ export const MASTER_TRAVEL_CORRIDORS: TravelCorridorDef[] = [
     name: "Eastern Sunstone Silkway",
     connects: ["capital_kingdom", "sunstone_highlands"],
     difficulty: "moderate",
+    approxWidth: 7.0,
+    terrainPreference: "sand_highway",
     pathNodes: [
       { x: 46, z: -4 },
       { x: 80, z: 5 },
@@ -274,6 +491,8 @@ export const MASTER_TRAVEL_CORRIDORS: TravelCorridorDef[] = [
     name: "Southern King's Highway",
     connects: ["capital_kingdom", "emerald_coast"],
     difficulty: "safe",
+    approxWidth: 10.0,
+    terrainPreference: "cobblestone",
     pathNodes: [
       { x: 0, z: -46 },
       { x: 0, z: -80 },
@@ -284,7 +503,7 @@ export const MASTER_TRAVEL_CORRIDORS: TravelCorridorDef[] = [
   },
 ];
 
-/* ── 6. Master Landmark Registry ── */
+/* ── 7. Master Landmark Registry (12 Original LEGEND Landmarks) ── */
 export const MASTER_LANDMARKS: MasterLandmarkDef[] = [
   {
     id: "landmark_royal_palace",
@@ -293,7 +512,7 @@ export const MASTER_LANDMARKS: MasterLandmarkDef[] = [
     category: "citadel",
     position: { x: 0, z: -26 },
     elevation: 2.0,
-    visibilityRadius: 150,
+    visibilityRadius: 160,
     importance: "major",
     loreDescription: "Towering seat of the Solar King with soaring spires, gold dome, and rose window overlooking the realm.",
   },
@@ -353,6 +572,28 @@ export const MASTER_LANDMARKS: MasterLandmarkDef[] = [
     loreDescription: "Impenetrable fortress battlement guarding the northern mountain passes amidst icy snow flurries.",
   },
   {
+    id: "landmark_frostpeak_shrine",
+    name: "Frostpeak Glacier Shrine",
+    region: "frostpeak_ridge",
+    category: "sanctuary",
+    position: { x: 25, z: 168 },
+    elevation: 35.0,
+    visibilityRadius: 110,
+    importance: "regional",
+    loreDescription: "Glacial crystal shrine commemorating the ancient Ice Wardens at the headwaters of the realm.",
+  },
+  {
+    id: "landmark_whispering_ruins",
+    name: "Whispering Stone Ruins",
+    region: "whistling_woods",
+    category: "ancient_ruin",
+    position: { x: -140, z: 30 },
+    elevation: 8.0,
+    visibilityRadius: 90,
+    importance: "minor",
+    loreDescription: "Weathered marble colonnade where the wind produces harmonious acoustic frequencies.",
+  },
+  {
     id: "landmark_sunken_cathedral",
     name: "Sunken Cathedral of Mist",
     region: "gloomwood_basin",
@@ -398,11 +639,12 @@ export const MASTER_LANDMARKS: MasterLandmarkDef[] = [
   },
 ];
 
-/* ── 7. Pure Mathematical Geography Sampling Engine ── */
+/* ── 8. Pure Mathematical Geography Sampling Engine ── */
 
 /**
  * Calculates continuous weight [0.0 to 1.0] of each region at world (x, z).
  * Guarantees smooth continuous transitions without harsh bounding box pops.
+ * Mathematical property: sum of all weights strictly equals 1.0.
  */
 export function getRegionWeightsAt(x: number, z: number): Record<RegionId, number> {
   const distCapital = Math.sqrt(x * x + (z + 4) * (z + 4));
@@ -428,7 +670,7 @@ export function getRegionWeightsAt(x: number, z: number): Record<RegionId, numbe
 
   // North -> Frostpeaks
   const northScore = Math.max(0, (z - 20) / 120);
-  // West -> Whistling Woods / Gloomwood
+  // West -> Whistling Woods
   const westScore = Math.max(0, (-x - 20) / 120);
   // East -> Sunstone
   const eastScore = Math.max(0, (x - 20) / 120);
@@ -469,6 +711,27 @@ export function getDominantRegionAt(x: number, z: number): RegionGeographyDef {
 }
 
 /**
+ * Returns the nearest dominant subregion at world (x, z).
+ */
+export function getDominantSubregionAt(x: number, z: number, dominantRegionId: RegionId): SubregionDef {
+  let nearestSub: SubregionDef = MASTER_SUBREGIONS.city_plateau;
+  let minDist = Infinity;
+
+  for (const sub of Object.values(MASTER_SUBREGIONS)) {
+    if (sub.regionId !== dominantRegionId) continue;
+    const dx = sub.center.x - x;
+    const dz = sub.center.z - z;
+    const dist = Math.sqrt(dx * dx + dz * dz);
+    if (dist < minDist) {
+      minDist = dist;
+      nearestSub = sub;
+    }
+  }
+
+  return nearestSub;
+}
+
+/**
  * Evaluates the River Path centerline X for a given Z coordinate.
  * Matches natural hydrological gorge meander.
  */
@@ -486,6 +749,7 @@ export function getDistanceToRiver(x: number, z: number): number {
 
 /**
  * Evaluates the Macro Landform Elevation at world (x, z) before micro FBM erosion.
+ * Deterministic pure mathematical function.
  */
 export function getMacroLandformElevation(x: number, z: number): number {
   const distCity = Math.sqrt(x * x + z * z);
@@ -518,22 +782,27 @@ export function getMacroLandformElevation(x: number, z: number): number {
   return (baseElev + mountainSpine - riverCarve) * easeFromCity;
 }
 
+/** Top-level alias for getMacroLandformElevation */
+export const macroElevation = getMacroLandformElevation;
+
 /**
  * Complete geography evaluation at world (x, z).
+ * Deterministic pure calculation.
  */
 export function sampleGeography(x: number, z: number): GeographySample {
   const region = getDominantRegionAt(x, z);
+  const subregion = getDominantSubregionAt(x, z, region.id);
   const weights = getRegionWeightsAt(x, z);
-  const macroElevation = getMacroLandformElevation(x, z);
+  const macroElev = getMacroLandformElevation(x, z);
   const distToRiver = getDistanceToRiver(x, z);
   const isCityPlateau = Math.sqrt(x * x + z * z) <= 50;
 
   // Compute elevation zone
   let elevationZone: ElevationZone = "river_valley";
-  if (macroElevation < -0.5) elevationZone = "lowland_marsh";
-  else if (macroElevation <= 6.0) elevationZone = "river_valley";
-  else if (macroElevation <= 16.0) elevationZone = "plateau";
-  else if (macroElevation <= 26.0) elevationZone = "highland";
+  if (macroElev < -0.5) elevationZone = "lowland_marsh";
+  else if (macroElev <= 6.0) elevationZone = "river_valley";
+  else if (macroElev <= 16.0) elevationZone = "plateau";
+  else if (macroElev <= 26.0) elevationZone = "highland";
   else elevationZone = "alpine_crest";
 
   // Find nearest landmark
@@ -549,14 +818,49 @@ export function sampleGeography(x: number, z: number): GeographySample {
     }
   }
 
+  // Find dominant landform if within influence radius
+  let dominantLandform: LandformDef | undefined;
+  for (const lf of MASTER_LANDFORMS) {
+    const dx = lf.center.x - x;
+    const dz = lf.center.z - z;
+    const d = Math.sqrt(dx * dx + dz * dz);
+    if (d <= lf.radius) {
+      dominantLandform = lf;
+      break;
+    }
+  }
+
+  // Calculate blended temperature & moisture
+  const blendedTemp =
+    weights.capital_kingdom * MASTER_REGIONS.capital_kingdom.temperature +
+    weights.frostpeak_ridge * MASTER_REGIONS.frostpeak_ridge.temperature +
+    weights.whistling_woods * MASTER_REGIONS.whistling_woods.temperature +
+    weights.sunstone_highlands * MASTER_REGIONS.sunstone_highlands.temperature +
+    weights.gloomwood_basin * MASTER_REGIONS.gloomwood_basin.temperature +
+    weights.emerald_coast * MASTER_REGIONS.emerald_coast.temperature;
+
+  const blendedMoisture =
+    weights.capital_kingdom * MASTER_REGIONS.capital_kingdom.moisture +
+    weights.frostpeak_ridge * MASTER_REGIONS.frostpeak_ridge.moisture +
+    weights.whistling_woods * MASTER_REGIONS.whistling_woods.moisture +
+    weights.sunstone_highlands * MASTER_REGIONS.sunstone_highlands.moisture +
+    weights.gloomwood_basin * MASTER_REGIONS.gloomwood_basin.moisture +
+    weights.emerald_coast * MASTER_REGIONS.emerald_coast.moisture;
+
   return {
     region,
+    subregion,
+    landform: dominantLandform,
     elevationZone,
-    macroElevation,
-    moisture: region.moisture,
+    macroElevation: macroElev,
+    moisture: blendedMoisture,
+    temperature: blendedTemp,
     distToRiver,
     isCityPlateau,
     nearestLandmark,
     transitionWeights: weights,
   };
 }
+
+/** Top-level alias for sampleGeography */
+export const geographyAt = sampleGeography;

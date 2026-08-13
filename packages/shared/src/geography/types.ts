@@ -1,6 +1,8 @@
 /**
  * Master World Geography Types — single source of truth for all spatial,
- * geological, hydrological, climatic, and landmark systems across LEGEND.
+ * geological, hydrological, climatic, travel, and landmark systems across LEGEND.
+ *
+ * PURE DATA + PURE MATH (No DOM / Three.js / React dependencies).
  */
 
 export type RegionId =
@@ -12,18 +14,26 @@ export type RegionId =
   | "emerald_coast";
 
 export type SubregionId =
+  | "frostpeak_foothills"
+  | "alpine_slopes"
+  | "glacier_zone"
+  | "mountain_valleys"
+  | "ancient_canopy"
+  | "forest_valley"
+  | "western_woodland"
+  | "river_forest"
+  | "sandstone_plateau"
+  | "basalt_crags"
+  | "dry_basin"
+  | "desert_approach"
+  | "mistmire_marsh"
+  | "swamp_forest"
+  | "emerald_basin"
+  | "southern_estuary"
   | "royal_palace_terrace"
-  | "capital_districts"
-  | "sunwell_basin"
-  | "frostpeak_glacier"
-  | "silverpine_pass"
-  | "whistling_canopy"
-  | "willow_brook"
-  | "sunstone_mesas"
-  | "ashen_crags"
-  | "gloomwood_delta"
-  | "mistmire_fen"
-  | "emerald_harbor";
+  | "city_plateau"
+  | "river_approach"
+  | "sunblossom_meadows";
 
 export type LandformKind =
   | "alpine_ridge"
@@ -35,8 +45,8 @@ export type LandformKind =
   | "wetland_delta";
 
 export type ElevationZone =
-  | "subsea"        // < -1m
-  | "lowland_marsh" // -1m to +2m
+  | "subsea"        // < -0.5m
+  | "lowland_marsh" // -0.5m to +2m
   | "river_valley"  // +0m to +6m
   | "plateau"       // +6m to +16m
   | "highland"      // +16m to +26m
@@ -58,11 +68,22 @@ export interface RegionGeographyDef {
   baseElevation: number; // in meters
   climate: "arctic" | "temperate" | "arid" | "humid_marsh" | "oceanic";
   moisture: number; // 0.0 (desert) to 1.0 (swamp)
+  temperature: number; // in Celsius
   dominantGround: string;
   fogColor: string;
   ambientColor: string;
   skyTint: string;
   waterTint: string;
+}
+
+export interface SubregionDef {
+  id: SubregionId;
+  name: string;
+  regionId: RegionId;
+  description: string;
+  center: { x: number; z: number };
+  radius: number;
+  elevationTarget: number;
 }
 
 export interface LandformDef {
@@ -89,6 +110,7 @@ export interface RiverDrainageNode {
   z: number;
   width: number;
   depth: number;
+  elevation: number;
 }
 
 export interface RiverDrainageDef {
@@ -105,6 +127,8 @@ export interface TravelCorridorDef {
   connects: [RegionId, RegionId];
   difficulty: "safe" | "moderate" | "dangerous" | "perilous";
   pathNodes: { x: number; z: number }[];
+  approxWidth: number;
+  terrainPreference: "cobblestone" | "dirt_trail" | "rocky_switchback" | "sand_highway";
   description: string;
 }
 
@@ -129,20 +153,15 @@ export interface MasterLandmarkDef {
   loreDescription: string;
 }
 
-export interface BiomeTransitionZone {
-  fromRegion: RegionId;
-  toRegion: RegionId;
-  boundaryAxis: "x" | "z" | "radial";
-  center: number;
-  transitionWidth: number;
-}
-
-/** Result of sampling the master geography model at any world (x, z) */
+/** Complete evaluation of any point (x, z) on the world grid */
 export interface GeographySample {
   region: RegionGeographyDef;
+  subregion: SubregionDef;
+  landform?: LandformDef;
   elevationZone: ElevationZone;
   macroElevation: number;
   moisture: number;
+  temperature: number;
   distToRiver: number;
   isCityPlateau: boolean;
   nearestLandmark?: MasterLandmarkDef;

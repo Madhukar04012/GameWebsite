@@ -134,11 +134,14 @@ export function groundTypeAt(x: number, z: number): GroundType {
 }
 
 /**
- * High-level geography inspector hook for engine and client systems.
+ * High-level geography inspector hooks for engine and client systems.
  */
 export function getTerrainGeography(x: number, z: number): GeographySample {
   return sampleGeography(x, z);
 }
+
+export const geographyAt = sampleGeography;
+export const macroElevation = getMacroLandformElevation;
 
 /**
  * Region definition hook for streaming systems.
