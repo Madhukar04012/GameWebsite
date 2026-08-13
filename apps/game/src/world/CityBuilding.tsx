@@ -6,6 +6,11 @@ import { heightAt } from "@legend/engine";
 import type { BuildingDef, ArchFamily } from "@legend/shared";
 import { getDistrictMaterials, DistrictMaterialSet, getAllDistrictMaterials } from "../materials/createDistrictMaterials";
 import { INTERIOR_REGISTRY } from "./interiors/InteriorRegistry";
+import { createStoneMaterial } from "../materials/createStoneMaterial";
+import { createWoodMaterial } from "../materials/createWoodMaterial";
+import { createMetalMaterial } from "../materials/createMetalMaterial";
+
+const shopSignGoldMat = new THREE.MeshStandardMaterial({ color: "#d4af37", roughness: 0.4, metalness: 0.8 });
 
 interface CityBuildingProps {
   def: BuildingDef;
@@ -147,7 +152,7 @@ export function CityBuilding({ def, color = "#cccccc", district = "residential" 
       <BuildingRoof kind={roof} w={w} d={d} h={h + 0.35} roofH={roofH} material={roofMat} accent={accent} isCorner={isCorner} wood={wood} />
 
       {interiorDef && (
-        <group position={[0, 0, 0]}>
+        <group position={[0, 0.3, 0]}>
            <interiorDef.component w={w} d={d} storyH={storyH} />
         </group>
       )}
@@ -327,7 +332,7 @@ function BuildingDoor({ family, w, d, storyH, woodMat, metalMat, glassMat, isOpe
         <mesh position={[0, 1.4, 0.06]} castShadow material={woodMat}>
           <boxGeometry args={[2.4, 2.6, 0.1]} />
         </mesh>
-        {[-0.6, 0.6].map(hx => (
+        {!isOpen && [-0.6, 0.6].map(hx => (
           <mesh key={`hinge-${hx}`} position={[hx, 1.4, 0.12]} material={metalMat}>
             <boxGeometry args={[0.8, 0.1, 0.04]} />
           </mesh>
@@ -342,9 +347,11 @@ function BuildingDoor({ family, w, d, storyH, woodMat, metalMat, glassMat, isOpe
         <mesh position={[0, 1.4, 0.15]} castShadow material={woodMat}>
            <boxGeometry args={[1.6, 2.6, 0.4]} />
         </mesh>
-        <mesh position={[0, 1.3, 0.06]} castShadow material={woodMat}>
-          <boxGeometry args={[1.2, 2.4, 0.1]} />
-        </mesh>
+        {!isOpen && (
+          <mesh position={[0, 1.3, 0.06]} castShadow material={woodMat}>
+            <boxGeometry args={[1.2, 2.4, 0.1]} />
+          </mesh>
+        )}
       </group>
     );
   }
@@ -354,12 +361,16 @@ function BuildingDoor({ family, w, d, storyH, woodMat, metalMat, glassMat, isOpe
       <mesh position={[0, 1.15, 0.02]} castShadow receiveShadow material={woodMat}>
         <boxGeometry args={[1.2, 2.3, 0.14]} />
       </mesh>
-      <mesh position={[-0.26, 1.1, 0.06]} castShadow material={woodMat}>
-        <boxGeometry args={[0.48, 2.0, 0.06]} />
-      </mesh>
-      <mesh position={[0.26, 1.1, 0.06]} castShadow material={woodMat}>
-        <boxGeometry args={[0.48, 2.0, 0.06]} />
-      </mesh>
+      {!isOpen && (
+        <>
+          <mesh position={[-0.26, 1.1, 0.06]} castShadow material={woodMat}>
+            <boxGeometry args={[0.48, 2.0, 0.06]} />
+          </mesh>
+          <mesh position={[0.26, 1.1, 0.06]} castShadow material={woodMat}>
+            <boxGeometry args={[0.48, 2.0, 0.06]} />
+          </mesh>
+        </>
+      )}
     </group>
   );
 }
@@ -525,9 +536,8 @@ function BuildingShopSign({ sign, d, woodMat, metalMat }: any) {
       <mesh position={[0, -0.3, 0.55]} castShadow material={woodMat}>
         <boxGeometry args={[0.06, 0.5, 0.5]} />
       </mesh>
-      <mesh position={[0.04, -0.3, 0.55]} rotation={[0, Math.PI / 2, 0]}>
+      <mesh position={[0.04, -0.3, 0.55]} rotation={[0, Math.PI / 2, 0]} material={shopSignGoldMat}>
         <circleGeometry args={[0.16, 8]} />
-        <meshStandardMaterial color="#d4af37" emissive="#d4af37" emissiveIntensity={0.8} />
       </mesh>
     </group>
   );
@@ -536,10 +546,10 @@ function BuildingShopSign({ sign, d, woodMat, metalMat }: any) {
 export function NightLightingUpdater() {
   const timeOfDay = useWorldStore(s => s.timeOfDay);
   const isNight = timeOfDay >= 18 || timeOfDay <= 6;
+  const cachedMats = useMemo(() => getAllDistrictMaterials(), []);
   useFrame(() => {
     const target = isNight ? 1 : 0;
-    const mats = getAllDistrictMaterials();
-    for (const mat of mats) {
+    for (const mat of cachedMats) {
       if (mat.glass) {
         if (!mat.glass.userData.baseEmissive) {
            mat.glass.userData.baseEmissive = mat.glass.color.clone();

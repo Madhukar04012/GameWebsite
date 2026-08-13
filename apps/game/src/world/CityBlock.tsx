@@ -1,6 +1,10 @@
 import { useMemo } from "react";
 import type { CityBlockDef, DistrictName, BuildingDef, ArchFamily } from "@legend/shared";
 import { CityBuilding } from "./CityBuilding";
+import * as THREE from "three";
+
+const courtyardMat = new THREE.MeshStandardMaterial({ color: "#3a3832", roughness: 0.9 });
+const blockPropMat = new THREE.MeshStandardMaterial({ color: "#8b5a2b", roughness: 0.9 });
 
 interface CityBlockProps {
   block: CityBlockDef;
@@ -146,15 +150,13 @@ export function CityBlock({ block, district, color }: CityBlockProps) {
   return (
     <group>
       {/* Courtyard base */}
-      <mesh position={[block.x, 0.015, block.z]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+      <mesh position={[block.x, 0.015, block.z]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow material={courtyardMat}>
         <planeGeometry args={[block.w - 0.2, block.d - 0.2]} />
-        <meshStandardMaterial color="#3a3832" roughness={0.9} />
       </mesh>
 
       {buildings.props.map((p, i) => (
-        <mesh key={`block-${block.seed}-prop-${i}`} position={[p.x, 0.4, p.z]} castShadow receiveShadow>
+        <mesh key={`block-${block.seed}-prop-${i}`} position={[p.x, 0.4, p.z]} castShadow receiveShadow material={blockPropMat}>
           {p.type === "barrel" ? <cylinderGeometry args={[0.3, 0.3, 0.8, 8]} /> : <boxGeometry args={[0.8, 0.8, 0.8]} />}
-          <meshStandardMaterial color="#8b5a2b" roughness={0.9} />
         </mesh>
       ))}
 

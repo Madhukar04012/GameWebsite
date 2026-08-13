@@ -1,5 +1,6 @@
 import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
+import * as THREE from "three";
 import { PlaneGeometry } from "three";
 import { heightAt } from "@legend/engine";
 import { WORLD_BOUNDS } from "@legend/shared";
@@ -102,6 +103,7 @@ const plankMat = createWoodMaterial({ woodColor: 0x6a4a2a, roughness: 0.85 });
 const postMat = createWoodMaterial({ woodColor: 0x4a3a22, roughness: 0.88 });
 const hullMat = createWoodMaterial({ woodColor: 0x5a3a22, roughness: 0.85 });
 const bowMat = createWoodMaterial({ woodColor: 0x4a2a18, roughness: 0.88, flatShading: true });
+const sailMat = new THREE.MeshStandardMaterial({ color: "#d4af37", roughness: 0.7, side: THREE.DoubleSide });
 
 function Boat({ position, rotation }: { position: [number, number, number]; rotation: number }) {
   return (
@@ -119,9 +121,8 @@ function Boat({ position, rotation }: { position: [number, number, number]; rota
         <cylinderGeometry args={[0.05, 0.05, 3.2, 6]} />
       </mesh>
       {/* Sail — gold rune cloth */}
-      <mesh position={[0, 1.8, 0.5]}>
+      <mesh position={[0, 1.8, 0.5]} material={sailMat}>
         <planeGeometry args={[1.2, 2]} />
-        <meshStandardMaterial color="#d4af37" emissive="#d4af37" emissiveIntensity={0.15} roughness={0.7} side={2} />
       </mesh>
     </group>
   );

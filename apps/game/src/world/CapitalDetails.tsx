@@ -6,6 +6,7 @@ import { createFabricMaterial } from "../materials/createFabricMaterial";
 import { createMetalMaterial } from "../materials/createMetalMaterial";
 import { createStoneMaterial } from "../materials/createStoneMaterial";
 import { createWoodMaterial } from "../materials/createWoodMaterial";
+import { useWorldStore } from "../store/worldStore";
 
 const gardenStone = createStoneMaterial({ stoneColor: "#e6dec8", roughness: 0.82, seed: [18, 7] });
 const gardenWood = createWoodMaterial({ woodColor: "#3b2418", roughness: 0.9 });
@@ -147,6 +148,7 @@ function RoyalTerraceGardens() {
 
 /** Street Gaslight Lampposts along Main Avenues */
 function StreetGaslights() {
+  const isNight = useWorldStore((s: any) => s.timeOfDay >= 18 || s.timeOfDay <= 6);
   const lampSpots = useMemo(() => [
     // South Imperial High Avenue
     { x: -5, z: -40 }, { x: 5, z: -40 },
@@ -178,10 +180,12 @@ function StreetGaslights() {
             {/* Glass Lantern Housing */}
             <mesh position={[0.2, 2.5, 0]} castShadow>
               <cylinderGeometry args={[0.16, 0.12, 0.35, 6]} />
-              <meshStandardMaterial color="#ffd700" emissive="#ffb703" emissiveIntensity={1.8} />
+              <meshStandardMaterial color="#ffd700" emissive="#ffb703" emissiveIntensity={isNight ? 1.8 : 0.2} />
             </mesh>
-            {/* Warm Volumetric Point Light */}
-            <pointLight position={[0.2, 2.5, 0]} color="#ffb703" intensity={3.5} distance={7} decay={2} />
+            {/* Warm Volumetric Point Light — night only */}
+            {isNight && (
+              <pointLight position={[0.2, 2.5, 0]} color="#ffb703" intensity={3.5} distance={7} decay={2} />
+            )}
           </group>
         );
       })}

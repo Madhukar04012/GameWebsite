@@ -1,4 +1,3 @@
-import React from "react";
 import { createWoodMaterial } from "../../../materials/createWoodMaterial";
 import { createStoneMaterial } from "../../../materials/createStoneMaterial";
 import { createFabricMaterial } from "../../../materials/createFabricMaterial";
