@@ -1,6 +1,7 @@
 import { useMemo } from "react";
+import * as THREE from "three";
 import { ROADS, ROAD_WIDTH, type RoadType } from "@legend/shared";
-import { heightAt } from "@legend/engine";
+import { heightAt, normalAt } from "@legend/engine";
 import { createCobbleMaterial } from "../materials/createCobbleMaterial";
 import { createStoneMaterial } from "../materials/createStoneMaterial";
 import { createTerrainMaterial } from "../materials/createTerrainMaterial";
@@ -44,22 +45,33 @@ interface StripProps {
 }
 
 function RoadStrip({ seg }: StripProps) {
-  const { length, angle, midX, midY, midZ, width } = useMemo(() => {
+  const { length, angle, pitch, midX, midY, midZ, width } = useMemo(() => {
     const dx = seg.to.x - seg.from.x;
     const dz = seg.to.z - seg.from.z;
     const len = Math.sqrt(dx * dx + dz * dz);
     const angle = Math.atan2(dx, dz);
+    const startY = heightAt(seg.from.x, seg.from.z);
+    const endY = heightAt(seg.to.x, seg.to.z);
+    
+    // Pitch: positive if endY is higher than startY
+    // We are rotating around X-axis. A positive rotation around X dips the "forward" (Z) direction down.
+    // Wait, the plane is length-wise along Z.
+    // Actually, we rotate by `angle` around Y first, then we need the plane to tilt.
+    // Wait, the order of rotation matters! The default euler order is XYZ.
+    // If we apply rotation=[pitch, angle, 0, "YXZ"], it rotates Y first, then X.
+    const pitch = Math.atan2(startY - endY, len);
+    
     const midX = (seg.from.x + seg.to.x) / 2;
     const midZ = (seg.from.z + seg.to.z) / 2;
-    const midY = heightAt(midX, midZ) + 0.04;
-    return { length: len, angle, midX, midY, midZ, width: seg.width };
+    const midY = (startY + endY) / 2 + 0.04;
+    return { length: len, angle, pitch, midX, midY, midZ, width: seg.width };
   }, [seg]);
 
   const edge = ROAD_EDGE[seg.type];
   const hasVerge = seg.type === "main" || seg.type === "plaza";
 
   return (
-    <group position={[midX, midY, midZ]} rotation={[0, angle, 0]}>
+    <group position={[midX, midY, midZ]} rotation={[pitch, angle, 0, "YXZ"]}>
       {/* Road surface plane lying flat on ground */}
       <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]} material={ROAD_MATS[seg.type]} receiveShadow>
         <planeGeometry args={[width, length]} />
@@ -137,9 +149,15 @@ function IntersectionRoundels() {
     <>
       {points.map((p, i) => {
         const y = heightAt(p.x, p.z) + 0.05;
+        const n = normalAt(p.x, p.z);
+        const normalVec = new THREE.Vector3(n.x, n.y, n.z);
+        const upVec = new THREE.Vector3(0, 1, 0);
+        const quaternion = new THREE.Quaternion().setFromUnitVectors(upVec, normalVec);
+        const euler = new THREE.Euler().setFromQuaternion(quaternion);
+
         const radius = 6.5;
         return (
-          <group key={`intersection-${i}`} position={[p.x, y, p.z]}>
+          <group key={`intersection-${i}`} position={[p.x, y, p.z]} rotation={euler}>
             <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow material={INTERSECTION_MAT}>
               <circleGeometry args={[radius, 32]} />
             </mesh>
