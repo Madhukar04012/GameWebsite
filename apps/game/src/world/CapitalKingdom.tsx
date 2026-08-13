@@ -11,8 +11,7 @@ import { NPCSimulationManager } from "../systems/npc/NPCSimulationManager";
 import { NPCRenderer } from "../systems/npc/NPCRenderer";
 import { useEffect } from "react";
 import { useNPCStore } from "../store/npcStore";
-import { NPCData, NPCProfession } from "@legend/shared";
-import { MathUtils } from "three";
+import { generateCapitalPopulation } from "@legend/shared";
 
 /**
  * Capital Kingdom — walled city blockout.
@@ -26,46 +25,24 @@ const plazaMat = createCobbleMaterial({ kind: "plaza", scale: 2.0, seed: [7.7, 2
 
 export function CapitalKingdom({ showLabels = false }: { showLabels?: boolean }) {
   useEffect(() => {
-    // Seed test NPCs for Milestone 5.3.1 foundation
+    // Seed test NPCs for Milestone 5.3.2 deterministic population
     const store = useNPCStore.getState();
     if (store.npcs.length > 0) return; // already seeded
 
-    const testNPCs: NPCData[] = [];
-    const professions: NPCProfession[] = ["Citizen", "Guard", "Merchant", "Noble", "Worker"];
+    // Generate the deterministic population for Solaria
+    // Using a fixed world seed so population is reproducible
+    const solariaSeed = "SOLARIA_WORLD_SEED_01";
+    const population = generateCapitalPopulation(solariaSeed);
     
-    for (let i = 0; i < 50; i++) {
-      const prof = professions[Math.floor(Math.random() * professions.length)];
-      
-      // Random start pos in city (city size is ~1200x1200, walled area is roughly -400 to 400)
-      const startX = MathUtils.randFloatSpread(600);
-      const startZ = MathUtils.randFloatSpread(600);
-      
-      const destX = MathUtils.randFloatSpread(600);
-      const destZ = MathUtils.randFloatSpread(600);
-
-      testNPCs.push({
-        id: `npc-${i}`,
-        name: `${prof} ${i}`,
-        profession: prof,
-        homeDistrict: "Residential",
-        homeCoords: { x: startX, z: startZ },
-        workplaceCoords: { x: destX, z: destZ },
-        schedule: [
-          { startHour: 0, endHour: 8, activity: "Sleeping", destination: { x: startX, z: startZ } },
-          { startHour: 8, endHour: 18, activity: "Working", destination: { x: destX, z: destZ } },
-          { startHour: 18, endHour: 24, activity: "Idle", destination: { x: startX, z: startZ } }
-        ],
-        state: {
-          currentActivity: "Idle",
-          tier: 0,
-          position: { x: startX, y: 0, z: startZ },
-          targetDestination: null,
-          velocity: 0
-        }
-      });
-    }
+    // Log debug counts to console
+    console.log(`[NPC] Generated Abstract Population: ${population.length} citizens.`);
+    const districtCounts: Record<string, number> = {};
+    population.forEach(npc => {
+      districtCounts[npc.homeDistrict] = (districtCounts[npc.homeDistrict] || 0) + 1;
+    });
+    console.table(districtCounts);
     
-    store.setNPCs(testNPCs);
+    store.setNPCs(population);
   }, []);
 
   return (

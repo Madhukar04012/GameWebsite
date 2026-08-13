@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { NPCData } from "@legend/shared";
+import { NPCData, Household } from "@legend/shared";
 
 interface NPCStoreState {
   // A reactive list of all NPCs for React to mount/unmount components if needed,
@@ -12,9 +12,15 @@ interface NPCStoreState {
 
   addNPC: (npc: NPCData) => void;
   setNPCs: (npcs: NPCData[]) => void;
+
+  // Registry APIs
+  getNPC: (id: string) => NPCData | undefined;
+  getNPCsByProfession: (profession: string) => NPCData[];
+  getNPCsByDistrict: (district: string) => NPCData[];
+  getNPCsByWorkplace: (workplaceDistrict: string) => NPCData[];
 }
 
-export const useNPCStore = create<NPCStoreState>((set) => ({
+export const useNPCStore = create<NPCStoreState>((set, get) => ({
   npcs: [],
   mutableNPCs: new Map(),
 
@@ -28,4 +34,9 @@ export const useNPCStore = create<NPCStoreState>((set) => ({
     npcs.forEach(n => state.mutableNPCs.set(n.id, n));
     return { npcs };
   }),
+
+  getNPC: (id) => get().mutableNPCs.get(id),
+  getNPCsByProfession: (profession) => get().npcs.filter(n => n.profession === profession),
+  getNPCsByDistrict: (district) => get().npcs.filter(n => n.homeDistrict === district),
+  getNPCsByWorkplace: (workplaceDistrict) => get().npcs.filter(n => n.workplaceDistrict === workplaceDistrict),
 }));
