@@ -1,4 +1,4 @@
-import { useRef, useMemo } from "react";
+import { useRef, useEffect } from "react";
 import { PerspectiveCamera, OrbitControls, Text } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import * as THREE from "three";
@@ -26,6 +26,13 @@ import { useQualitySettings } from "../systems/GraphicsScalability";
 import { EffectPlayer } from "../systems/EffectPlayer";
 import { AudioController } from "../systems/AudioController";
 import { PLAYER_SPAWN, SOUTH_GATE_POSITION, WORLD_SIZE } from "@legend/shared";
+import { StorytellingVignettes } from "../world/StorytellingVignettes";
+import { LandmarkLighting } from "../world/LandmarkLighting";
+import { ExplorationLandmarks } from "../world/ExplorationLandmarks";
+import { Waterfall } from "../world/Waterfall";
+import { DenseGrass } from "../world/DenseGrass";
+import { AmbientWildlife } from "../world/AmbientWildlife";
+import { WorldWaypoints } from "../world/WorldWaypoints";
 
 /**
  * Scene — world composition.
@@ -47,7 +54,7 @@ import { PLAYER_SPAWN, SOUTH_GATE_POSITION, WORLD_SIZE } from "@legend/shared";
 function GroundedEnvironment() {
   const gl = useThree((s) => s.gl);
   const scene = useThree((s) => s.scene);
-  useMemo(() => {
+  useEffect(() => {
     const pmrem = new THREE.PMREMGenerator(gl);
     const envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     scene.environment = envTex;
@@ -73,6 +80,9 @@ export function Scene() {
           in-game time (worldStore). Replaces the static Environment + SceneLighting. */}
       <DayNightCycle />
 
+      {/* Time-of-day reactive light sources for lanterns, braziers, and shrines */}
+      <LandmarkLighting />
+
       {/* Debug grid + spawn markers (dev only). */}
       {debug.grid && <gridHelper args={[WORLD_SIZE, 80, "#d4af37", "#1a3b66"]} />}
       {debug.spawnPoints && <PlayerSpawn />}
@@ -82,6 +92,7 @@ export function Scene() {
       <River />
 
       <CapitalKingdom showLabels={debug.labels} />
+      <StorytellingVignettes />
       <FlowerFields />
       <Vegetation />
       <Harbor />
@@ -93,6 +104,11 @@ export function Scene() {
           the Capital Kingdom. Self-contained: ground, instanced props, and
           atmospheric effects. Rendered last so they overlay base terrain. */}
       <Biomes />
+      <Waterfall />
+      <ExplorationLandmarks />
+      <DenseGrass />
+      <AmbientWildlife />
+      <WorldWaypoints />
 
       {/* Weather effects (rain / lightning / fog / wind) driven by worldStore. */}
       <WeatherController />
@@ -102,9 +118,9 @@ export function Scene() {
       <AudioController />
 
       {/* Explicit default camera so ThirdPersonCamera has a known starting view
-          before the player apiRef is populated. OrbitControls for debug. */}
+          before the player apiRef is populated. OrbitControls for debug mode. */}
       <PerspectiveCamera makeDefault position={[0, 12, 22]} fov={60} />
-      {!debug.physics && <OrbitControls target={[0, 0, 0]} />}
+      {debug.physics && <OrbitControls target={[0, 0, 0]} />}
 
       <PlayerEntity apiRef={playerRef} />
       <RemotePlayers />
@@ -142,14 +158,14 @@ export function Scene() {
       {/* Post Processing for Stylized AAA Look */}
       {!debug.physics && settings.postProcessing && (() => {
         const children = [];
-        if (settings.ssao) children.push(<SSAO key="ssao" radius={8} intensity={2.5} distanceFalloff={0.2} color={new THREE.Color("#1a1a2e")} />);
-        if (settings.bloom) children.push(<Bloom key="bloom" luminanceThreshold={0.9} luminanceSmoothing={0.75} intensity={0.6} mipmapBlur />);
-        if (settings.vignette) children.push(<Vignette key="vignette" eskil={false} offset={0.1} darkness={0.5} />);
-        if (settings.ssao) children.push(<Noise key="noise" intensity={0.15} size={1} opacity={0.4} />);
-        if (settings.ssao) children.push(<ChromaticAberration key="ca" offset={[0.0008, 0.0012]} />);
-        children.push(<ToneMapping key="tm" mode={THREE.ACESFilmicToneMapping} exposure={1.0} />);
-        children.push(<BrightnessContrast key="bc" brightness={-0.02} contrast={0.05} />);
-        children.push(<HueSaturation key="hs" saturation={0.08} />);
+        if (settings.ssao) children.push(<SSAO key="ssao" radius={12} intensity={3.0} distanceFalloff={0.25} color={new THREE.Color("#1a1a2e")} />);
+        if (settings.bloom) children.push(<Bloom key="bloom" luminanceThreshold={0.8} luminanceSmoothing={0.6} intensity={1.2} mipmapBlur />);
+        if (settings.vignette) children.push(<Vignette key="vignette" eskil={false} offset={0.15} darkness={0.45} />);
+        if (settings.ssao) children.push(<Noise key="noise" intensity={0.08} size={1} opacity={0.3} />);
+        if (settings.ssao) children.push(<ChromaticAberration key="ca" offset={[0.0006, 0.001]} />);
+        children.push(<ToneMapping key="tm" mode={THREE.ACESFilmicToneMapping} exposure={1.15} />);
+        children.push(<BrightnessContrast key="bc" brightness={0.01} contrast={0.08} />);
+        children.push(<HueSaturation key="hs" saturation={0.14} />);
         return <EffectComposer enableNormalPass={false} multisampling={settings.multisampling} frameBufferType={THREE.HalfFloatType}>{children}</EffectComposer>;
       })()}
     </group>

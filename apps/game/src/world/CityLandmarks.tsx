@@ -1,6 +1,7 @@
 import { useMemo, useRef } from "react";
 import { Instances, Instance, Sparkles, Text } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
+import * as THREE from "three";
 import { Group, Mesh, Vector3 } from "three";
 import { heightAt } from "@legend/engine";
 import { createStoneMaterial } from "../materials/createStoneMaterial";
@@ -25,12 +26,102 @@ const bannerCloth = createFabricMaterial({ kind: "banner", color: "#d4af37", see
 export function CityLandmarks() {
   return (
     <group>
+      <RoyalHighPalace position={[0, heightAt(0, -36), -36]} />
+      <CathedralOfLight position={[28, heightAt(28, 15), 15]} />
       <SunwellFountain position={[0, heightAt(0, -4), -4]} />
       <OathkeeperStatue position={[0, heightAt(0, -22), -22]} />
       <HeartwoodTree position={[-25, heightAt(-25, 12), 12]} />
       <GuildMonument position={[-32, heightAt(-32, -4), -4]} />
       <RoyalArch position={[0, heightAt(0, -18), -18]} />
       <Watchtowers />
+    </group>
+  );
+}
+
+/** Grand Royal High Palace — Central seat of the Capital Kingdom */
+function RoyalHighPalace({ position }: { position: [number, number, number] }) {
+  return (
+    <group position={position}>
+      {/* Main Palace Keep */}
+      <mesh position={[0, 9, 0]} castShadow receiveShadow material={stone}>
+        <boxGeometry args={[18, 18, 14]} />
+      </mesh>
+      {/* Upper Royal Tier */}
+      <mesh position={[0, 21, 0]} castShadow receiveShadow material={stone}>
+        <boxGeometry args={[12, 6, 10]} />
+      </mesh>
+      {/* Central Grand Spire */}
+      <mesh position={[0, 27, 0]} castShadow material={gold}>
+        <coneGeometry args={[4, 9, 8]} />
+      </mesh>
+      {/* 4 Corner Towers */}
+      {[-8.5, 8.5].flatMap((cx) =>
+        [-6.5, 6.5].map((cz, i) => (
+          <group key={`ptower-${cx}-${cz}`} position={[cx, 0, cz]}>
+            <mesh position={[0, 12, 0]} castShadow receiveShadow material={darkStone}>
+              <cylinderGeometry args={[2.2, 2.5, 24, 8]} />
+            </mesh>
+            <mesh position={[0, 26, 0]} castShadow material={gold}>
+              <coneGeometry args={[2.5, 6, 8]} />
+            </mesh>
+          </group>
+        ))
+      )}
+      {/* Grand Entrance Portico */}
+      <mesh position={[0, 3.5, 7.5]} castShadow material={darkStone}>
+        <boxGeometry args={[8, 7, 3]} />
+      </mesh>
+      {/* Emissive Rose Window */}
+      <mesh position={[0, 14, 7.05]} material={new THREE.MeshStandardMaterial({ color: "#ffb703", emissive: "#fb8500", emissiveIntensity: 1.8 })}>
+        <circleGeometry args={[2.4, 16]} />
+      </mesh>
+      {/* Royal Red Banners */}
+      {[-3, 3].map((bx) => (
+        <mesh key={bx} position={[bx, 8, 7.2]} material={bannerCloth}>
+          <planeGeometry args={[1.6, 5]} />
+        </mesh>
+      ))}
+      <Sparkles count={30} scale={[20, 25, 16]} position={[0, 15, 0]} size={3.5} speed={0.3} color="#ffd166" />
+      <Text position={[0, 33, 0]} fontSize={1.3} color="#f4a261" anchorX="center">ROYAL HIGH PALACE</Text>
+    </group>
+  );
+}
+
+/** Grand Cathedral of Light — Vaulted gothic cathedral with flying buttresses */
+function CathedralOfLight({ position }: { position: [number, number, number] }) {
+  return (
+    <group position={position} rotation={[0, -Math.PI / 4, 0]}>
+      {/* Main Cathedral Nave */}
+      <mesh position={[0, 7, 0]} castShadow receiveShadow material={stone}>
+        <boxGeometry args={[10, 14, 20]} />
+      </mesh>
+      {/* Vaulted Steep Roof */}
+      <mesh position={[0, 16, 0]} castShadow material={darkStone}>
+        <coneGeometry args={[7, 6, 4]} />
+      </mesh>
+      {/* Soaring Bell Tower */}
+      <mesh position={[0, 15, 9]} castShadow receiveShadow material={stone}>
+        <boxGeometry args={[5, 30, 5]} />
+      </mesh>
+      <mesh position={[0, 33, 9]} castShadow material={gold}>
+        <coneGeometry args={[3.2, 8, 8]} />
+      </mesh>
+      {/* Glowing Stained Glass Clerestory Windows */}
+      <mesh position={[0, 9, 10.05]} material={new THREE.MeshStandardMaterial({ color: "#00b4d8", emissive: "#0077b6", emissiveIntensity: 2.0 })}>
+        <circleGeometry args={[1.8, 16]} />
+      </mesh>
+      {/* Flying Buttresses */}
+      {[-6, 6].map((bx) => (
+        <group key={bx} position={[bx, 0, 0]}>
+          {[-6, 0, 6].map((bz) => (
+            <mesh key={bz} position={[0, 6, bz]} rotation={[0, 0, bx > 0 ? 0.3 : -0.3]} castShadow material={stone}>
+              <boxGeometry args={[0.8, 12, 1]} />
+            </mesh>
+          ))}
+        </group>
+      ))}
+      <Sparkles count={25} scale={[12, 20, 20]} position={[0, 14, 0]} size={3.5} speed={0.4} color="#90e0ef" />
+      <Text position={[0, 38, 9]} fontSize={1.2} color="#90e0ef" anchorX="center">CATHEDRAL OF LIGHT</Text>
     </group>
   );
 }

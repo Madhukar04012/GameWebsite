@@ -5,7 +5,7 @@
  * No React/Three.js dependency — pure deterministic math for wind gusts.
  */
 
-export type WeatherPreset = "clear" | "cloudy" | "foggy" | "rainy" | "storm";
+export type WeatherPreset = "clear" | "cloudy" | "foggy" | "rainy" | "storm" | "snow" | "sandstorm";
 export type WindStrength = "calm" | "breeze" | "gusty" | "gale";
 
 export interface WeatherState {
@@ -73,6 +73,20 @@ const PRESETS: Record<WeatherPreset, Omit<WeatherState, "preset" | "transition" 
     wind: "gale",
     ambientBrightness: 0.35,
   },
+  snow: {
+    cloudCover: 0.8,
+    fogDensity: 0.3,
+    rainIntensity: 0.0,
+    wind: "breeze",
+    ambientBrightness: 0.8,
+  },
+  sandstorm: {
+    cloudCover: 0.6,
+    fogDensity: 0.65,
+    rainIntensity: 0.0,
+    wind: "gale",
+    ambientBrightness: 0.5,
+  },
 };
 
 /* ── Wind helpers ── */
@@ -87,6 +101,16 @@ const WIND_AMPLITUDE: Record<WindStrength, number> = {
 /** Map wind strength to foliage sway amplitude multiplier. */
 export function windAmplitude(wind: WindStrength): number {
   return WIND_AMPLITUDE[wind];
+}
+
+/** Get 2D wind direction vector (x, z) scaled by wind strength. */
+export function getWindVector(state: WeatherState): { x: number; z: number; strength: number } {
+  const amp = windAmplitude(state.wind) * (1.0 + state.gustFactor * 0.5);
+  return {
+    x: Math.cos(state.windDirection) * amp,
+    z: Math.sin(state.windDirection) * amp,
+    strength: amp,
+  };
 }
 
 /* ── Factory ── */

@@ -196,6 +196,60 @@ function playFootstep(ctx: AudioContext, surface: string) {
   osc.stop(ctx.currentTime + 0.1);
 }
 
+/* ── District Ambient Soundscapes ── */
+
+class DistrictSoundscape {
+  private ctx: AudioContext;
+  private harborOsc: OscillatorNode | null = null;
+  private harborGain: GainNode;
+  private marketGain: GainNode;
+  private marketFilter: BiquadFilterNode;
+
+  constructor(ctx: AudioContext) {
+    this.ctx = ctx;
+
+    // Harbor ocean wave swell
+    this.harborGain = ctx.createGain();
+    this.harborGain.gain.value = 0;
+    this.harborGain.connect(ctx.destination);
+
+    this.harborOsc = ctx.createOscillator();
+    this.harborOsc.type = "sine";
+    this.harborOsc.frequency.value = 0.2; // 0.2 Hz wave cycle
+    this.harborOsc.connect(this.harborGain);
+    this.harborOsc.start();
+
+    // Market crowd murmur filter
+    this.marketGain = ctx.createGain();
+    this.marketGain.gain.value = 0;
+    this.marketGain.connect(ctx.destination);
+
+    this.marketFilter = ctx.createBiquadFilter();
+    this.marketFilter.type = "bandpass";
+    this.marketFilter.frequency.value = 500;
+    this.marketFilter.Q.value = 3;
+    this.marketFilter.connect(this.marketGain);
+  }
+
+  update(playerPos: { x: number; z: number }) {
+    // Harbor district check: z > 30
+    const harborDist = Math.max(0, 1 - Math.hypot(playerPos.x - 0, playerPos.z - 40) / 45);
+    this.harborGain.gain.setTargetAtTime(harborDist * 0.04, this.ctx.currentTime, 1);
+
+    // Market district check: x~22, z~6
+    const marketDist = Math.max(0, 1 - Math.hypot(playerPos.x - 22, playerPos.z - 6) / 30);
+    this.marketGain.gain.setTargetAtTime(marketDist * 0.03, this.ctx.currentTime, 1);
+  }
+
+  stop() {
+    this.harborOsc?.stop();
+    this.harborOsc?.disconnect();
+    this.harborGain.disconnect();
+    this.marketGain.disconnect();
+    this.marketFilter.disconnect();
+  }
+}
+
 /* ── Controller component ── */
 
 /**
@@ -207,7 +261,8 @@ export function AudioController({ enabled = true }: { enabled?: boolean }) {
     wind: WindSound | null;
     rain: RainSound | null;
     thunder: ThunderSound | null;
-  }>({ wind: null, rain: null, thunder: null });
+    district: DistrictSoundscape | null;
+  }>({ wind: null, rain: null, thunder: null, district: null });
   const stepAccRef = useRef(0);
   const thunderTimerRef = useRef(0);
 
@@ -218,12 +273,14 @@ export function AudioController({ enabled = true }: { enabled?: boolean }) {
     const wind = new WindSound(ctx);
     const rain = new RainSound(ctx);
     const thunder = new ThunderSound(ctx);
-    soundsRef.current = { wind, rain, thunder };
+    const district = new DistrictSoundscape(ctx);
+    soundsRef.current = { wind, rain, thunder, district };
 
     return () => {
       wind.stop();
       rain.stop();
       thunder.stop();
+      district.stop();
     };
   }, [enabled]);
 
@@ -231,7 +288,7 @@ export function AudioController({ enabled = true }: { enabled?: boolean }) {
   useFrame((_, dt) => {
     if (!enabled) return;
     const weather = useWorldStore.getState().weather;
-    const { wind, rain, thunder } = soundsRef.current;
+    const { wind, rain, thunder, district } = soundsRef.current;
     if (!wind || !rain || !thunder) return;
 
     // Wind from weather state
@@ -240,6 +297,12 @@ export function AudioController({ enabled = true }: { enabled?: boolean }) {
 
     // Rain
     rain.setIntensity(weather.rainIntensity);
+
+    // District soundscape based on player position
+    const pp = playerPos.get();
+    if (district && pp) {
+      district.update({ x: pp.x, z: pp.z });
+    }
 
     // Thunder
     if (weather.lightningFreq > 0) {
@@ -250,17 +313,14 @@ export function AudioController({ enabled = true }: { enabled?: boolean }) {
       }
     }
 
-    // Footsteps (simple timer-based, driven by player movement)
-    const pp = playerPos.get();
-    // Check if player is moving by comparing position (dumb check)
+    // Footsteps
     stepAccRef.current += dt;
     if (stepAccRef.current > 0.45) {
       stepAccRef.current = 0;
-      // Only play if likely moving (player state changes)
-      const surface = "stone"; // simplified; could sample groundTypeAt
+      const surface = "stone";
       playFootstep(getCtx(), surface);
     }
   });
 
-  return null; // Audio-only, no visual render
+  return null;
 }

@@ -22,6 +22,7 @@ export interface DebugState {
   lighting: boolean;
   roads: boolean;
   physics: boolean; // placeholder hook; no physics system yet
+  worldMap: boolean;
   set: (key: keyof DebugState, value: boolean) => void;
   toggle: (key: keyof DebugState) => void;
 }
@@ -33,6 +34,7 @@ export const useDebugStore = create<DebugState>((set, get) => ({
   lighting: true,
   roads: true,
   physics: false,
+  worldMap: false,
   set: (key, value) => set({ [key]: value } as Partial<DebugState>),
   toggle: (key) => set({ [key]: !get()[key] } as Partial<DebugState>),
 }));

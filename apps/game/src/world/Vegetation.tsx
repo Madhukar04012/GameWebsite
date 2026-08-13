@@ -1,6 +1,7 @@
 import { Instances, Instance } from "@react-three/drei";
 import { useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
+import * as THREE from "three";
 import { heightAt } from "@legend/engine";
 import { VEGETATION_PATCHES, type VegKind } from "@legend/shared";
 import { createFoliageMaterial } from "../materials/createFoliageMaterial";
@@ -23,16 +24,43 @@ function seedRand(seed: number) {
 
 interface Spot { x: number; z: number; s: number; rot: number; }
 
+/** Authoritative terrain & city collision validator */
+function isClearGround(x: number, z: number): boolean {
+  // 1. City wall & district exclusion zone
+  const distToCity = Math.sqrt(x * x + z * z);
+  if (distToCity < 50) return false;
+
+  // 2. River channel exclusion
+  const riverX = -40 + Math.sin(z * 0.02) * 18 + Math.cos(z * 0.05) * 8;
+  if (Math.abs(x - riverX) < 10) return false;
+
+  // 3. South Gate primary roadway corridor
+  if (Math.abs(x) < 6 && z > -85 && z < -40) return false;
+
+  // 4. Steep cliff face exclusion
+  const h = heightAt(x, z);
+  const hN = heightAt(x, z + 1);
+  if (Math.abs(h - hN) > 1.8) return false;
+
+  return true;
+}
+
 function scatterPatch(center: { x: number; z: number }, radius: number, count: number, seed: number): Spot[] {
   const r = seedRand(seed);
   const out: Spot[] = [];
-  for (let i = 0; i < count; i++) {
+  let attempts = 0;
+  while (out.length < count && attempts < count * 3) {
+    attempts++;
     const ang = r() * Math.PI * 2;
     const dist = Math.sqrt(r()) * radius;
+    const px = center.x + Math.cos(ang) * dist;
+    const pz = center.z + Math.sin(ang) * dist;
+    if (!isClearGround(px, pz)) continue;
+
     out.push({
-      x: center.x + Math.cos(ang) * dist,
-      z: center.z + Math.sin(ang) * dist,
-      s: 0.7 + r() * 0.6,
+      x: px,
+      z: pz,
+      s: 0.8 + r() * 0.5,
       rot: r() * Math.PI * 2,
     });
   }
@@ -61,12 +89,14 @@ export function Vegetation() {
   );
 }
 
-const treeMat = createFoliageMaterial({ kind: "tree" });
-const bushMat = createFoliageMaterial({ kind: "bush" });
-const flowerMat = createFoliageMaterial({ kind: "flower", color: 0xffd700 });
-const grassMat = createFoliageMaterial({ kind: "grass", color: 0x7bdc55 });
-const rockMat = createStoneMaterial({ stoneColor: 0x8a8a8a, roughness: 0.95, flatShading: true });
-const logMat = createWoodMaterial({ woodColor: 0x6a4a2a, roughness: 0.88 });
+const treeFoliageMat = createFoliageMaterial({ kind: "tree", color: "#2d7a2f" });
+const treeTrunkMat = createWoodMaterial({ woodColor: "#3a2618", roughness: 0.92 });
+const bushMat = createFoliageMaterial({ kind: "bush", color: "#388e3c" });
+const flowerPetalMat = new THREE.MeshStandardMaterial({ color: "#e91e63", roughness: 0.5 });
+const flowerGoldMat = new THREE.MeshStandardMaterial({ color: "#fbc02d", roughness: 0.4 });
+const grassTuftMat = createFoliageMaterial({ kind: "grass", color: "#4caf50", side: THREE.DoubleSide });
+const rockMat = createStoneMaterial({ stoneColor: "#616161", roughness: 0.88, flatShading: true });
+const logMat = createWoodMaterial({ woodColor: "#4e342e", roughness: 0.9 });
 
 function baseY(spot: Spot) {
   return heightAt(spot.x, spot.z);
@@ -74,59 +104,110 @@ function baseY(spot: Spot) {
 
 function Trees({ spots }: { spots: Spot[] }) {
   return (
-    <Instances limit={Math.max(1, spots.length)} castShadow>
-      <coneGeometry args={[0.8, 3, 8]} />
-      <primitive object={treeMat} attach="material" />
-      {spots.map((s, i) => (
-        <Instance key={i} position={[s.x, baseY(s) + 1.5, s.z]} rotation={[0, s.rot, 0]} scale={[s.s, s.s, s.s]} />
-      ))}
-    </Instances>
+    <group>
+      {spots.map((s, i) => {
+        const y = baseY(s);
+        return (
+          <group key={`tree-${i}`} position={[s.x, y, s.z]} rotation={[0, s.rot, 0]} scale={[s.s, s.s, s.s]}>
+            {/* Root Flare Base */}
+            <mesh castShadow receiveShadow material={treeTrunkMat} position={[0, 0.3, 0]}>
+              <cylinderGeometry args={[0.32, 0.52, 0.6, 8]} />
+            </mesh>
+            {/* Tapered Wooden Trunk */}
+            <mesh castShadow receiveShadow material={treeTrunkMat} position={[0, 1.8, 0]}>
+              <cylinderGeometry args={[0.22, 0.34, 2.6, 8]} />
+            </mesh>
+            {/* Sculpted 3-Tier Canopy Cloud Masses */}
+            <mesh castShadow receiveShadow material={treeFoliageMat} position={[0, 2.8, 0]}>
+              <sphereGeometry args={[1.5, 10, 10]} />
+            </mesh>
+            <mesh castShadow receiveShadow material={treeFoliageMat} position={[0.2, 3.8, -0.15]}>
+              <sphereGeometry args={[1.15, 9, 9]} />
+            </mesh>
+            <mesh castShadow receiveShadow material={treeFoliageMat} position={[-0.15, 4.6, 0.15]}>
+              <sphereGeometry args={[0.8, 8, 8]} />
+            </mesh>
+          </group>
+        );
+      })}
+    </group>
   );
 }
 
 function Bushes({ spots }: { spots: Spot[] }) {
   return (
-    <Instances limit={Math.max(1, spots.length)} castShadow>
-      <sphereGeometry args={[0.6, 8, 8]} />
-      <primitive object={bushMat} attach="material" />
-      {spots.map((s, i) => (
-        <Instance key={i} position={[s.x, baseY(s) + 0.6, s.z]} rotation={[0, s.rot, 0]} scale={[s.s, s.s, s.s]} />
-      ))}
-    </Instances>
+    <group>
+      {spots.map((s, i) => {
+        const y = baseY(s);
+        return (
+          <group key={`bush-${i}`} position={[s.x, y, s.z]} rotation={[0, s.rot, 0]} scale={[s.s, s.s, s.s]}>
+            <mesh castShadow receiveShadow material={bushMat} position={[0, 0.45, 0]}>
+              <sphereGeometry args={[0.55, 8, 8]} />
+            </mesh>
+            <mesh castShadow receiveShadow material={bushMat} position={[0.3, 0.35, 0]}>
+              <sphereGeometry args={[0.4, 7, 7]} />
+            </mesh>
+            <mesh castShadow receiveShadow material={bushMat} position={[-0.25, 0.35, 0.2]}>
+              <sphereGeometry args={[0.38, 7, 7]} />
+            </mesh>
+          </group>
+        );
+      })}
+    </group>
   );
 }
 
 function Flowers({ spots }: { spots: Spot[] }) {
   return (
-    <Instances limit={Math.max(1, spots.length)}>
-      <coneGeometry args={[0.06, 0.5, 3]} />
-      <primitive object={flowerMat} attach="material" />
-      {spots.map((s, i) => (
-        <Instance key={i} position={[s.x, baseY(s) + 0.25, s.z]} rotation={[0, s.rot, 0]} scale={[s.s, s.s, s.s]} />
-      ))}
-    </Instances>
+    <group>
+      {spots.map((s, i) => {
+        const y = baseY(s);
+        const mat = i % 2 === 0 ? flowerPetalMat : flowerGoldMat;
+        return (
+          <group key={`flw-${i}`} position={[s.x, y, s.z]} rotation={[0, s.rot, 0]} scale={[s.s * 1.2, s.s * 1.2, s.s * 1.2]}>
+            {/* Green Stem */}
+            <mesh position={[0, 0.2, 0]} material={grassTuftMat}>
+              <cylinderGeometry args={[0.02, 0.02, 0.4, 4]} />
+            </mesh>
+            {/* Flower Blossom Head */}
+            <mesh position={[0, 0.4, 0]} material={mat}>
+              <sphereGeometry args={[0.12, 6, 6]} />
+            </mesh>
+          </group>
+        );
+      })}
+    </group>
   );
 }
 
 function Grass({ spots }: { spots: Spot[] }) {
   return (
-    <Instances limit={Math.max(1, spots.length)}>
-      <coneGeometry args={[0.1, 0.4, 3]} />
-      <primitive object={grassMat} attach="material" />
-      {spots.map((s, i) => (
-        <Instance key={i} position={[s.x, baseY(s) + 0.2, s.z]} rotation={[0, s.rot, 0]} scale={[s.s, s.s, s.s]} />
-      ))}
-    </Instances>
+    <group>
+      {spots.map((s, i) => {
+        const y = baseY(s);
+        return (
+          <group key={`grs-${i}`} position={[s.x, y, s.z]} rotation={[0, s.rot, 0]} scale={[s.s * 1.4, s.s * 1.4, s.s * 1.4]}>
+            {/* Crossed Blade Cluster */}
+            <mesh position={[0, 0.3, 0]} material={grassTuftMat}>
+              <planeGeometry args={[0.55, 0.6]} />
+            </mesh>
+            <mesh position={[0, 0.3, 0]} rotation={[0, Math.PI / 2, 0]} material={grassTuftMat}>
+              <planeGeometry args={[0.55, 0.6]} />
+            </mesh>
+          </group>
+        );
+      })}
+    </group>
   );
 }
 
 function Rocks({ spots }: { spots: Spot[] }) {
   return (
-    <Instances limit={Math.max(1, spots.length)} castShadow>
-      <dodecahedronGeometry args={[0.6, 0]} />
+    <Instances limit={Math.max(1, spots.length)} castShadow receiveShadow>
+      <dodecahedronGeometry args={[0.7, 0]} />
       <primitive object={rockMat} attach="material" />
       {spots.map((s, i) => (
-        <Instance key={i} position={[s.x, baseY(s) + 0.3 * s.s, s.z]} rotation={[s.rot, s.rot, 0]} scale={[s.s, s.s * 0.7, s.s]} />
+        <Instance key={i} position={[s.x, baseY(s) + 0.35 * s.s, s.z]} rotation={[s.rot, s.rot * 0.7, 0]} scale={[s.s * 1.2, s.s * 0.8, s.s * 1.1]} />
       ))}
     </Instances>
   );
@@ -134,19 +215,12 @@ function Rocks({ spots }: { spots: Spot[] }) {
 
 function Logs({ spots }: { spots: Spot[] }) {
   return (
-    <Instances limit={Math.max(1, spots.length)} castShadow>
-      <cylinderGeometry args={[0.25, 0.25, 1.8, 6]} />
+    <Instances limit={Math.max(1, spots.length)} castShadow receiveShadow>
+      <cylinderGeometry args={[0.25, 0.28, 2.0, 7]} />
       <primitive object={logMat} attach="material" />
       {spots.map((s, i) => (
         <Instance key={i} position={[s.x, baseY(s) + 0.25, s.z]} rotation={[Math.PI / 2, s.rot, 0]} scale={[s.s, s.s, s.s]} />
       ))}
     </Instances>
   );
-}
-
-/** Advances a foliage material's uTime each frame using the patch's stable hook. */
-function useFoliageClock(mat: import("three").MeshStandardMaterial) {
-  useFrame(({ clock }) => {
-    (mat as any).userData.__setUniform?.("uTime", clock.elapsedTime);
-  });
 }

@@ -3,6 +3,7 @@ import { PlaneGeometry } from "three";
 import { heightAt } from "@legend/engine";
 import { WORLD_BOUNDS } from "@legend/shared";
 import { createTerrainMaterial } from "../materials/createTerrainMaterial";
+import { useQualitySettings } from "../systems/GraphicsScalability";
 
 /**
  * Terrain — chunked, height-displaced ground replacing the flat plane.
@@ -17,9 +18,22 @@ import { createTerrainMaterial } from "../materials/createTerrainMaterial";
 
 const CHUNK = WORLD_BOUNDS.citySize / 4; // ~23-unit chunks around the city
 const TILES = Math.ceil(WORLD_BOUNDS.terrainSize / CHUNK);
-const SEG = 32; // significantly increased detail for smoother rolling hills
+
+// Module-level cache for terrain material instances
+const terrainMatCache = new Map<string, ReturnType<typeof createTerrainMaterial>>();
+
+function getSharedTerrainMaterial(x: number, z: number) {
+  const key = `${Math.round(x * 0.137)},${Math.round(z * 0.137)}`;
+  if (!terrainMatCache.has(key)) {
+    terrainMatCache.set(key, createTerrainMaterial({ seed: [x * 0.137, z * 0.137] }));
+  }
+  return terrainMatCache.get(key)!;
+}
 
 export function Terrain() {
+  const settings = useQualitySettings();
+  const seg = Math.max(8, settings.geometrySegments || 24);
+
   const tiles = useMemo(() => {
     const list: { x: number; z: number; key: string }[] = [];
     for (let ix = -TILES / 2; ix < TILES / 2; ix++) {
@@ -33,15 +47,15 @@ export function Terrain() {
   return (
     <group>
       {tiles.map((t) => (
-        <TerrainTile key={t.key} x={t.x} z={t.z} size={CHUNK} />
+        <TerrainTile key={t.key} x={t.x} z={t.z} size={CHUNK} seg={seg} />
       ))}
     </group>
   );
 }
 
-function TerrainTile({ x, z, size }: { x: number; z: number; size: number }) {
+function TerrainTile({ x, z, size, seg }: { x: number; z: number; size: number; seg: number }) {
   const geometry = useMemo(() => {
-    const geo = new PlaneGeometry(size, size, SEG, SEG);
+    const geo = new PlaneGeometry(size, size, seg, seg);
     const pos = geo.attributes.position;
     // Plane is XY; rotate -PI/2 around X so it lies in XZ. We do it per-vertex
     // below rather than mesh rotation so normals match displacement.
@@ -53,11 +67,10 @@ function TerrainTile({ x, z, size }: { x: number; z: number; size: number }) {
     }
     geo.computeVertexNormals();
     return geo;
-  }, [x, z, size]);
+  }, [x, z, size, seg]);
 
-  // One shared material instance per tile variant (cached by mount). The
-  // shader derives color from world space, so instances need no per-tile data.
-  const material = useMemo(() => createTerrainMaterial({ seed: [x * 0.137, z * 0.137] }), []);
+  // Cached material instance per seed position
+  const material = useMemo(() => getSharedTerrainMaterial(x, z), [x, z]);
 
   return (
     <mesh

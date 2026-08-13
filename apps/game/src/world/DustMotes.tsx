@@ -2,13 +2,16 @@ import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { WORLD_BOUNDS } from "@legend/shared";
+import { useQualitySettings } from "../systems/GraphicsScalability";
 
 /**
  * DustMotes — Ambient floating particles surrounding the player/camera.
  * Creates a magical, ethereal atmosphere with slowly drifting glowing orbs.
  */
-export function DustMotes({ count = 2000 }: { count?: number }) {
+export function DustMotes({ count: baseCount = 2000 }: { count?: number }) {
   const pointsRef = useRef<THREE.Points>(null);
+  const settings = useQualitySettings();
+  const count = Math.max(100, Math.round(baseCount * (settings.particleScale ?? 1)));
 
   // Generate random positions and phases for the particles
   const [positions, phases] = useMemo(() => {

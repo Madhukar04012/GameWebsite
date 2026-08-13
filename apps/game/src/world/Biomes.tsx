@@ -99,287 +99,257 @@ function BiomeSparkles({ biome }: { biome: BiomeKind }) {
   );
 }
 
-/* ── Ashen Barrens — East ── */
+/* ── Ashen Barrens — East (Volcanic Crags & Basalt Pillars) ── */
 
 const ashenDef = BIOME_DEFS.find((b) => b.id === "ashen_mountains")!;
 const ashenCx = (ashenDef.bounds.minX + ashenDef.bounds.maxX) / 2;
 const ashenCz = (ashenDef.bounds.minZ + ashenDef.bounds.maxZ) / 2;
 const ashenRadius = (ashenDef.bounds.maxX - ashenDef.bounds.minX) / 2.5;
 
-const ashenRocks = scatterPatch(ashenCx, ashenCz - 10, ashenRadius, 80, 91);
-const ashenStumps = scatterPatch(ashenCx + 10, ashenCz + 5, ashenRadius * 0.6, 25, 73);
+const ashenRocks = scatterPatch(ashenCx, ashenCz - 10, ashenRadius, 60, 91);
+const basaltColumns = scatterPatch(ashenCx + 15, ashenCz + 10, ashenRadius * 0.7, 35, 73);
 
-const rockMatDk = createStoneMaterial({ stoneColor: 0x4a3a2a, roughness: 0.95 });
-const stumpMat = createStoneMaterial({ stoneColor: 0x3a2a1a, roughness: 0.9 });
+const basaltMat = createStoneMaterial({ stoneColor: "#2b2b2b", roughness: 0.9, flatShading: true });
+const magmaGlowMat = new THREE.MeshStandardMaterial({
+  color: "#ff3d00",
+  emissive: "#ff5722",
+  emissiveIntensity: 2.0,
+  roughness: 0.2,
+});
 
 function AshenBarrens() {
   return (
     <group>
-      {/* Ground */}
-      <mesh
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[ashenCx, 0, ashenCz]}
-        receiveShadow
-        material={ashenGroundMat}
-      >
-        <planeGeometry args={[100, 100]} />
-      </mesh>
+      {/* Basalt Hexagonal Pillars */}
+      {basaltColumns.map((s, i) => {
+        const y = baseY(s);
+        const colH = 2 + (i % 5) * 1.2;
+        return (
+          <group key={`basalt-${i}`} position={[s.x, y, s.z]}>
+            <mesh castShadow receiveShadow material={basaltMat} position={[0, colH / 2, 0]}>
+              <cylinderGeometry args={[0.7 * s.s, 0.7 * s.s, colH, 6]} />
+            </mesh>
+            {/* Glowing Magma Crevice */}
+            {i % 4 === 0 && (
+              <mesh position={[0, 0.05, 0]} material={magmaGlowMat}>
+                <circleGeometry args={[1.2, 8]} />
+              </mesh>
+            )}
+          </group>
+        );
+      })}
 
-      {/* Charred rock formations */}
-      <Instances limit={ashenRocks.length} castShadow>
-        <dodecahedronGeometry args={[0.8, 0]} />
-        <primitive object={rockMatDk} attach="material" />
+      {/* Volcanic Crags */}
+      <Instances limit={ashenRocks.length} castShadow receiveShadow>
+        <dodecahedronGeometry args={[0.9, 0]} />
+        <primitive object={basaltMat} attach="material" />
         {ashenRocks.map((s, i) => (
           <Instance
             key={i}
-            position={[s.x, baseY(s) + 0.4 * s.s, s.z]}
+            position={[s.x, baseY(s) + 0.45 * s.s, s.z]}
             rotation={[s.rot, s.rot * 0.5, 0]}
-            scale={[s.s, s.s * 0.6, s.s]}
+            scale={[s.s * 1.3, s.s * 0.9, s.s * 1.2]}
           />
         ))}
       </Instances>
 
-      {/* Burnt stumps */}
-      <Instances limit={ashenStumps.length} castShadow>
-        <cylinderGeometry args={[0.15, 0.3, 0.8, 5]} />
-        <primitive object={stumpMat} attach="material" />
-        {ashenStumps.map((s, i) => (
-          <Instance
-            key={i}
-            position={[s.x, baseY(s) + 0.2, s.z]}
-            rotation={[0, s.rot, 0]}
-            scale={[s.s, s.s, s.s]}
-          />
-        ))}
-      </Instances>
-
-      <BiomeSparkles biome="ashen_mountains" />
+      {/* Rising Volcanic Embers */}
+      <Sparkles count={45} scale={[60, 20, 60]} position={[ashenCx, 10, ashenCz]} size={4} speed={0.8} color="#ff5722" />
     </group>
   );
 }
 
-/* ── Mistmire Bog — West ── */
+/* ── Mistmire Bog & Whistling Woods — West ── */
 
 const bogDef = BIOME_DEFS.find((b) => b.id === "mistwood")!;
 const bogCx = (bogDef.bounds.minX + bogDef.bounds.maxX) / 2;
 const bogCz = (bogDef.bounds.minZ + bogDef.bounds.maxZ) / 2;
 const bogRadius = (bogDef.bounds.maxX - bogDef.bounds.minX) / 2.5;
 
-const bogTrees = scatterPatch(bogCx, bogCz, bogRadius, 35, 41);
-const bogMounds = scatterPatch(bogCx - 5, bogCz + 5, bogRadius * 0.5, 40, 67);
+const bogTrees = scatterPatch(bogCx, bogCz, bogRadius, 40, 41);
+const swampShrooms = scatterPatch(bogCx - 10, bogCz + 12, bogRadius * 0.6, 30, 67);
 
-const bogTreeMat = createStoneMaterial({ stoneColor: 0x3a4a3a, roughness: 0.92 });
-const bogMoundMat = createStoneMaterial({ stoneColor: 0x2a4a2a, roughness: 0.95, flatShading: true });
+const willowWoodMat = createStoneMaterial({ stoneColor: "#283618", roughness: 0.92 });
+const willowFoliageMat = new THREE.MeshStandardMaterial({ color: "#606c38", roughness: 0.8, flatShading: true });
+const shroomCapMat = new THREE.MeshStandardMaterial({
+  color: "#00f5d4",
+  emissive: "#00bbf9",
+  emissiveIntensity: 1.8,
+  roughness: 0.3,
+});
 
 function MistmireBog() {
   return (
     <group>
-      {/* Ground */}
-      <mesh
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[bogCx, 0, bogCz]}
-        receiveShadow
-        material={bogGroundMat}
-      >
-        <planeGeometry args={[100, 100]} />
-      </mesh>
+      {/* Whistling Woods Towering Willows */}
+      {bogTrees.map((s, i) => {
+        const y = baseY(s);
+        return (
+          <group key={`tree-${i}`} position={[s.x, y, s.z]} rotation={[0, s.rot, 0]} scale={[s.s * 1.3, s.s * 1.3, s.s * 1.3]}>
+            {/* Twisted Trunk */}
+            <mesh castShadow receiveShadow material={willowWoodMat} position={[0, 2.2, 0]}>
+              <cylinderGeometry args={[0.3, 0.6, 4.4, 7]} />
+            </mesh>
+            {/* Weeping Canopy */}
+            <mesh castShadow receiveShadow material={willowFoliageMat} position={[0, 4.2, 0]}>
+              <sphereGeometry args={[1.8, 8, 8]} />
+            </mesh>
+            <mesh castShadow receiveShadow material={willowFoliageMat} position={[0.5, 3.2, 0.4]}>
+              <coneGeometry args={[1.2, 2.5, 6]} />
+            </mesh>
+          </group>
+        );
+      })}
 
-      {/* Twisted bog trees (tall cones) */}
-      <Instances limit={bogTrees.length} castShadow>
-        <coneGeometry args={[0.3, 2.5, 5]} />
-        <primitive object={bogTreeMat} attach="material" />
-        {bogTrees.map((s, i) => (
-          <Instance
-            key={i}
-            position={[s.x, baseY(s) + 0.2, s.z]}
-            rotation={[0.1, s.rot, 0.15]}
-            scale={[s.s * 0.8, s.s * 1.2, s.s * 0.8]}
-          />
-        ))}
-      </Instances>
+      {/* Bioluminescent Glowing Mushrooms */}
+      {swampShrooms.map((s, i) => {
+        const y = baseY(s);
+        return (
+          <group key={`shroom-${i}`} position={[s.x, y, s.z]} scale={[s.s * 1.4, s.s * 1.4, s.s * 1.4]}>
+            <mesh position={[0, 0.25, 0]} material={willowWoodMat}>
+              <cylinderGeometry args={[0.06, 0.1, 0.5, 6]} />
+            </mesh>
+            <mesh position={[0, 0.5, 0]} material={shroomCapMat}>
+              <sphereGeometry args={[0.3, 8, 6]} />
+            </mesh>
+          </group>
+        );
+      })}
 
-      {/* Mossy mounds */}
-      <Instances limit={bogMounds.length} castShadow>
-        <sphereGeometry args={[0.5, 6, 5]} />
-        <primitive object={bogMoundMat} attach="material" />
-        {bogMounds.map((s, i) => (
-          <Instance
-            key={i}
-            position={[s.x, baseY(s) - 0.1, s.z]}
-            rotation={[0, s.rot, 0]}
-            scale={[s.s, s.s * 0.3, s.s]}
-          />
-        ))}
-      </Instances>
-
-      <BiomeSparkles biome="mistwood" />
+      {/* Floating Marsh Spores & Fireflies */}
+      <Sparkles count={55} scale={[65, 14, 65]} position={[bogCx, 6, bogCz]} size={4} speed={0.3} color="#90be6d" />
+      <Sparkles count={30} scale={[40, 8, 40]} position={[bogCx, 3, bogCz]} size={5} speed={0.4} color="#00f5d4" />
     </group>
   );
 }
 
-/* ── Sunstone Desert — SE ── */
+/* ── Sunstone Desert — South-East (Dunes & Oasis Palms) ── */
 
 const desertDef = BIOME_DEFS.find((b) => b.id === "golden_desert")!;
 const desertCx = (desertDef.bounds.minX + desertDef.bounds.maxX) / 2;
 const desertCz = (desertDef.bounds.minZ + desertDef.bounds.maxZ) / 2;
 const desertRadius = (desertDef.bounds.maxX - desertDef.bounds.minX) / 2.5;
 
-const desertRocks = scatterPatch(desertCx, desertCz, desertRadius, 50, 13);
-const desertArches: { x: number; z: number; rotY: number }[] = [];
-for (let i = 0; i < 6; i++) {
-  const r = seedRand(131 + i);
-  desertArches.push({
-    x: desertCx + (r() - 0.5) * desertRadius * 1.2,
-    z: desertCz + (r() - 0.5) * desertRadius * 1.2,
-    rotY: r() * Math.PI * 2,
-  });
-}
+const desertPalms = scatterPatch(desertCx, desertCz, desertRadius * 0.7, 25, 13);
+const desertRockFormations = scatterPatch(desertCx + 15, desertCz - 10, desertRadius, 40, 59);
 
-const desertRockMat = createStoneMaterial({ stoneColor: 0xc8a870, roughness: 0.92 });
-const archMat = createStoneMaterial({ stoneColor: 0xb89860, roughness: 0.9, flatShading: true });
-
-/** Arch — simple stone arch silhouette. */
-function Arch({
-  position,
-  rotationY,
-}: {
-  position: [number, number, number];
-  rotationY: number;
-}) {
-  const y = heightAt(position[0], position[2]);
-  return (
-    <group position={[position[0], y + 1.2, position[2]]} rotation={[0, rotationY, 0]}>
-      {/* Left pillar */}
-      <mesh position={[-1.2, -1.2, 0]} castShadow material={archMat}>
-        <boxGeometry args={[0.6, 2.4, 0.6]} />
-      </mesh>
-      {/* Right pillar */}
-      <mesh position={[1.2, -1.2, 0]} castShadow material={archMat}>
-        <boxGeometry args={[0.6, 2.4, 0.6]} />
-      </mesh>
-      {/* Top beam */}
-      <mesh position={[0, 0.6, 0]} castShadow material={archMat}>
-        <boxGeometry args={[3.0, 0.4, 0.8]} />
-      </mesh>
-    </group>
-  );
-}
+const palmTrunkMat = createStoneMaterial({ stoneColor: "#8d6e63", roughness: 0.9 });
+const palmFrondMat = new THREE.MeshStandardMaterial({ color: "#2e7d32", roughness: 0.6, side: THREE.DoubleSide });
+const desertSandstoneMat = createStoneMaterial({ stoneColor: "#d7ccc8", roughness: 0.85, flatShading: true });
 
 function SunstoneDesert() {
   return (
     <group>
-      <mesh
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[desertCx, 0, desertCz]}
-        receiveShadow
-        material={desertGroundMat}
-      >
-        <planeGeometry args={[100, 100]} />
-      </mesh>
+      {/* Oasis Date Palm Trees */}
+      {desertPalms.map((s, i) => {
+        const y = baseY(s);
+        return (
+          <group key={`palm-${i}`} position={[s.x, y, s.z]} rotation={[0, s.rot, 0]} scale={[s.s * 1.2, s.s * 1.2, s.s * 1.2]}>
+            {/* Curved Palm Trunk */}
+            <mesh castShadow receiveShadow material={palmTrunkMat} position={[0.4, 2.5, 0]} rotation={[0, 0, -0.15]}>
+              <cylinderGeometry args={[0.2, 0.35, 5.2, 7]} />
+            </mesh>
+            {/* Palm Fronds Star */}
+            {[0, 1, 2, 3, 4, 5].map((ang) => (
+              <mesh
+                key={ang}
+                position={[0.8, 5.1, 0]}
+                rotation={[0.35, (ang * Math.PI) / 3, 0.4]}
+                castShadow
+                material={palmFrondMat}
+              >
+                <planeGeometry args={[1.2, 2.2]} />
+              </mesh>
+            ))}
+          </group>
+        );
+      })}
 
-      {/* Desert rocks */}
-      <Instances limit={desertRocks.length} castShadow>
-        <dodecahedronGeometry args={[0.7, 0]} />
-        <primitive object={desertRockMat} attach="material" />
-        {desertRocks.map((s, i) => (
+      {/* Weathered Sandstone Boulders */}
+      <Instances limit={desertRockFormations.length} castShadow receiveShadow>
+        <dodecahedronGeometry args={[0.9, 0]} />
+        <primitive object={desertSandstoneMat} attach="material" />
+        {desertRockFormations.map((s, i) => (
           <Instance
             key={i}
-            position={[s.x, baseY(s) + 0.3 * s.s, s.z]}
+            position={[s.x, baseY(s) + 0.35 * s.s, s.z]}
             rotation={[s.rot, s.rot * 0.7, 0]}
-            scale={[s.s, s.s * 0.5, s.s]}
+            scale={[s.s * 1.5, s.s * 0.6, s.s * 1.2]}
           />
         ))}
       </Instances>
 
-      {/* Stone arches */}
-      {desertArches.map((a, i) => (
-        <Arch key={i} position={[a.x, 0, a.z]} rotationY={a.rotY} />
-      ))}
+      {/* Shimmering Golden Dust Motes */}
+      <Sparkles count={45} scale={[70, 16, 70]} position={[desertCx, 8, desertCz]} size={4} speed={0.5} color="#ffd166" />
     </group>
   );
 }
 
-/* ── Frostfang Ridge — North ── */
+/* ── Frostfang Ridge — North (Glacial Monoliths & Snow Pines) ── */
 
 const frostDef = BIOME_DEFS.find((b) => b.id === "frost_peaks")!;
 const frostCx = (frostDef.bounds.minX + frostDef.bounds.maxX) / 2;
 const frostCz = (frostDef.bounds.minZ + frostDef.bounds.maxZ) / 2;
 const frostRadius = (frostDef.bounds.maxZ - frostDef.bounds.minZ) / 2.5;
 
-const frostSpires = scatterPatch(frostCx, frostCz, frostRadius, 30, 47);
-const frostCrystals = scatterPatch(frostCx + 10, frostCz - 5, frostRadius * 0.6, 50, 89);
+const frostPines = scatterPatch(frostCx, frostCz, frostRadius, 35, 47);
+const glacialMonoliths = scatterPatch(frostCx + 8, frostCz - 8, frostRadius * 0.7, 20, 89);
 
-const spireMat = createStoneMaterial({ stoneColor: 0xc8d8e8, roughness: 0.7 });
-const crystalMat = createStoneMaterial({ stoneColor: 0x80b0e0, roughness: 0.3 });
+const pineFoliageMat = new THREE.MeshStandardMaterial({ color: "#2d6a4f", roughness: 0.8 });
+const pineSnowMat = new THREE.MeshStandardMaterial({ color: "#f8f9fa", roughness: 0.6 });
+const glacialIceMat = new THREE.MeshStandardMaterial({
+  color: "#a0e7e5",
+  emissive: "#48cae4",
+  emissiveIntensity: 1.4,
+  roughness: 0.15,
+  metalness: 0.1,
+  transparent: true,
+  opacity: 0.88,
+});
 
 function FrostfangRidge() {
-  const crystalRef = useRef<THREE.InstancedMesh>(null);
-  useFrame(({ clock }) => {
-    if (crystalRef.current) {
-      const dummy = new THREE.Object3D();
-      const t = clock.elapsedTime;
-      for (let i = 0; i < frostCrystals.length; i++) {
-        crystalRef.current.getMatrixAt(i, dummy.matrix);
-        dummy.matrix.decompose(dummy.position, dummy.quaternion, dummy.scale);
-        dummy.position.y += Math.sin(t + i * 0.7) * 0.002;
-        dummy.updateMatrix();
-        crystalRef.current.setMatrixAt(i, dummy.matrix);
-      }
-      crystalRef.current.instanceMatrix.needsUpdate = true;
-    }
-  });
-
   return (
     <group>
-      <mesh
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[frostCx, 0, frostCz]}
-        receiveShadow
-        material={frostGroundMat}
-      >
-        <planeGeometry args={[100, 100]} />
-      </mesh>
+      {/* Snow-covered Alpine Pine Trees */}
+      {frostPines.map((s, i) => {
+        const y = baseY(s);
+        return (
+          <group key={`pine-${i}`} position={[s.x, y, s.z]} rotation={[0, s.rot, 0]} scale={[s.s * 1.3, s.s * 1.3, s.s * 1.3]}>
+            {/* Trunk */}
+            <mesh castShadow receiveShadow material={palmTrunkMat} position={[0, 1.2, 0]}>
+              <cylinderGeometry args={[0.18, 0.3, 2.4, 6]} />
+            </mesh>
+            {/* 3 Tier Cones with Snow Caps */}
+            <mesh castShadow receiveShadow material={pineFoliageMat} position={[0, 2.4, 0]}>
+              <coneGeometry args={[1.3, 1.8, 7]} />
+            </mesh>
+            <mesh position={[0, 2.7, 0]} material={pineSnowMat}>
+              <coneGeometry args={[1.35, 0.4, 7]} />
+            </mesh>
+            <mesh castShadow receiveShadow material={pineFoliageMat} position={[0, 3.6, 0]}>
+              <coneGeometry args={[1.0, 1.6, 7]} />
+            </mesh>
+            <mesh position={[0, 3.9, 0]} material={pineSnowMat}>
+              <coneGeometry args={[1.05, 0.4, 7]} />
+            </mesh>
+          </group>
+        );
+      })}
 
-      {/* Ice spires (elongated cones) */}
-      <Instances limit={frostSpires.length} castShadow>
-        <coneGeometry args={[0.5, 2.0, 6]} />
-        <primitive object={spireMat} attach="material" />
-        {frostSpires.map((s, i) => (
-          <Instance
-            key={i}
-            position={[s.x, baseY(s) + 0.3, s.z]}
-            rotation={[0.1, s.rot, 0.05]}
-            scale={[s.s * 0.7, s.s * 1.4, s.s * 0.7]}
-          />
-        ))}
-      </Instances>
+      {/* Glowing Glacial Monoliths */}
+      {glacialMonoliths.map((s, i) => {
+        const y = baseY(s);
+        return (
+          <group key={`ice-${i}`} position={[s.x, y, s.z]} scale={[s.s * 1.4, s.s * 1.6, s.s * 1.4]}>
+            <mesh castShadow receiveShadow material={glacialIceMat} position={[0, 2.2, 0]} rotation={[0.1, s.rot, -0.1]}>
+              <cylinderGeometry args={[0.4, 0.9, 4.5, 6]} />
+            </mesh>
+          </group>
+        );
+      })}
 
-      {/* Floating ice crystals (hexagonal prisms) */}
-      <instancedMesh
-        ref={crystalRef}
-        args={[undefined, undefined, frostCrystals.length]}
-        castShadow
-        material={crystalMat}
-      >
-        <cylinderGeometry args={[0.08, 0.12, 0.4, 6]} />
-      </instancedMesh>
-      {/* Position crystals manually once */}
-      {(() => {
-        const dummy = new THREE.Object3D();
-        const ref = crystalRef.current;
-        if (ref) {
-          frostCrystals.forEach((s, i) => {
-            dummy.position.set(s.x, baseY(s) + 0.8 + s.s * 0.3, s.z);
-            dummy.scale.set(s.s, s.s, s.s);
-            dummy.updateMatrix();
-            ref.setMatrixAt(i, dummy.matrix);
-          });
-          ref.instanceMatrix.needsUpdate = true;
-        }
-        return null;
-      })()}
-
-      <BiomeSparkles biome="frost_peaks" />
+      {/* Floating Snow Flurries */}
+      <Sparkles count={55} scale={[65, 18, 65]} position={[frostCx, 10, frostCz]} size={4} speed={0.6} color="#e0fbfc" />
     </group>
   );
 }

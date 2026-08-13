@@ -12,12 +12,14 @@ import { NetworkClient } from "../systems/NetworkClient";
 import { ZoneTransition } from "../systems/ZoneTransition";
 import { CharacterSelectScreen } from "../systems/CharacterSelectScreen";
 import { DebugTools } from "../systems/DebugTools";
+import { DebugWorldMap } from "../systems/DebugWorldMap";
 
 export function GameCanvas() {
   const phase = useGameStore((s) => s.phase);
   const dpr = useGraphicsStore((s) => s.dpr);
   const antialias = useGraphicsStore((s) => s.antialias);
-  const shadows = useGraphicsStore((s) => s.quality !== "low");
+  const quality = useGraphicsStore((s) => s.quality);
+  const shadows = quality !== "low";
   const showGame = phase === GamePhase.PLAYING || phase === GamePhase.SPAWNING;
   const showCinematic = phase === GamePhase.CINEMATIC;
 
@@ -33,7 +35,7 @@ export function GameCanvas() {
           toneMapping: ACESFilmicToneMapping,
           toneMappingExposure: 1.15,
           outputColorSpace: SRGBColorSpace,
-          logarithmicDepthBuffer: true,
+          logarithmicDepthBuffer: false,
         }}
         dpr={dpr}
         onCreated={({ gl }) => {
@@ -42,9 +44,8 @@ export function GameCanvas() {
           const shadowType = gfx.quality === "ultra" || gfx.quality === "high" ? PCFSoftShadowMap :
                              gfx.quality === "medium" ? PCFShadowMap : BasicShadowMap;
           gl.shadowMap.type = shadowType;
-          gl.shadowMap.enabled = true;
+          gl.shadowMap.enabled = shadows;
           gl.toneMappingExposure = 1.15;
-          // log removed
         }}
       >
         <Suspense fallback={null}>
@@ -58,6 +59,7 @@ export function GameCanvas() {
       <ZoneTransition />
       <CharacterSelectScreen />
       <DebugTools />
+      <DebugWorldMap />
     </div>
   );
 }

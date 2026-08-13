@@ -1,5 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { GameCanvas } from "./components/GameCanvas";
+import { BootSequence } from "./systems/BootSequence";
+import { ErrorBoundary } from "./systems/ErrorBoundary";
 
 // Log errors to the error-log div
 const errLog = (msg: string) => {
@@ -14,14 +17,11 @@ window.addEventListener("unhandledrejection", (e) => {
   errLog(`[PROMISE] ${e.reason?.message || e.reason}\n${e.reason?.stack || ""}`);
 });
 
-// Catch all async errors
-async function bootGame() {
+function bootGame() {
   try {
-    const { GameCanvas } = await import("./components/GameCanvas");
-    const { BootSequence } = await import("./systems/BootSequence");
-    const { ErrorBoundary } = await import("./systems/ErrorBoundary");
-
-    ReactDOM.createRoot(document.getElementById("root")!).render(
+    const rootEl = document.getElementById("root");
+    if (!rootEl) return;
+    ReactDOM.createRoot(rootEl).render(
       <React.StrictMode>
         <ErrorBoundary>
           <BootSequence />
@@ -36,3 +36,4 @@ async function bootGame() {
 }
 
 bootGame();
+

@@ -106,43 +106,61 @@ export const GLSL_NOISE_LIB = [
  * the moss/slope tint.
  */
 export const GLSL_GROUND_BLEND = /* glsl */ `
-// World-space ground blend — grass / dirt / stone / sand / rock.
-// Heights mirror packages/engine TerrainSystem: city flat zone ~0, hills >4 rock.
+// World-space ground blend — stylized AAA fantasy grass / dirt / stone / sand / rock.
 vec3 groundAlbedo(vec3 worldPos, vec3 geomNormal, float seed) {
   vec2 wp = worldPos.xz + seed;
   float h = worldPos.y;
   float slope = 1.0 - clamp(geomNormal.y, 0.0, 1.0); // 0 flat, 1 vertical
   float n = fbm(wp * 0.08);
+  float detail = fbm(wp * 0.4);
 
-  vec3 grass = mix(vec3(0.45, 0.80, 0.20), vec3(0.65, 0.95, 0.25), n);
-  vec3 dirt  = mix(vec3(0.75, 0.50, 0.25), vec3(0.85, 0.65, 0.35), n);
-  vec3 stone = mix(vec3(0.75, 0.75, 0.78), vec3(0.90, 0.90, 0.92), n);
-  vec3 sand  = mix(vec3(0.95, 0.90, 0.65), vec3(1.00, 0.95, 0.80), n);
-  vec3 rock  = mix(vec3(0.55, 0.60, 0.65), vec3(0.65, 0.70, 0.75), n);
+  // Painterly stylized grass palette (lush emerald with warm golden highlights)
+  vec3 grassDeep = vec3(0.16, 0.38, 0.14);
+  vec3 grassMid  = vec3(0.26, 0.56, 0.20);
+  vec3 grassSun  = vec3(0.38, 0.68, 0.24);
+  vec3 grass = mix(grassDeep, grassMid, n);
+  grass = mix(grass, grassSun, smoothstep(0.4, 0.8, detail));
+
+  // Rich warm earth & trail loam
+  vec3 dirt = mix(vec3(0.36, 0.24, 0.14), vec3(0.48, 0.34, 0.20), n);
+  
+  // Warm royal city paving stone
+  vec3 stone = mix(vec3(0.58, 0.54, 0.48), vec3(0.70, 0.66, 0.60), n);
+
+  // Soft golden coastal sand
+  vec3 sand = mix(vec3(0.78, 0.68, 0.48), vec3(0.88, 0.78, 0.58), n);
+
+  // Mountain cliff rock with mossy top-facing blending
+  vec3 rockBase = mix(vec3(0.38, 0.40, 0.42), vec3(0.50, 0.52, 0.55), n);
+  vec3 rockMoss = mix(rockBase, vec3(0.24, 0.42, 0.18), clamp((1.0 - slope * 1.5), 0.0, 0.5));
+  vec3 rock = rockMoss;
 
   vec3 col = grass;
-  // Dirt ring just past the city radius (~60..72), plus noise feather.
+  // Dirt ring just past the city radius (~60..72)
   float cityR = 60.0;
   float distR = length(worldPos.xz);
   col = mix(col, dirt, smoothstep(cityR, cityR + 12.0, distR) * (0.6 + 0.4 * n));
-  // City interior stone.
+
+  // City interior paving stone
   col = mix(col, stone, (1.0 - smoothstep(cityR - 6.0, cityR, distR)));
-  // High ground → rock.
-  col = mix(col, rock, smoothstep(3.0, 5.0, h));
-  // Steep slopes → bare rock regardless of height.
-  col = mix(col, rock, smoothstep(0.35, 0.6, slope));
-  // Far-south low beach sand.
+
+  // High ground & cliffs
+  col = mix(col, rock, smoothstep(3.5, 6.0, h));
+  col = mix(col, rock, smoothstep(0.32, 0.58, slope));
+
+  // Far-south beach sand
   col = mix(col, sand, smoothstep(-150.0, -135.0, worldPos.z) * (1.0 - smoothstep(0.0, 1.5, abs(h))));
-  // Micro variation for grain.
-  col *= 0.92 + 0.16 * fbm(wp * 0.9);
+
+  // Subtle painterly micro-texture variation
+  col *= 0.94 + 0.12 * fbm(wp * 0.8);
   return col;
 }
 
 float groundRoughness(vec3 worldPos, vec3 geomNormal) {
   float slope = 1.0 - clamp(geomNormal.y, 0.0, 1.0);
-  float base = 0.92;
-  base = mix(base, 0.78, smoothstep(0.35, 0.6, slope)); // rock faces a touch glossier
+  float base = 0.90;
+  base = mix(base, 0.72, smoothstep(0.32, 0.58, slope)); // rock faces catch specular sheen
   base += (fbm(worldPos.xz * 0.3) - 0.5) * 0.1;
-  return clamp(base, 0.6, 1.0);
+  return clamp(base, 0.55, 1.0);
 }
 `;

@@ -75,6 +75,11 @@ export function CityBuilding({ def, color = "#cccccc", district = "residential" 
 
   return (
     <group position={[x, baseY, z]}>
+      {/* Submerged Stone Foundation Plinth — guarantees zero floating gaps */}
+      <mesh position={[0, 0.1, 0]} castShadow receiveShadow material={wall}>
+        <boxGeometry args={[w + 0.35, 0.6, d + 0.35]} />
+      </mesh>
+
       {/* Main wall volume */}
       <mesh position={[0, h / 2, 0]} castShadow receiveShadow material={wall}>
         <boxGeometry args={[w, h, d]} />

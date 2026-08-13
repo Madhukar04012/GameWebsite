@@ -5,6 +5,7 @@ import { useDebugStore, type DebugState } from "../store/debugStore";
  * Roadmap PRIORITY 14. Only rendered under `import.meta.env.DEV`.
  */
 const TOGGLES: { key: keyof DebugState; label: string }[] = [
+  { key: "worldMap", label: "World Map (M)" },
   { key: "grid", label: "Grid" },
   { key: "labels", label: "District Labels" },
   { key: "spawnPoints", label: "Spawn Points" },

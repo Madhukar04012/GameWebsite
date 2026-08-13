@@ -203,6 +203,44 @@ export function DayNightCycle() {
       {quality !== "low" && <Sparkles count={quality === "medium" ? 60 : 120} scale={[160, 40, 160]} size={3.5} speed={0.25} color="#f3c649" opacity={0.5} />}
       {(quality === "high" || quality === "ultra") && <Sparkles count={80} scale={[100, 20, 100]} size={1.5} speed={0.4} color="#ffffff" opacity={0.2} />}
 
+      {/* ── Volumetric Sun Godrays Shafts (Daytime) ── */}
+      {quality !== "low" && (
+        <group position={[40, 50, -20]} rotation={[0.4, -0.6, 0]}>
+          <mesh>
+            <cylinderGeometry args={[4, 28, 90, 8, 1, true]} />
+            <meshBasicMaterial
+              color="#ffeaa7"
+              transparent
+              opacity={0.08}
+              depthWrite={false}
+              blending={THREE.AdditiveBlending}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+          <mesh rotation={[0, Math.PI / 4, 0]}>
+            <cylinderGeometry args={[2, 22, 90, 8, 1, true]} />
+            <meshBasicMaterial
+              color="#ffd369"
+              transparent
+              opacity={0.06}
+              depthWrite={false}
+              blending={THREE.AdditiveBlending}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+        </group>
+      )}
+
+      {/* Sun Disc & Corona Glow */}
+      <mesh position={[120, 150, -60]}>
+        <sphereGeometry args={[18, 16, 16]} />
+        <meshBasicMaterial color="#fffbe6" />
+      </mesh>
+      <mesh position={[120, 150, -60]}>
+        <sphereGeometry args={[28, 16, 16]} />
+        <meshBasicMaterial color="#ffd56b" transparent opacity={0.3} depthWrite={false} blending={THREE.AdditiveBlending} />
+      </mesh>
+
       {/* Moon — sphere + glow + directional light */}
       <mesh ref={moonRef} renderOrder={10}>
         <sphereGeometry args={[12, 32, 32]} />
@@ -233,12 +271,12 @@ export function DayNightCycle() {
       />
 
       {/* Dynamic lights */}
-      <ambientLight ref={ambientRef} intensity={0.4} color="#87ceeb" />
+      <ambientLight ref={ambientRef} intensity={0.5} color="#87ceeb" />
       <directionalLight
         ref={sunRef}
         position={[40, 50, -20]}
-        intensity={2.2}
-        color="#ffe5b4"
+        intensity={2.8}
+        color="#fff1d0"
         castShadow
         shadow-mapSize-width={shadowMapSize}
         shadow-mapSize-height={shadowMapSize}
@@ -253,8 +291,8 @@ export function DayNightCycle() {
         target={target}
       />
       <primitive object={target} />
-      <hemisphereLight ref={hemiRef} args={["#ffe5b4", "#6b6b9e", 1.2]} />
-      <directionalLight ref={rimRef} position={[-30, 18, -25]} intensity={1.5} color="#87ceeb" />
+      <hemisphereLight ref={hemiRef} args={["#fff1d0", "#5c6b7e", 1.4]} />
+      <directionalLight ref={rimRef} position={[-30, 18, -25]} intensity={1.6} color="#8ecae6" />
     </group>
   );
 }

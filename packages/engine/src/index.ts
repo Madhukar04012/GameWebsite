@@ -52,7 +52,7 @@ export type {
   EquipmentSlot,
   Settings,
 } from "./systems/SaveSystem.js";
-export { heightAt, normalAt, groundTypeAt } from "./systems/TerrainSystem.js";
+export { heightAt, normalAt, groundTypeAt, getTerrainGeography } from "./systems/TerrainSystem.js";
 export type { GroundType, RegionDef } from "./systems/TerrainSystem.js";
 export {
   computeCelestialState,

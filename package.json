@@ -7,12 +7,15 @@
     "dev": "npm run dev -w @legend/website",
     "dev:game": "npm run dev -w @legend/game",
     "dev:server": "npm run dev -w @legend/server",
+    "dev:all": "concurrently -k -n \"SERVER,GAME,WEBSITE\" -c \"magenta.bold,cyan.bold,blue.bold\" \"npm run dev:server\" \"npm run dev:game\" \"npm run dev\"",
     "build": "npm run build -w @legend/website",
     "build:game": "npm run build -w @legend/game",
     "build:server": "npm run build -w @legend/server",
+    "build:all": "npm run build:server && npm run build:game && npm run build",
     "lint": "npm run lint -w @legend/website"
   },
   "devDependencies": {
+    "concurrently": "^9.1.2",
     "typescript": "^5"
   },
   "overrides": {
