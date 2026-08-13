@@ -5,6 +5,7 @@ import * as THREE from "three";
 import { heightAt } from "@legend/engine";
 import type { BuildingDef, ArchFamily } from "@legend/shared";
 import { getDistrictMaterials, DistrictMaterialSet, getAllDistrictMaterials } from "../materials/createDistrictMaterials";
+import { INTERIOR_REGISTRY } from "./interiors/InteriorRegistry";
 
 interface CityBuildingProps {
   def: BuildingDef;
@@ -54,6 +55,8 @@ export function CityBuilding({ def, color = "#cccccc", district = "residential" 
   const stairDrop = baseY - doorTerrainY;
   const stairSteps = stairDrop > 0.2 ? Math.ceil(stairDrop / 0.2) : 0;
 
+  const interiorDef = def.label ? INTERIOR_REGISTRY[def.label] : undefined;
+
   return (
     <group position={[x, baseY, z]}>
       {/* 1. Foundation */}
@@ -76,9 +79,35 @@ export function CityBuilding({ def, color = "#cccccc", district = "residential" 
       })}
 
       {/* 2. Main Wall */}
-      <mesh position={[0, storyH / 2 + 0.3, 0]} castShadow receiveShadow material={baseMat}>
-        <boxGeometry args={[w, storyH, d]} />
-      </mesh>
+      {interiorDef ? (
+        <group position={[0, storyH / 2 + 0.3, 0]}>
+          <mesh position={[0, 0, -d/2 + 0.1]} castShadow receiveShadow material={baseMat}>
+            <boxGeometry args={[w, storyH, 0.2]} />
+          </mesh>
+          <mesh position={[-w/2 + 0.1, 0, 0]} castShadow receiveShadow material={baseMat}>
+            <boxGeometry args={[0.2, storyH, d]} />
+          </mesh>
+          <mesh position={[w/2 - 0.1, 0, 0]} castShadow receiveShadow material={baseMat}>
+            <boxGeometry args={[0.2, storyH, d]} />
+          </mesh>
+          <mesh position={[-w/4 - 0.3, 0, d/2 - 0.1]} castShadow receiveShadow material={baseMat}>
+            <boxGeometry args={[w/2 - 0.6, storyH, 0.2]} />
+          </mesh>
+          <mesh position={[w/4 + 0.3, 0, d/2 - 0.1]} castShadow receiveShadow material={baseMat}>
+            <boxGeometry args={[w/2 - 0.6, storyH, 0.2]} />
+          </mesh>
+          {storyH > 2.4 && (
+            <mesh position={[0, 1.2, d/2 - 0.1]} castShadow receiveShadow material={baseMat}>
+              <boxGeometry args={[1.2, storyH - 2.4, 0.2]} />
+            </mesh>
+          )}
+        </group>
+      ) : (
+        <mesh position={[0, storyH / 2 + 0.3, 0]} castShadow receiveShadow material={baseMat}>
+          <boxGeometry args={[w, storyH, d]} />
+        </mesh>
+      )}
+      
       {floors > 1 && (
         <mesh position={[0, storyH + (h - storyH) / 2 + 0.3, 0]} castShadow receiveShadow material={upperMat}>
           <boxGeometry args={[w, h - storyH, d]} />
@@ -117,8 +146,14 @@ export function CityBuilding({ def, color = "#cccccc", district = "residential" 
       {/* Roof */}
       <BuildingRoof kind={roof} w={w} d={d} h={h + 0.35} roofH={roofH} material={roofMat} accent={accent} isCorner={isCorner} wood={wood} />
 
+      {interiorDef && (
+        <group position={[0, 0, 0]}>
+           <interiorDef.component w={w} d={d} storyH={storyH} />
+        </group>
+      )}
+
       {/* Doors & Ground Floor */}
-      <BuildingDoor family={family} w={w} d={d} storyH={storyH} woodMat={wood} metalMat={metal} glassMat={glass} />
+      <BuildingDoor family={family} w={w} d={d} storyH={storyH} woodMat={wood} metalMat={metal} glassMat={glass} isOpen={!!interiorDef} />
 
       {/* Windows & Awnings */}
       <BuildingWindows family={family} w={w} d={d} h={h} floors={floors} storyH={storyH} woodMat={wood} glassMat={glass} bannerMat={banner} isCorner={isCorner} />
@@ -257,20 +292,31 @@ function BuildingRoof({ kind, w, d, h, roofH, material, accent, isCorner, wood }
   }
 }
 
-function BuildingDoor({ family, w, d, storyH, woodMat, metalMat, glassMat }: any) {
+function BuildingDoor({ family, w, d, storyH, woodMat, metalMat, glassMat, isOpen = false }: any) {
   if (family === "commercial") {
-    // Large shopfront door with display window
+    // Grand double doors for shops
     return (
       <group position={[0, 0, d / 2 + 0.02]}>
-        <mesh position={[-0.8, 1.2, 0.06]} castShadow material={woodMat}>
-           <boxGeometry args={[1.2, 2.2, 0.1]} />
+        <mesh position={[0, 1.3, 0.02]} castShadow receiveShadow material={woodMat}>
+          <boxGeometry args={[1.8, 2.6, 0.14]} />
         </mesh>
-        <mesh position={[0.8, 1.2, 0.06]} material={glassMat}>
-           <boxGeometry args={[1.6, 2.0, 0.1]} />
-        </mesh>
-        <mesh position={[0.8, 1.2, 0.1]} material={woodMat}>
-           <boxGeometry args={[1.7, 2.1, 0.02]} />
-        </mesh>
+        {!isOpen && (
+          <>
+            <mesh position={[-0.45, 1.25, 0.06]} castShadow material={woodMat}>
+              <boxGeometry args={[0.7, 2.3, 0.06]} />
+            </mesh>
+            <mesh position={[0.45, 1.25, 0.06]} castShadow material={woodMat}>
+              <boxGeometry args={[0.7, 2.3, 0.06]} />
+            </mesh>
+            {/* Glass panels */}
+            <mesh position={[-0.45, 1.7, 0.1]} material={glassMat}>
+              <planeGeometry args={[0.4, 0.8]} />
+            </mesh>
+            <mesh position={[0.45, 1.7, 0.1]} material={glassMat}>
+              <planeGeometry args={[0.4, 0.8]} />
+            </mesh>
+          </>
+        )}
       </group>
     );
   }
