@@ -27,13 +27,31 @@ const wood = createWoodMaterial({ woodColor: "#3a2e1c", roughness: 0.9, seed: [4
 
 export function Walls() {
   const walls = useMemo(() => {
-    const list: { key: string; pos: [number, number, number]; size: [number, number, number] }[] = [];
-    list.push({ key: "wall-n", pos: [0, WALL_H / 2, -HALF], size: [WORLD_BOUNDS.citySize, WALL_H, WALL_T] });
-    const segLen = (WORLD_BOUNDS.citySize - GAP) / 2;
-    list.push({ key: "wall-s-w", pos: [-(GAP / 2 + segLen / 2), WALL_H / 2, HALF], size: [segLen, WALL_H, WALL_T] });
-    list.push({ key: "wall-s-e", pos: [GAP / 2 + segLen / 2, WALL_H / 2, HALF], size: [segLen, WALL_H, WALL_T] });
-    list.push({ key: "wall-e", pos: [HALF, WALL_H / 2, 0], size: [WALL_T, WALL_H, WORLD_BOUNDS.citySize] });
-    list.push({ key: "wall-w", pos: [-HALF, WALL_H / 2, 0], size: [WALL_T, WALL_H, WORLD_BOUNDS.citySize] });
+    const list: { key: string; pos: [number, number, number]; rotY: number; size: [number, number, number] }[] = [];
+    
+    // Instead of 4 massive boxes, build the wall in shorter segments so it follows the terrain elevation
+    const numSegs = 20;
+    const segLen = WORLD_BOUNDS.citySize / numSegs;
+
+    const addEdge = (startX: number, startZ: number, endX: number, endZ: number, isSouth: boolean) => {
+      for (let i = 0; i < numSegs; i++) {
+        const cx = startX + ((endX - startX) * (i + 0.5)) / numSegs;
+        const cz = startZ + ((endZ - startZ) * (i + 0.5)) / numSegs;
+
+        // Leave a gap for the South Gate
+        if (isSouth && Math.abs(cx) < GAP / 2 + 1) continue;
+
+        const cy = heightAt(cx, cz);
+        const rotY = startX === endX ? Math.PI / 2 : 0;
+        list.push({ key: `wall-${cx}-${cz}`, pos: [cx, cy + WALL_H / 2, cz], rotY, size: [segLen, WALL_H, WALL_T] });
+      }
+    };
+
+    addEdge(-HALF, -HALF, HALF, -HALF, false); // North
+    addEdge(-HALF, HALF, HALF, HALF, true);    // South
+    addEdge(HALF, -HALF, HALF, HALF, false);   // East
+    addEdge(-HALF, -HALF, -HALF, HALF, false); // West
+
     return list;
   }, []);
 
@@ -53,7 +71,7 @@ export function Walls() {
     <group>
       {/* Wall segments with battlements */}
       {walls.map((w) => (
-        <group key={w.key} position={w.pos}>
+        <group key={w.key} position={w.pos} rotation={[0, w.rotY, 0]}>
           <mesh castShadow receiveShadow material={wallMat}>
             <boxGeometry args={w.size} />
           </mesh>

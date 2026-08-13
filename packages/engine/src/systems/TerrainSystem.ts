@@ -20,19 +20,44 @@ import {
 
 export type GroundType = "grass" | "dirt" | "stone" | "sand" | "rock" | "snow";
 
-/* City flat zone radius — terrain eases to 0 inside this to keep the
- * walled city level. Matches CITY_BOUNDS (±46) plus a transition margin. */
+/* City flat zone radius — terrain eases to city elevation inside this */
 const CITY_FLAT_RADIUS = 50;
+
+/** Smooth cubic interpolation */
+function smoothStep(edge0: number, edge1: number, t: number): number {
+  const v = Math.max(0, Math.min(1, (t - edge0) / (edge1 - edge0)));
+  return v * v * (3 - 2 * v);
+}
+
+/** 
+ * City Elevation Tiers (Verticality)
+ * Citadel (+8m), Noble Terraces (+4m), Central (0m), Docks (-2m).
+ * Smooth slopes allow roads to act as natural ramps.
+ */
+function getCityElevation(x: number, z: number): number {
+  let h = 0;
+  if (z < -10) {
+    // Ramp up to Noble (+4m) between z = -10 and z = -22
+    h += 4 * smoothStep(-10, -22, z);
+    // Ramp up to Citadel (+8m total) between z = -24 and z = -34
+    if (z < -24) {
+      h += 4 * smoothStep(-24, -34, z);
+    }
+  } else if (z > 28) {
+    // Ramp down to Docks (-2m) between z = 28 and z = 38
+    h -= 2 * smoothStep(28, 38, z);
+  }
+  return h;
+}
 
 /**
  * Smooth interpolation: 0 inside flat radius, ramping to 1 outside.
- * Keeps the city perfectly flat while letting mountains & valleys rise in the wilderness.
  */
 function cityBlend(x: number, z: number): number {
   const dist = Math.sqrt(x * x + z * z);
   if (dist <= CITY_FLAT_RADIUS) return 0;
   const ramp = (dist - CITY_FLAT_RADIUS) / 25;
-  return ramp >= 1 ? 1 : ramp * ramp * (3 - 2 * ramp); // smoothstep
+  return ramp >= 1 ? 1 : smoothStep(0, 1, ramp);
 }
 
 /* Deterministic hashed value-noise */
@@ -78,7 +103,10 @@ function fbm(x: number, z: number, octaves = 4): number {
  */
 export function heightAt(x: number, z: number): number {
   const blend = cityBlend(x, z);
-  if (blend === 0) return 0;
+  const cityH = getCityElevation(x, z);
+
+  // Inside the city, just return the city elevation tier height
+  if (blend === 0) return cityH;
 
   // 1. Master Geography Macro Landforms
   const macroElevation = getMacroLandformElevation(x, z);
@@ -92,7 +120,9 @@ export function heightAt(x: number, z: number): number {
   const microNoise = fbm(x * 0.04, z * 0.04, 3) * 1.5;
 
   const totalWildernessHeight = macroElevation + mesoHills + microNoise;
-  return totalWildernessHeight * blend;
+  
+  // Blend smoothly from city elevation to wilderness elevation at the border
+  return cityH * (1 - blend) + totalWildernessHeight * blend;
 }
 
 /**

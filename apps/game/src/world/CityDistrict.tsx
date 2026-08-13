@@ -1,5 +1,6 @@
 import { Text } from "@react-three/drei";
 import { CityBuilding } from "./CityBuilding";
+import { CityBlock } from "./CityBlock";
 import type { DistrictDef } from "@legend/shared";
 
 interface CityDistrictProps {
@@ -18,7 +19,12 @@ export function CityDistrict({ district, showLabel = false }: CityDistrictProps)
     <group>
       {/* Buildings */}
       {district.buildings.map((b, i) => (
-        <CityBuilding key={`${district.name}-${i}`} def={b} color={b.color ?? district.color} district={district.name} />
+        <CityBuilding key={`${district.name}-bldg-${i}`} def={b} color={b.color ?? district.color} district={district.name} />
+      ))}
+
+      {/* Procedural Urban Blocks */}
+      {district.blocks?.map((block, i) => (
+        <CityBlock key={`${district.name}-block-${i}`} block={block} district={district.name} color={district.color} />
       ))}
 
       {/* District label (floating text — debug) */}

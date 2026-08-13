@@ -118,6 +118,15 @@ export interface BuildingDef {
   shopSign?: "potion" | "sword" | "tankard" | "anvil" | "shield" | "scroll";
 }
 
+export interface CityBlockDef {
+  x: number;
+  z: number;
+  w: number;
+  d: number;
+  /** Seed for deterministic procedural generation of the block's buildings */
+  seed: number;
+}
+
 export interface DistrictDef {
   name: DistrictName;
   label: string;
@@ -125,6 +134,7 @@ export interface DistrictDef {
   center: { x: number; z: number };
   radius: number;
   buildings: BuildingDef[];
+  blocks?: CityBlockDef[];
 }
 
 export const CITY_LAYOUT: DistrictDef[] = [
@@ -172,6 +182,10 @@ export const CITY_LAYOUT: DistrictDef[] = [
       { x: -33, z: -30, w: 5, d: 5, h: 7.5, label: "Noble Carriage House", roof: "gable", floors: 2, hasChimney: true },
       { x: -18, z: -16, w: 4.5, d: 4.5, h: 6.5, label: "Noble Gate Lodge", roof: "flat", floors: 2 },
     ],
+    blocks: [
+      { x: -16, z: -28, w: 8, d: 12, seed: 101 },
+      { x: -38, z: -28, w: 6, d: 14, seed: 102 },
+    ],
   },
   {
     name: "guild_hall",
@@ -184,6 +198,10 @@ export const CITY_LAYOUT: DistrictDef[] = [
       { x: -39, z: -12, w: 5.5, d: 4.5, h: 7, label: "Guild Training Stables", roof: "gable", floors: 2 },
       { x: -28, z: -18, w: 4.5, d: 4.5, h: 14, label: "Arcane Observatory Tower", roof: "tower", floors: 4, shopSign: "scroll" },
       { x: -38, z: -4, w: 5, d: 5, h: 6.5, label: "Mercenary Bounty Office", roof: "gable", floors: 2, shopSign: "shield" },
+    ],
+    blocks: [
+      { x: -16, z: -12, w: 10, d: 10, seed: 201 },
+      { x: -24, z: -2, w: 12, d: 6, seed: 202 },
     ],
   },
   {
@@ -201,6 +219,11 @@ export const CITY_LAYOUT: DistrictDef[] = [
       { x: 22, z: 16, w: 5, d: 4.5, h: 6.5, label: "Royal Baker's Guild", roof: "gable", floors: 2, hasChimney: true },
       { x: 30, z: 15, w: 4.5, d: 4.5, h: 6, label: "Spice Merchant Vaults", roof: "flat", floors: 2 },
     ],
+    blocks: [
+      { x: 14, z: 0, w: 6, d: 14, seed: 301 },
+      { x: 14, z: 16, w: 8, d: 10, seed: 302 },
+      { x: 38, z: 0, w: 8, d: 12, seed: 303 },
+    ],
   },
   {
     name: "inn",
@@ -211,6 +234,9 @@ export const CITY_LAYOUT: DistrictDef[] = [
     buildings: [
       { x: 36, z: 10, w: 8, d: 6.5, h: 9.5, label: "The Sleeping Giant Inn", roof: "gable", floors: 3, hasBalcony: true, hasChimney: true, shopSign: "tankard" },
       { x: 41, z: 16, w: 4.5, d: 4, h: 5.5, label: "Wayfarer's Stable & Brewery", roof: "gable", floors: 1 },
+    ],
+    blocks: [
+      { x: 42, z: 8, w: 6, d: 10, seed: 401 },
     ],
   },
   {
@@ -251,6 +277,12 @@ export const CITY_LAYOUT: DistrictDef[] = [
       { x: 20, z: 32, w: 5.5, d: 4.5, h: 8, label: "Highcrest Townhouse", roof: "gable", floors: 3, hasBalcony: true, hasChimney: true },
       { x: 28, z: 32, w: 4.5, d: 4.5, h: 6.5, label: "Artisan Quarter Home", roof: "gable", floors: 2, hasChimney: true },
       { x: 35, z: 31, w: 5, d: 4.5, h: 7, label: "Garden Lane Cottage", roof: "gable", floors: 2, hasChimney: true },
+    ],
+    blocks: [
+      { x: 14, z: 28, w: 8, d: 12, seed: 501 },
+      { x: 24, z: 38, w: 16, d: 8, seed: 502 },
+      { x: 38, z: 26, w: 10, d: 12, seed: 503 },
+      { x: 36, z: 40, w: 12, d: 8, seed: 504 },
     ],
   },
   {

@@ -244,6 +244,27 @@ function BuildingRoof({
             <boxGeometry args={[w * 0.85, 0.12, 0.12]} />
             <meshStandardMaterial color="#d4af37" emissive="#d4af37" emissiveIntensity={0.4} />
           </mesh>
+          {/* Dormer Windows on long sides */}
+          {w > 4 && d > 4 && (
+            <>
+              {[-w * 0.25, w * 0.25].map((dx, i) => (
+                <group key={`dormer-front-${i}`} position={[dx, roofH * 0.1, d * 0.35]}>
+                  {/* Dormer walls */}
+                  <mesh castShadow material={accent ?? material}>
+                    <boxGeometry args={[0.8, 1.2, 0.8]} />
+                  </mesh>
+                  {/* Dormer roof */}
+                  <mesh position={[0, 0.7, 0]} rotation={[0, Math.PI / 4, 0]} castShadow material={material}>
+                    <coneGeometry args={[0.8, 0.6, 4]} />
+                  </mesh>
+                  {/* Dormer glass */}
+                  <mesh position={[0, 0, 0.41]} material={accent ?? material}>
+                    <planeGeometry args={[0.4, 0.6]} />
+                  </mesh>
+                </group>
+              ))}
+            </>
+          )}
         </group>
       );
   }
