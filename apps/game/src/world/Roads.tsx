@@ -6,9 +6,8 @@ import { createStoneMaterial } from "../materials/createStoneMaterial";
 import { createTerrainMaterial } from "../materials/createTerrainMaterial";
 
 /**
- * Roads — road network with curbs, intersection blending, and roadside detail.
- * Each segment: cobble strip + stone curbs + roadside grass verge on main/plaza.
- * Intersections get a blended roundel to hide z-fighting.
+ * Roads — AAA city road network with granite curbs, gold inlays, grass verges,
+ * and blended intersection roundels.
  */
 const ROAD_MATS: Record<RoadType, import("three").MeshStandardMaterial> = {
   main: createCobbleMaterial({ kind: "main" }),
@@ -17,7 +16,7 @@ const ROAD_MATS: Record<RoadType, import("three").MeshStandardMaterial> = {
   dirt: createCobbleMaterial({ kind: "dirt" }),
 };
 
-const CURB_MAT = createStoneMaterial({ stoneColor: "#4a463a", roughness: 0.9, metalness: 0.02, seed: [50, 1] });
+const CURB_MAT = createStoneMaterial({ stoneColor: "#524e42", roughness: 0.88, metalness: 0.02, seed: [50, 1] });
 const VERGE_MAT = createTerrainMaterial({ variant: "world", seed: [50, 2] });
 const INTERSECTION_MAT = createCobbleMaterial({ kind: "plaza", scale: 2.2 });
 
@@ -52,7 +51,7 @@ function RoadStrip({ seg }: StripProps) {
     const angle = Math.atan2(dx, dz);
     const midX = (seg.from.x + seg.to.x) / 2;
     const midZ = (seg.from.z + seg.to.z) / 2;
-    const midY = heightAt(midX, midZ) + 0.06;
+    const midY = heightAt(midX, midZ) + 0.04;
     return { length: len, angle, midX, midY, midZ, width: seg.width };
   }, [seg]);
 
@@ -60,58 +59,55 @@ function RoadStrip({ seg }: StripProps) {
   const hasVerge = seg.type === "main" || seg.type === "plaza";
 
   return (
-    <group position={[midX, midY, midZ]} rotation={[-Math.PI / 2, 0, 0]}>
-      <group rotation={[0, 0, angle]}>
-        {/* Road surface */}
-        <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]} material={ROAD_MATS[seg.type]} receiveShadow>
-          <planeGeometry args={[length, width]} />
-        </mesh>
+    <group position={[midX, midY, midZ]} rotation={[0, angle, 0]}>
+      {/* Road surface plane lying flat on ground */}
+      <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]} material={ROAD_MATS[seg.type]} receiveShadow>
+        <planeGeometry args={[width, length]} />
+      </mesh>
 
-        {/* Stone curbs on main/plaza/district */}
-        {seg.type !== "dirt" && (
-          <>
-            <mesh position={[0, 0.07, width / 2 + 0.18]} rotation={[-Math.PI / 2, 0, 0]} castShadow receiveShadow material={CURB_MAT}>
-              <boxGeometry args={[length + 0.4, 0.36, 0.36]} />
-            </mesh>
-            <mesh position={[0, 0.07, -(width / 2 + 0.18)]} rotation={[-Math.PI / 2, 0, 0]} castShadow receiveShadow material={CURB_MAT}>
-              <boxGeometry args={[length + 0.4, 0.36, 0.36]} />
-            </mesh>
-          </>
-        )}
+      {/* Granite curbs flanking the road */}
+      {seg.type !== "dirt" && (
+        <>
+          <mesh position={[-width / 2 - 0.16, 0.08, 0]} castShadow receiveShadow material={CURB_MAT}>
+            <boxGeometry args={[0.32, 0.18, length + 0.4]} />
+          </mesh>
+          <mesh position={[width / 2 + 0.16, 0.08, 0]} castShadow receiveShadow material={CURB_MAT}>
+            <boxGeometry args={[0.32, 0.18, length + 0.4]} />
+          </mesh>
+        </>
+      )}
 
-        {/* Gold edging on main/plaza roads (inside curbs) */}
-        {edge && (
-          <>
-            <mesh position={[0, 0.03, width / 2 - 0.12]} rotation={[-Math.PI / 2, 0, 0]}>
-              <planeGeometry args={[length, 0.24]} />
-              <meshStandardMaterial color={edge} emissive={edge} emissiveIntensity={0.25} roughness={0.7} />
-            </mesh>
-            <mesh position={[0, 0.03, -(width / 2 - 0.12)]} rotation={[-Math.PI / 2, 0, 0]}>
-              <planeGeometry args={[length, 0.24]} />
-              <meshStandardMaterial color={edge} emissive={edge} emissiveIntensity={0.25} roughness={0.7} />
-            </mesh>
-          </>
-        )}
+      {/* Gold edging inside curbs on royal avenues */}
+      {edge && (
+        <>
+          <mesh position={[-width / 2 + 0.12, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[0.24, length]} />
+            <meshStandardMaterial color={edge} emissive={edge} emissiveIntensity={0.3} roughness={0.6} />
+          </mesh>
+          <mesh position={[width / 2 - 0.12, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[0.24, length]} />
+            <meshStandardMaterial color={edge} emissive={edge} emissiveIntensity={0.3} roughness={0.6} />
+          </mesh>
+        </>
+      )}
 
-        {/* Grass verge outside curbs on main/plaza */}
-        {hasVerge && (
-          <>
-            <mesh position={[0, 0.04, width / 2 + 0.6]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow material={VERGE_MAT}>
-              <planeGeometry args={[length, 1.2]} />
-            </mesh>
-            <mesh position={[0, 0.04, -(width / 2 + 0.6)]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow material={VERGE_MAT}>
-              <planeGeometry args={[length, 1.2]} />
-            </mesh>
-          </>
-        )}
-      </group>
+      {/* Grass verge outside curbs */}
+      {hasVerge && (
+        <>
+          <mesh position={[-width / 2 - 0.65, 0.015, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow material={VERGE_MAT}>
+            <planeGeometry args={[0.9, length]} />
+          </mesh>
+          <mesh position={[width / 2 + 0.65, 0.015, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow material={VERGE_MAT}>
+            <planeGeometry args={[0.9, length]} />
+          </mesh>
+        </>
+      )}
     </group>
   );
 }
 
-/** Blended intersection roundels — prevents z-fighting at crossings, adds visual anchor. */
+/** Blended intersection roundels */
 function IntersectionRoundels() {
-  // Compute unique intersection points from road endpoints
   const points = useMemo(() => {
     const map = new Map<string, { x: number; z: number; count: number }>();
     ROADS.forEach((r) => {
@@ -128,17 +124,17 @@ function IntersectionRoundels() {
   return (
     <>
       {points.map((p, i) => {
-        const y = heightAt(p.x, p.z) + 0.07;
-        const radius = 6;
+        const y = heightAt(p.x, p.z) + 0.05;
+        const radius = 6.5;
         return (
-          <group key={`intersection-${i}`} position={[p.x, y, p.z]} rotation={[-Math.PI / 2, 0, 0]}>
-            <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow material={INTERSECTION_MAT}>
+          <group key={`intersection-${i}`} position={[p.x, y, p.z]}>
+            <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow material={INTERSECTION_MAT}>
               <circleGeometry args={[radius, 32]} />
             </mesh>
-            {/* Center compass marker */}
-            <mesh position={[0, 0.03, 0]} castShadow>
-              <circleGeometry args={[1.2, 8]} />
-              <meshStandardMaterial color="#d4af37" emissive="#d4af37" emissiveIntensity={0.4} />
+            {/* Center gilded compass star marker */}
+            <mesh position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+              <circleGeometry args={[1.4, 8]} />
+              <meshStandardMaterial color="#d4af37" emissive="#d4af37" emissiveIntensity={0.5} />
             </mesh>
           </group>
         );

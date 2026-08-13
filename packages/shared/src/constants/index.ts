@@ -30,33 +30,44 @@ export interface RoadSegment {
   type: RoadType;
 }
 
-export const ROAD_WIDTH = { main: 8, plaza: 12, district: 5, dirt: 3 } as const;
+export const ROAD_WIDTH = { main: 8, plaza: 12, district: 6, dirt: 4 } as const;
 
 export const ROADS: RoadSegment[] = [
-  // South Gate -> Central Plaza (main road)
+  // 1. Imperial High Avenue (South Gate z=-46 -> Central Plaza z=-4 -> North Gate z=+46)
   { id: "main-south", from: { x: 0, z: -46 }, to: { x: 0, z: -4 }, width: ROAD_WIDTH.main, type: "main" },
-  // Central Plaza -> Castle (main road, north)
-  { id: "main-castle", from: { x: 0, z: -4 }, to: { x: 0, z: -26 }, width: ROAD_WIDTH.main, type: "main" },
-  // Plaza ring
-  { id: "plaza-ring-w", from: { x: -10, z: -4 }, to: { x: 10, z: -4 }, width: ROAD_WIDTH.plaza, type: "plaza" },
-  // Market streets (east)
-  { id: "market-h", from: { x: 8, z: -4 }, to: { x: 30, z: -2 }, width: ROAD_WIDTH.district, type: "district" },
-  // Residential streets (NE)
-  { id: "residential-h", from: { x: 8, z: -4 }, to: { x: 30, z: 14 }, width: ROAD_WIDTH.district, type: "district" },
-  // Guild district (west)
-  { id: "guild-h", from: { x: -10, z: -4 }, to: { x: -30, z: -6 }, width: ROAD_WIDTH.district, type: "district" },
-  // Training grounds (NW)
-  { id: "training-h", from: { x: -10, z: -4 }, to: { x: -22, z: 18 }, width: ROAD_WIDTH.district, type: "district" },
-  // Harbor (north)
-  { id: "harbor-n", from: { x: 0, z: -26 }, to: { x: 0, z: 40 }, width: ROAD_WIDTH.district, type: "district" },
-  // Blacksmith spur
-  { id: "blacksmith-h", from: { x: -22, z: 18 }, to: { x: -34, z: 24 }, width: ROAD_WIDTH.district, type: "district" },
-  // Inn spur
-  { id: "inn-h", from: { x: 30, z: 14 }, to: { x: 36, z: 6 }, width: ROAD_WIDTH.dirt, type: "dirt" },
+  { id: "main-north", from: { x: 0, z: -4 }, to: { x: 0, z: 46 }, width: ROAD_WIDTH.main, type: "main" },
+
+  // 2. East-West Trans-Plaza Boulevard (West Gate x=-44 -> Central Plaza x=0 -> East Gate x=+44)
+  { id: "plaza-cross-w", from: { x: -44, z: -4 }, to: { x: 0, z: -4 }, width: ROAD_WIDTH.plaza, type: "plaza" },
+  { id: "plaza-cross-e", from: { x: 0, z: -4 }, to: { x: 44, z: -4 }, width: ROAD_WIDTH.plaza, type: "plaza" },
+
+  // 3. Northern Citadel Promenade (Connecting Noble District to Citadel and Cathedral)
+  { id: "citadel-prom-w", from: { x: -28, z: -24 }, to: { x: 0, z: -24 }, width: ROAD_WIDTH.district, type: "district" },
+  { id: "citadel-prom-e", from: { x: 0, z: -24 }, to: { x: 28, z: -24 }, width: ROAD_WIDTH.district, type: "district" },
+  { id: "citadel-approach", from: { x: 0, z: -24 }, to: { x: 0, z: -36 }, width: ROAD_WIDTH.main, type: "main" },
+
+  // 4. Market & Commercial Ring (East)
+  { id: "market-avenue", from: { x: 6, z: -4 }, to: { x: 24, z: 6 }, width: ROAD_WIDTH.district, type: "district" },
+  { id: "market-loop-n", from: { x: 24, z: 6 }, to: { x: 28, z: -16 }, width: ROAD_WIDTH.district, type: "district" },
+  { id: "market-loop-s", from: { x: 24, z: 6 }, to: { x: 28, z: 18 }, width: ROAD_WIDTH.district, type: "district" },
+  { id: "inn-access", from: { x: 24, z: 6 }, to: { x: 36, z: 8 }, width: ROAD_WIDTH.dirt, type: "dirt" },
+
+  // 5. Southern Artisan & Residential Way (Connecting Guilds, Guard, Residential)
+  { id: "artisan-way-w", from: { x: -36, z: 18 }, to: { x: 0, z: 18 }, width: ROAD_WIDTH.district, type: "district" },
+  { id: "artisan-way-e", from: { x: 0, z: 18 }, to: { x: 36, z: 18 }, width: ROAD_WIDTH.district, type: "district" },
+
+  // 6. Western Guild & Forge Arterials
+  { id: "guild-quarter", from: { x: -6, z: -4 }, to: { x: -28, z: -12 }, width: ROAD_WIDTH.district, type: "district" },
+  { id: "forge-lane", from: { x: -28, z: -4 }, to: { x: -36, z: 24 }, width: ROAD_WIDTH.district, type: "district" },
+  { id: "training-access", from: { x: -6, z: 18 }, to: { x: -22, z: 22 }, width: ROAD_WIDTH.district, type: "district" },
+
+  // 7. Harbor Canal Quay (North Wharf)
+  { id: "harbor-quay-w", from: { x: -24, z: 38 }, to: { x: 0, z: 38 }, width: ROAD_WIDTH.district, type: "district" },
+  { id: "harbor-quay-e", from: { x: 0, z: 38 }, to: { x: 24, z: 38 }, width: ROAD_WIDTH.district, type: "district" },
 ];
 
 /* ── Spawn Point ── */
-export const PLAYER_SPAWN = { x: 0, z: -35 };
+export const PLAYER_SPAWN = { x: 0, z: -38 };
 
 /* ── South Gate ── */
 export const SOUTH_GATE_POSITION = { x: 0, z: -46 };
@@ -100,149 +111,160 @@ export interface BuildingDef {
   label?: string;
   /** Roof silhouette for blockout; dispatcher in CityBuilding. */
   roof?: "gable" | "flat" | "tower" | "cone" | "dome";
+  /** Optional architectural metadata */
+  floors?: number;
+  hasBalcony?: boolean;
+  hasChimney?: boolean;
+  shopSign?: "potion" | "sword" | "tankard" | "anvil" | "shield" | "scroll";
 }
 
 export interface DistrictDef {
   name: DistrictName;
   label: string;
   color: string;
-  /** District center in world space — group offset for spacing. */
   center: { x: number; z: number };
-  /** Approx radius for spacing label placement + future streaming. */
   radius: number;
   buildings: BuildingDef[];
 }
 
-/* District centers placed around an expanded central plaza (scale ×1.5).
- * Building coords are already relative to the world origin; the `center`
- * field is metadata for labels/streaming, group offset is large-arena feel
- * via the building coordinates themselves. */
 export const CITY_LAYOUT: DistrictDef[] = [
   {
     name: "castle",
-    label: "Royal Castle",
+    label: "Royal Citadel of Solaria",
     color: "#8a7a5a",
-    center: { x: 0, z: -32 },
-    radius: 18,
+    center: { x: 0, z: -34 },
+    radius: 20,
     buildings: [
-      { x: 0, z: -32, w: 9, d: 9, h: 12, label: "Royal Castle", roof: "dome" },
-      { x: -6, z: -38, w: 3, d: 3, h: 16, label: "Castle Tower", roof: "tower" },
-      { x: 6, z: -38, w: 3, d: 3, h: 16, label: "Castle Tower", roof: "tower" },
-      { x: 0, z: -42, w: 6, d: 3, h: 4, label: "Castle Gate", roof: "flat" },
-      { x: -8, z: -30, w: 3, d: 3, h: 10, label: "Bastion", roof: "tower" },
-      { x: 8, z: -30, w: 3, d: 3, h: 10, label: "Bastion", roof: "tower" },
+      { x: 0, z: -36, w: 14, d: 12, h: 16, label: "Royal High Palace", roof: "dome", floors: 4, hasChimney: true },
+      { x: -9, z: -42, w: 4.5, d: 4.5, h: 22, label: "Citadel West Spire", roof: "tower", floors: 5 },
+      { x: 9, z: -42, w: 4.5, d: 4.5, h: 22, label: "Citadel East Spire", roof: "tower", floors: 5 },
+      { x: 0, z: -44, w: 8, d: 4, h: 7, label: "Citadel North Barbican", roof: "flat", floors: 2 },
+      { x: -12, z: -32, w: 5, d: 5, h: 12, label: "Royal Archives", roof: "gable", floors: 3, hasChimney: true },
+      { x: 12, z: -32, w: 5, d: 5, h: 12, label: "Sovereign Guardhouse", roof: "gable", floors: 3, hasChimney: true },
+      { x: -7, z: -27, w: 4, d: 4, h: 8, label: "High Chancellor's Office", roof: "gable", floors: 2 },
+      { x: 7, z: -27, w: 4, d: 4, h: 8, label: "Royal Treasury", roof: "flat", floors: 2 },
     ],
   },
   {
     name: "central_plaza",
-    label: "Central Plaza",
+    label: "Central Royal Plaza",
     color: "#b8963e",
     center: { x: 0, z: -4 },
-    radius: 14,
+    radius: 16,
     buildings: [
-      { x: 0, z: -4, w: 1.5, d: 1.5, h: 0.8, color: "#d4af37", label: "Fountain", roof: "flat" },
-      { x: -6, z: -4, w: 0.5, d: 0.5, h: 1, color: "#d4af37", label: "Lamp", roof: "flat" },
-      { x: 6, z: -4, w: 0.5, d: 0.5, h: 1, color: "#d4af37", label: "Lamp", roof: "flat" },
+      { x: 0, z: -4, w: 2.2, d: 2.2, h: 1.2, color: "#d4af37", label: "The Sunwell Fountain", roof: "flat" },
+      { x: -10, z: -4, w: 0.6, d: 0.6, h: 2.2, color: "#d4af37", label: "West Grand Gaslight", roof: "flat" },
+      { x: 10, z: -4, w: 0.6, d: 0.6, h: 2.2, color: "#d4af37", label: "East Grand Gaslight", roof: "flat" },
+      { x: 0, z: -14, w: 0.6, d: 0.6, h: 2.2, color: "#d4af37", label: "North Grand Gaslight", roof: "flat" },
+      { x: 0, z: 6, w: 0.6, d: 0.6, h: 2.2, color: "#d4af37", label: "South Grand Gaslight", roof: "flat" },
     ],
   },
   {
     name: "noble",
-    label: "Noble District",
+    label: "Noble District & Estates",
     color: "#c4a96a",
-    center: { x: -24, z: 12 },
-    radius: 14,
+    center: { x: -26, z: -24 },
+    radius: 16,
     buildings: [
-      { x: -24, z: 12, w: 4, d: 4, h: 4, label: "Noble Estate", roof: "gable" },
-      { x: -30, z: 8, w: 3.5, d: 3.5, h: 3.5, label: "Noble Estate", roof: "gable" },
-      { x: -22, z: 18, w: 3.5, d: 3.5, h: 4.5, label: "Noble Manor", roof: "cone" },
-      { x: -28, z: 18, w: 2.5, d: 2.5, h: 3, label: "Guard Post", roof: "flat" },
+      { x: -24, z: -22, w: 7, d: 6, h: 9, label: "Solaris Noble Manor", roof: "gable", floors: 3, hasBalcony: true, hasChimney: true },
+      { x: -34, z: -20, w: 6, d: 6, h: 8.5, label: "Silvercrest Estate", roof: "gable", floors: 2, hasBalcony: true, hasChimney: true },
+      { x: -22, z: -32, w: 6.5, d: 5.5, h: 9.5, label: "Grand Chancellor Manor", roof: "cone", floors: 3, hasBalcony: true },
+      { x: -33, z: -30, w: 5, d: 5, h: 7.5, label: "Noble Carriage House", roof: "gable", floors: 2, hasChimney: true },
+      { x: -18, z: -16, w: 4.5, d: 4.5, h: 6.5, label: "Noble Gate Lodge", roof: "flat", floors: 2 },
     ],
   },
   {
     name: "guild_hall",
-    label: "Guild District",
+    label: "Adventurer's Guild & Archives",
     color: "#7a6a4a",
     center: { x: -32, z: -10 },
-    radius: 14,
+    radius: 15,
     buildings: [
-      { x: -32, z: -10, w: 6, d: 5, h: 6, label: "Adventurer's Guild", roof: "gable" },
-      { x: -38, z: -12, w: 3.5, d: 3.5, h: 3.5, label: "Guild Stable", roof: "gable" },
-      { x: -30, z: -16, w: 3, d: 3, h: 5, label: "Guild Tower", roof: "tower" },
+      { x: -30, z: -10, w: 8, d: 7, h: 10.5, label: "Grand Adventurer's Guildhall", roof: "gable", floors: 3, hasBalcony: true, hasChimney: true, shopSign: "sword" },
+      { x: -39, z: -12, w: 5.5, d: 4.5, h: 7, label: "Guild Training Stables", roof: "gable", floors: 2 },
+      { x: -28, z: -18, w: 4.5, d: 4.5, h: 14, label: "Arcane Observatory Tower", roof: "tower", floors: 4, shopSign: "scroll" },
+      { x: -38, z: -4, w: 5, d: 5, h: 6.5, label: "Mercenary Bounty Office", roof: "gable", floors: 2, shopSign: "shield" },
     ],
   },
   {
     name: "market",
-    label: "Market District",
+    label: "Grand Market Bazaar & Emporium",
     color: "#9a8a6a",
-    center: { x: 22, z: 6 },
-    radius: 16,
+    center: { x: 24, z: 4 },
+    radius: 18,
     buildings: [
-      { x: 22, z: 6, w: 5, d: 4, h: 3.5, label: "Market Hall", roof: "gable" },
-      { x: 28, z: 4, w: 3.5, d: 3.5, h: 2.8, label: "Trader Post", roof: "flat" },
-      { x: 20, z: 12, w: 3.5, d: 3, h: 3, label: "Alchemist", roof: "cone" },
-      { x: 28, z: 12, w: 2.8, d: 2.8, h: 2.4, label: "Food Stall", roof: "flat" },
-      { x: 16, z: 10, w: 3.5, d: 3.5, h: 3.6, label: "Magic Shop", roof: "dome" },
-    ],
-  },
-  {
-    name: "training",
-    label: "Training Grounds",
-    color: "#6a5a4a",
-    center: { x: -22, z: 18 },
-    radius: 12,
-    buildings: [
-      { x: -22, z: 18, w: 6, d: 5, h: 2.5, color: "#5a4a3a", label: "Training Arena", roof: "flat" },
-      { x: -18, z: 22, w: 2.5, d: 2.5, h: 1.8, color: "#4a3a2a", label: "Dummy Yard", roof: "flat" },
-      { x: -26, z: 22, w: 2, d: 2, h: 2, color: "#5a4a3a", label: "Armory", roof: "gable" },
-    ],
-  },
-  {
-    name: "blacksmith",
-    label: "Blacksmith",
-    color: "#5a3a2a",
-    center: { x: -34, z: 24 },
-    radius: 8,
-    buildings: [
-      { x: -34, z: 24, w: 4, d: 4, h: 4, label: "Blacksmith Forge", roof: "gable" },
-      { x: -38, z: 26, w: 2.5, d: 2.5, h: 2, color: "#7a4a2a", label: "Smelter", roof: "cone" },
-    ],
-  },
-  {
-    name: "residential",
-    label: "Residential District",
-    color: "#7a7a5a",
-    center: { x: 26, z: 18 },
-    radius: 14,
-    buildings: [
-      { x: 22, z: 18, w: 3.5, d: 3.5, h: 3, label: "Home", roof: "gable" },
-      { x: 28, z: 16, w: 3.5, d: 3.5, h: 2.8, label: "Home", roof: "gable" },
-      { x: 24, z: 24, w: 4, d: 3.5, h: 3.4, label: "Home", roof: "gable" },
-      { x: 30, z: 24, w: 3, d: 3, h: 2.6, label: "Home", roof: "gable" },
-      { x: 20, z: 24, w: 3.5, d: 3, h: 2.8, label: "Home", roof: "gable" },
-      { x: 32, z: 18, w: 3, d: 3, h: 2.6, label: "Home", roof: "gable" },
+      { x: 20, z: 0, w: 7.5, d: 6, h: 8, label: "Grand Market Hall", roof: "gable", floors: 2, hasBalcony: true, hasChimney: true },
+      { x: 30, z: -2, w: 5.5, d: 4.5, h: 7, label: "Master Alchemist Apothecary", roof: "cone", floors: 2, hasChimney: true, shopSign: "potion" },
+      { x: 18, z: 9, w: 5, d: 5, h: 7.5, label: "Arcane Enchantment Emporium", roof: "dome", floors: 2, hasBalcony: true, shopSign: "scroll" },
+      { x: 28, z: 8, w: 5.5, d: 4.5, h: 6.5, label: "Solaria Merchant Guild", roof: "gable", floors: 2, hasChimney: true },
+      { x: 36, z: 2, w: 4.5, d: 4.5, h: 6, label: "Master Jeweler & Gemcutter", roof: "flat", floors: 2 },
+      { x: 22, z: 16, w: 5, d: 4.5, h: 6.5, label: "Royal Baker's Guild", roof: "gable", floors: 2, hasChimney: true },
+      { x: 30, z: 15, w: 4.5, d: 4.5, h: 6, label: "Spice Merchant Vaults", roof: "flat", floors: 2 },
     ],
   },
   {
     name: "inn",
-    label: "Inn",
+    label: "The Sleeping Giant Inn & Tavern",
     color: "#8a7a3a",
-    center: { x: 36, z: 6 },
-    radius: 8,
+    center: { x: 36, z: 10 },
+    radius: 12,
     buildings: [
-      { x: 36, z: 6, w: 5, d: 4, h: 4.5, label: "The Sleeping Giant Inn", roof: "gable" },
+      { x: 36, z: 10, w: 8, d: 6.5, h: 9.5, label: "The Sleeping Giant Inn", roof: "gable", floors: 3, hasBalcony: true, hasChimney: true, shopSign: "tankard" },
+      { x: 41, z: 16, w: 4.5, d: 4, h: 5.5, label: "Wayfarer's Stable & Brewery", roof: "gable", floors: 1 },
+    ],
+  },
+  {
+    name: "training",
+    label: "Knight Barracks & Sparring Yard",
+    color: "#6a5a4a",
+    center: { x: -22, z: 22 },
+    radius: 14,
+    buildings: [
+      { x: -20, z: 20, w: 8, d: 6.5, h: 7.5, label: "Royal Knight Barracks", roof: "flat", floors: 2, hasChimney: true },
+      { x: -28, z: 18, w: 5, d: 4.5, h: 6.5, label: "Armory & Weapon Storage", roof: "gable", floors: 2, shopSign: "shield" },
+      { x: -18, z: 28, w: 6, d: 5, h: 4, label: "Archery Range Pavilion", roof: "flat", floors: 1 },
+      { x: -26, z: 26, w: 4.5, d: 4.5, h: 5.5, label: "Guard Watchpost", roof: "tower", floors: 2 },
+    ],
+  },
+  {
+    name: "blacksmith",
+    label: "Great Ironworks & Master Forge",
+    color: "#5a3a2a",
+    center: { x: -36, z: 26 },
+    radius: 12,
+    buildings: [
+      { x: -36, z: 24, w: 7, d: 6, h: 8.5, label: "Great Ironworks Foundry", roof: "gable", floors: 2, hasChimney: true, shopSign: "anvil" },
+      { x: -42, z: 28, w: 4.5, d: 4.5, h: 7, label: "Blast Furnace & Crucible", roof: "cone", floors: 1, hasChimney: true },
+      { x: -34, z: 32, w: 5, d: 4.5, h: 6, label: "Armor Smithy & Anvil Bay", roof: "gable", floors: 1, shopSign: "sword" },
+    ],
+  },
+  {
+    name: "residential",
+    label: "Residential Quarters & Townhouses",
+    color: "#7a7a5a",
+    center: { x: 26, z: 28 },
+    radius: 16,
+    buildings: [
+      { x: 18, z: 24, w: 5, d: 4.5, h: 7.5, label: "Sunbeam Townhouse", roof: "gable", floors: 2, hasBalcony: true, hasChimney: true },
+      { x: 26, z: 24, w: 4.5, d: 4.5, h: 7, label: "Cobblestone Haven", roof: "gable", floors: 2, hasChimney: true },
+      { x: 33, z: 24, w: 5, d: 4, h: 6.5, label: "Weaver's Row Home", roof: "gable", floors: 2, hasChimney: true },
+      { x: 20, z: 32, w: 5.5, d: 4.5, h: 8, label: "Highcrest Townhouse", roof: "gable", floors: 3, hasBalcony: true, hasChimney: true },
+      { x: 28, z: 32, w: 4.5, d: 4.5, h: 6.5, label: "Artisan Quarter Home", roof: "gable", floors: 2, hasChimney: true },
+      { x: 35, z: 31, w: 5, d: 4.5, h: 7, label: "Garden Lane Cottage", roof: "gable", floors: 2, hasChimney: true },
     ],
   },
   {
     name: "harbor",
-    label: "Harbor",
+    label: "Royal Canal Docks & Waterway",
     color: "#5a6a7a",
     center: { x: 0, z: 40 },
-    radius: 12,
+    radius: 15,
     buildings: [
-      { x: 0, z: 38, w: 6, d: 3, h: 4, label: "Harbor Master", roof: "flat" },
-      { x: -5, z: 42, w: 3.5, d: 2.5, h: 2.4, label: "Dock Office", roof: "gable" },
-      { x: 6, z: 42, w: 3.5, d: 2.5, h: 2.4, label: "Warehouse", roof: "flat" },
-      { x: -3, z: 46, w: 2, d: 2, h: 2, color: "#6a7a8a", label: "Lighthouse", roof: "tower" },
+      { x: 0, z: 38, w: 8, d: 5, h: 8, label: "Harbor Master's Citadel", roof: "flat", floors: 2, hasBalcony: true },
+      { x: -8, z: 42, w: 5.5, d: 4, h: 6, label: "Royal Customs & Quarantine", roof: "gable", floors: 2 },
+      { x: 8, z: 42, w: 5.5, d: 4, h: 6, label: "South Canal Warehouse", roof: "flat", floors: 2 },
+      { x: -16, z: 40, w: 3.5, d: 3.5, h: 14, label: "North Canal Beacon Light", roof: "tower", floors: 4 },
+      { x: 16, z: 40, w: 4.5, d: 4, h: 5.5, label: "Boatwright & Rigging Depot", roof: "gable", floors: 1 },
     ],
   },
 ];

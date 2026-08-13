@@ -1,21 +1,16 @@
 import { Instances, Instance } from "@react-three/drei";
 import { useMemo } from "react";
 import { heightAt } from "@legend/engine";
-import type { DistrictName } from "@legend/shared";
 import { createWoodMaterial } from "../materials/createWoodMaterial";
 import { createStoneMaterial } from "../materials/createStoneMaterial";
+import { createMetalMaterial } from "../materials/createMetalMaterial";
 
-/**
- * Props — atmosphere props as primitive placeholders (barrels, crates, tents,
- * benches, fences, signposts, flags, lanterns). Composition-focused, not asset
- * quality. Instanced per-kind via drei <Instances> so hundreds cost few draws.
- *
- * Placement arrays are derived deterministically near district centers.
- */
+interface PropSpot {
+  x: number;
+  z: number;
+  rot?: number;
+}
 
-interface PropSpot { x: number; z: number; rot?: number; }
-
-/* Deterministic pseudo-random from a seed for stable layouts. */
 function rand(seed: number): number {
   const s = Math.sin(seed * 127.1) * 43758.5453;
   return s - Math.floor(s);
@@ -25,7 +20,7 @@ function scatter(center: { x: number; z: number }, radius: number, count: number
   const out: PropSpot[] = [];
   for (let i = 0; i < count; i++) {
     const ang = rand(seed + i) * Math.PI * 2;
-    const r = Math.sqrt(rand(seed + i + 100)) * radius;
+    const r = (0.2 + rand(seed + i + 100) * 0.8) * radius;
     out.push({
       x: center.x + Math.cos(ang) * r,
       z: center.z + Math.sin(ang) * r,
@@ -35,208 +30,172 @@ function scatter(center: { x: number; z: number }, radius: number, count: number
   return out;
 }
 
-const DISTRICT_CENTERS: { name: DistrictName; center: { x: number; z: number }; radius: number }[] = [
-  { name: "market", center: { x: 22, z: 6 }, radius: 16 },
-  { name: "central_plaza", center: { x: 0, z: -4 }, radius: 12 },
-  { name: "residential", center: { x: 26, z: 18 }, radius: 14 },
-  { name: "training", center: { x: -22, z: 18 }, radius: 12 },
-  { name: "harbor", center: { x: 0, z: 40 }, radius: 14 },
-];
-
 export function Props() {
-  const { barrels, crates, benches, fences, signposts, flags, lanterns, tents, banners, wells, carts, stalls } = useMemo(() => {
-    const market = DISTRICT_CENTERS.find((d) => d.name === "market")!;
-    const plaza = DISTRICT_CENTERS.find((d) => d.name === "central_plaza")!;
-    const residential = DISTRICT_CENTERS.find((d) => d.name === "residential")!;
-    const training = DISTRICT_CENTERS.find((d) => d.name === "training")!;
-    const harbor = DISTRICT_CENTERS.find((d) => d.name === "harbor")!;
-
+  const {
+    barrels,
+    crates,
+    benches,
+    trainingDummies,
+    archeryTargets,
+    weaponRacks,
+    anvils,
+    marketStalls,
+    merchantCarts,
+    noticeBoards,
+    wishingWells,
+  } = useMemo(() => {
     return {
-      barrels: [...scatter(market.center, market.radius, 14, 1), ...scatter(harbor.center, harbor.radius, 16, 101)],
-      crates: [...scatter(market.center, market.radius, 10, 7), ...scatter(harbor.center, harbor.radius, 12, 107)],
-      benches: scatter(plaza.center, plaza.radius, 8, 31),
-      fences: scatter(residential.center, residential.radius, 30, 41),
-      signposts: [
-        { x: plaza.center.x + 6, z: plaza.center.z },
-        { x: market.center.x - 12, z: market.center.z },
-        { x: training.center.x + 8, z: training.center.z + 6 },
-        { x: 0, z: -24, rot: Math.PI },
+      barrels: [
+        ...scatter({ x: 24, z: 4 }, 14, 16, 10), // Market
+        ...scatter({ x: 36, z: 10 }, 8, 10, 20), // Tavern
+        ...scatter({ x: 0, z: 40 }, 12, 14, 30), // Harbor
       ],
-      flags: scatter(plaza.center, plaza.radius, 6, 61),
-      lanterns: DISTRICT_CENTERS.flatMap((d, i) => scatter(d.center, d.radius, 5, 200 + i * 13)),
-      tents: scatter(training.center, training.radius, 8, 71),
-      banners: [
-        { x: plaza.center.x - 5, z: plaza.center.z - 3, rot: 0 },
-        { x: plaza.center.x + 5, z: plaza.center.z - 3, rot: 0 },
-        { x: market.center.x, z: market.center.z - 8, rot: Math.PI / 8 },
-        { x: harbor.center.x, z: harbor.center.z - 6, rot: 0 },
-        { x: -10, z: -8, rot: 0 },
-        { x: 10, z: -8, rot: 0 },
+      crates: [
+        ...scatter({ x: 24, z: 4 }, 14, 18, 50), // Market
+        ...scatter({ x: 0, z: 40 }, 12, 16, 60), // Harbor
+        ...scatter({ x: 36, z: 10 }, 8, 8, 70), // Tavern
       ],
-      wells: [
-        { x: plaza.center.x, z: plaza.center.z, rot: 0 },
-        { x: market.center.x - 4, z: market.center.z + 4, rot: 0 },
+      benches: [
+        { x: -6, z: -8, rot: 0 },
+        { x: 6, z: -8, rot: 0 },
+        { x: -6, z: 0, rot: Math.PI },
+        { x: 6, z: 0, rot: Math.PI },
+        { x: 26, z: -20, rot: Math.PI / 2 },
+        { x: -26, z: -20, rot: -Math.PI / 2 },
       ],
-      carts: scatter(market.center, market.radius, 6, 311),
-      stalls: scatter(market.center, market.radius, 10, 411),
+      trainingDummies: [
+        { x: -16, z: 20, rot: 0.3 },
+        { x: -18, z: 23, rot: -0.5 },
+        { x: -15, z: 25, rot: 0.8 },
+      ],
+      archeryTargets: [
+        { x: -21, z: 30, rot: 0 },
+        { x: -18, z: 30, rot: 0 },
+        { x: -15, z: 30, rot: 0 },
+      ],
+      weaponRacks: [
+        { x: -26, z: 20, rot: 0 },
+        { x: -22, z: 16, rot: Math.PI / 2 },
+      ],
+      anvils: [
+        { x: -36, z: 26, rot: 0 },
+        { x: -33, z: 30, rot: 0.4 },
+      ],
+      marketStalls: [
+        { x: 21, z: -2, rot: 0.1 },
+        { x: 27, z: -1, rot: -0.2 },
+        { x: 21, z: 7, rot: 0.2 },
+        { x: 27, z: 8, rot: -0.1 },
+        { x: 24, z: 12, rot: 0 },
+      ],
+      merchantCarts: [
+        { x: 16, z: 2, rot: 0.4 },
+        { x: 32, z: 5, rot: -0.3 },
+        { x: -4, z: 36, rot: 0.2 },
+      ],
+      noticeBoards: [
+        { x: -4, z: -4, rot: Math.PI / 4 }, // Plaza notice board
+        { x: -26, z: -8, rot: 0 }, // Guild notice board
+      ],
+      wishingWells: [
+        { x: 26, z: 20, rot: 0 }, // Residential well
+      ],
     };
   }, []);
 
   return (
     <group>
-      <Barrels spots={barrels} />
-      <Crates spots={crates} />
-      <Benches spots={benches} />
-      <Fences spots={fences} />
-      <Signposts spots={signposts} />
-      <Flags spots={flags} />
-      <Lanterns spots={lanterns} />
-      <Tents spots={tents} />
-      <Banners spots={banners} />
-      <Wells spots={wells} />
-      <Carts spots={carts} />
-      <Stalls spots={stalls} />
+      <InstancedBarrels spots={barrels} />
+      <InstancedCrates spots={crates} />
+      <PlazaBenches spots={benches} />
+      <KnightTrainingDummies spots={trainingDummies} />
+      <ArcheryTargets spots={archeryTargets} />
+      <WeaponRacks spots={weaponRacks} />
+      <BlacksmithAnvils spots={anvils} />
+      <MarketStalls spots={marketStalls} />
+      <MerchantCarts spots={merchantCarts} />
+      <NoticeBoards spots={noticeBoards} />
+      <WishingWells spots={wishingWells} />
     </group>
   );
 }
 
-// Shared procedural prop materials (one per kind, reused across all spots).
-const woodMatDark = createWoodMaterial({ woodColor: 0x5a3a22, roughness: 0.88 });
-const woodMatMid = createWoodMaterial({ woodColor: 0x6a4a2a, roughness: 0.85 });
-const woodMatLight = createWoodMaterial({ woodColor: 0x8a6a3a, roughness: 0.82 });
-const wellStoneMat = createStoneMaterial({ stoneColor: 0x4a4a4a, roughness: 0.95, flatShading: true });
+const woodDark = createWoodMaterial({ woodColor: "#3a2416", roughness: 0.9 });
+const woodMid = createWoodMaterial({ woodColor: "#5c3c24", roughness: 0.86 });
+const woodLight = createWoodMaterial({ woodColor: "#8c6239", roughness: 0.82 });
+const ironMat = createMetalMaterial({ kind: "iron" });
+const goldMat = createMetalMaterial({ kind: "gold" });
+const stoneMat = createStoneMaterial({ stoneColor: "#555248", roughness: 0.92 });
 
-function Barrels({ spots }: { spots: PropSpot[] }) {
+function InstancedBarrels({ spots }: { spots: PropSpot[] }) {
   return (
     <Instances limit={spots.length} castShadow>
-      <cylinderGeometry args={[0.4, 0.4, 1, 10]} />
-      <primitive object={woodMatMid} attach="material" />
+      <cylinderGeometry args={[0.42, 0.48, 1.05, 10]} />
+      <primitive object={woodMid} attach="material" />
       {spots.map((s, i) => (
-        <Instance key={i} position={[s.x, heightAt(s.x, s.z) + 0.5, s.z]} rotation={[0, s.rot ?? 0, 0]} />
+        <Instance key={i} position={[s.x, heightAt(s.x, s.z) + 0.52, s.z]} rotation={[0, s.rot ?? 0, 0]} />
       ))}
     </Instances>
   );
 }
 
-function Crates({ spots }: { spots: PropSpot[] }) {
+function InstancedCrates({ spots }: { spots: PropSpot[] }) {
   return (
     <Instances limit={spots.length} castShadow>
-      <boxGeometry args={[0.8, 0.8, 0.8]} />
-      <primitive object={woodMatLight} attach="material" />
+      <boxGeometry args={[0.85, 0.85, 0.85]} />
+      <primitive object={woodLight} attach="material" />
       {spots.map((s, i) => (
-        <Instance key={i} position={[s.x, heightAt(s.x, s.z) + 0.4, s.z]} rotation={[0, s.rot ?? 0, 0]} />
+        <Instance key={i} position={[s.x, heightAt(s.x, s.z) + 0.42, s.z]} rotation={[0, s.rot ?? 0, 0]} />
       ))}
     </Instances>
   );
 }
 
-function Benches({ spots }: { spots: PropSpot[] }) {
-  return (
-    <Instances limit={spots.length} castShadow>
-      <boxGeometry args={[1.6, 0.1, 0.4]} />
-      <primitive object={woodMatDark} attach="material" />
-      {spots.map((s, i) => (
-        <Instance key={i} position={[s.x, heightAt(s.x, s.z) + 0.4, s.z]} rotation={[0, s.rot ?? 0, 0]} />
-      ))}
-    </Instances>
-  );
-}
-
-function Fences({ spots }: { spots: PropSpot[] }) {
-  return (
-    <Instances limit={spots.length}>
-      <boxGeometry args={[0.1, 0.6, 0.08]} />
-      <primitive object={woodMatLight} attach="material" />
-      {spots.map((s, i) => (
-        <Instance key={i} position={[s.x, heightAt(s.x, s.z) + 0.3, s.z]} rotation={[0, s.rot ?? 0, 0]} />
-      ))}
-    </Instances>
-  );
-}
-
-function Signposts({ spots }: { spots: PropSpot[] }) {
+function PlazaBenches({ spots }: { spots: PropSpot[] }) {
   return (
     <group>
       {spots.map((s, i) => (
         <group key={i} position={[s.x, heightAt(s.x, s.z), s.z]} rotation={[0, s.rot ?? 0, 0]}>
-          <mesh position={[0, 0.8, 0]} castShadow material={woodMatDark}>
-            <cylinderGeometry args={[0.05, 0.05, 1.6, 5]} />
+          {/* Bench seat */}
+          <mesh position={[0, 0.45, 0]} castShadow material={woodMid}>
+            <boxGeometry args={[1.8, 0.1, 0.5]} />
           </mesh>
-          <mesh position={[0, 1.4, 0]} castShadow material={woodMatLight}>
-            <boxGeometry args={[0.6, 0.25, 0.04]} />
+          {/* Bench backrest */}
+          <mesh position={[0, 0.85, -0.22]} castShadow material={woodMid}>
+            <boxGeometry args={[1.8, 0.4, 0.08]} />
           </mesh>
+          {/* Iron legs */}
+          {[-0.75, 0.75].map((lx) => (
+            <mesh key={lx} position={[lx, 0.22, 0]} castShadow material={ironMat}>
+              <boxGeometry args={[0.08, 0.44, 0.45]} />
+            </mesh>
+          ))}
         </group>
       ))}
     </group>
   );
 }
 
-function Flags({ spots }: { spots: PropSpot[] }) {
-  return (
-    <group>
-      {spots.map((s, i) => (
-        <group key={i} position={[s.x, heightAt(s.x, s.z), s.z]}>
-          <mesh position={[0, 2.2, 0]} material={woodMatDark}>
-            <cylinderGeometry args={[0.04, 0.04, 4.4, 4]} />
-          </mesh>
-          <mesh position={[0.4, 3.3, 0]} rotation={[0, s.rot ?? 0, 0]}>
-            <planeGeometry args={[0.8, 0.5]} />
-            <meshStandardMaterial color="#d4af37" emissive="#d4af37" emissiveIntensity={0.25} side={2} />
-          </mesh>
-        </group>
-      ))}
-    </group>
-  );
-}
-
-function Lanterns({ spots }: { spots: PropSpot[] }) {
-  return (
-    <Instances limit={spots.length} castShadow>
-      <sphereGeometry args={[0.18, 8, 8]} />
-      <meshStandardMaterial color="#d4af37" emissive="#f3c649" emissiveIntensity={0.9} />
-      {spots.map((s, i) => (
-        <Instance key={i} position={[s.x, heightAt(s.x, s.z) + 2.6, s.z]} />
-      ))}
-    </Instances>
-  );
-}
-
-function Tents({ spots }: { spots: PropSpot[] }) {
-  return (
-    <Instances limit={spots.length} castShadow>
-      <coneGeometry args={[1.4, 1.6, 4]} />
-      <meshStandardMaterial color="#9a8a6a" roughness={0.95} flatShading />
-      {spots.map((s, i) => (
-        <Instance key={i} position={[s.x, heightAt(s.x, s.z) + 0.8, s.z]} rotation={[0, (s.rot ?? 0) + Math.PI / 4, 0]} />
-      ))}
-    </Instances>
-  );
-}
-
-/** Hanging banner — crossbar pole + rune-embroidered cloth in art-bible gold. */
-function Banners({ spots }: { spots: PropSpot[] }) {
+function KnightTrainingDummies({ spots }: { spots: PropSpot[] }) {
   return (
     <group>
       {spots.map((s, i) => (
         <group key={i} position={[s.x, heightAt(s.x, s.z), s.z]} rotation={[0, s.rot ?? 0, 0]}>
-          {/* Post */}
-          <mesh position={[0, 2, 0]} castShadow material={woodMatDark}>
-            <cylinderGeometry args={[0.06, 0.06, 4, 6]} />
+          {/* Stand post */}
+          <mesh position={[0, 1.0, 0]} castShadow material={woodDark}>
+            <cylinderGeometry args={[0.08, 0.1, 2.0, 6]} />
           </mesh>
-          {/* Crossbar */}
-          <mesh position={[0, 3.4, 0]} castShadow material={woodMatDark}>
-            <cylinderGeometry args={[0.04, 0.04, 1.6, 5]} />
-            {/* lie horizontal */}
-            <group rotation={[0, 0, Math.PI / 2]} />
+          {/* Straw torso */}
+          <mesh position={[0, 1.4, 0]} castShadow material={woodLight}>
+            <cylinderGeometry args={[0.35, 0.4, 1.0, 8]} />
           </mesh>
-          {/* Cloth — two-tone with gold stripe */}
-          <mesh position={[0, 2.5, 0.02]}>
-            <planeGeometry args={[1.2, 1.8]} />
-            <meshStandardMaterial color="#1a3b66" emissive="#1a3b66" emissiveIntensity={0.15} roughness={0.8} side={2} />
+          {/* Dummy head */}
+          <mesh position={[0, 2.05, 0]} castShadow material={woodLight}>
+            <sphereGeometry args={[0.22, 8, 8]} />
           </mesh>
-          <mesh position={[0, 2.5, 0.03]}>
-            <planeGeometry args={[1.2, 0.2]} />
-            <meshStandardMaterial color="#d4af37" emissive="#d4af37" emissiveIntensity={0.5} roughness={0.6} side={2} />
+          {/* Wooden cross-arm holding target shields */}
+          <mesh position={[0, 1.5, 0]} castShadow material={woodDark}>
+            <boxGeometry args={[1.6, 0.1, 0.1]} />
           </mesh>
         </group>
       ))}
@@ -244,35 +203,28 @@ function Banners({ spots }: { spots: PropSpot[] }) {
   );
 }
 
-/** Stone wishing well — ring of stone + wooden roof + bucket rope. */
-function Wells({ spots }: { spots: PropSpot[] }) {
+function ArcheryTargets({ spots }: { spots: PropSpot[] }) {
   return (
     <group>
       {spots.map((s, i) => (
         <group key={i} position={[s.x, heightAt(s.x, s.z), s.z]} rotation={[0, s.rot ?? 0, 0]}>
-          {/* Stone base */}
-          <mesh position={[0, 0.6, 0]} castShadow receiveShadow material={wellStoneMat}>
-            <cylinderGeometry args={[1, 1.1, 1.2, 12]} />
+          {/* Target stand */}
+          <mesh position={[0, 0.9, -0.2]} rotation={[-0.2, 0, 0]} castShadow material={woodDark}>
+            <boxGeometry args={[0.1, 1.8, 0.1]} />
           </mesh>
-          {/* Water surface inside */}
-          <mesh position={[0, 1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-            <circleGeometry args={[0.8, 16]} />
-            <meshStandardMaterial color="#1a3b66" metalness={0.5} roughness={0.2} />
+          {/* Target straw boss */}
+          <mesh position={[0, 1.2, 0]} rotation={[0, 0, 0]} castShadow>
+            <cylinderGeometry args={[0.65, 0.65, 0.2, 16]} />
+            <meshStandardMaterial color="#d4a373" roughness={0.9} />
           </mesh>
-          {/* Two roof posts */}
-          <mesh position={[-0.8, 1.6, 0]} castShadow material={woodMatDark}>
-            <cylinderGeometry args={[0.08, 0.08, 1.4, 5]} />
+          {/* Target bullseye rings */}
+          <mesh position={[0, 1.2, 0.11]}>
+            <circleGeometry args={[0.45, 16]} />
+            <meshStandardMaterial color="#e63946" />
           </mesh>
-          <mesh position={[0.8, 1.6, 0]} castShadow material={woodMatDark}>
-            <cylinderGeometry args={[0.08, 0.08, 1.4, 5]} />
-          </mesh>
-          {/* Conical thatch roof */}
-          <mesh position={[0, 2.6, 0]} castShadow material={woodMatMid}>
-            <coneGeometry args={[1.4, 0.8, 8]} />
-          </mesh>
-          {/* Bucket */}
-          <mesh position={[0, 0.9, 0]} castShadow material={woodMatDark}>
-            <cylinderGeometry args={[0.18, 0.14, 0.3, 6]} />
+          <mesh position={[0, 1.2, 0.12]}>
+            <circleGeometry args={[0.22, 16]} />
+            <meshStandardMaterial color="#ffd166" />
           </mesh>
         </group>
       ))}
@@ -280,32 +232,43 @@ function Wells({ spots }: { spots: PropSpot[] }) {
   );
 }
 
-/** Wooden cart — plank bed + two spoked wheels + cargo crate. */
-function Carts({ spots }: { spots: PropSpot[] }) {
+function WeaponRacks({ spots }: { spots: PropSpot[] }) {
   return (
     <group>
       {spots.map((s, i) => (
         <group key={i} position={[s.x, heightAt(s.x, s.z), s.z]} rotation={[0, s.rot ?? 0, 0]}>
-          {/* Bed */}
-          <mesh position={[0, 0.6, 0]} castShadow receiveShadow material={woodMatMid}>
-            <boxGeometry args={[1.6, 0.3, 2.4]} />
+          {/* Timber frame */}
+          <mesh position={[0, 0.9, 0]} castShadow material={woodDark}>
+            <boxGeometry args={[1.8, 1.6, 0.5]} />
           </mesh>
-          {/* Cargo */}
-          <mesh position={[0, 1, 0]} castShadow material={woodMatLight}>
-            <boxGeometry args={[1.2, 0.8, 1.4]} />
+          {/* Iron Halberds & Swords standing in rack */}
+          {[-0.5, 0, 0.5].map((wx, j) => (
+            <mesh key={j} position={[wx, 1.1, 0]} rotation={[0, 0, 0.1]} castShadow material={ironMat}>
+              <boxGeometry args={[0.04, 2.2, 0.04]} />
+            </mesh>
+          ))}
+        </group>
+      ))}
+    </group>
+  );
+}
+
+function BlacksmithAnvils({ spots }: { spots: PropSpot[] }) {
+  return (
+    <group>
+      {spots.map((s, i) => (
+        <group key={i} position={[s.x, heightAt(s.x, s.z), s.z]} rotation={[0, s.rot ?? 0, 0]}>
+          {/* Wooden log base */}
+          <mesh position={[0, 0.35, 0]} castShadow material={woodDark}>
+            <cylinderGeometry args={[0.45, 0.5, 0.7, 10]} />
           </mesh>
-          {/* Wheels */}
-          <mesh position={[-0.7, 0.4, 0.8]} rotation={[0, 0, Math.PI / 2]} castShadow material={woodMatDark}>
-            <torusGeometry args={[0.4, 0.1, 6, 12]} />
+          {/* Heavy Cast Iron Anvil */}
+          <mesh position={[0, 0.82, 0]} castShadow material={ironMat}>
+            <boxGeometry args={[0.8, 0.28, 0.35]} />
           </mesh>
-          <mesh position={[0.7, 0.4, 0.8]} rotation={[0, 0, Math.PI / 2]} castShadow material={woodMatDark}>
-            <torusGeometry args={[0.4, 0.1, 6, 12]} />
-          </mesh>
-          <mesh position={[-0.7, 0.4, -0.8]} rotation={[0, 0, Math.PI / 2]} castShadow material={woodMatDark}>
-            <torusGeometry args={[0.4, 0.1, 6, 12]} />
-          </mesh>
-          <mesh position={[0.7, 0.4, -0.8]} rotation={[0, 0, Math.PI / 2]} castShadow material={woodMatDark}>
-            <torusGeometry args={[0.4, 0.1, 6, 12]} />
+          {/* Anvil Horn */}
+          <mesh position={[0.45, 0.85, 0]} rotation={[0, 0, -Math.PI / 2]} castShadow material={ironMat}>
+            <coneGeometry args={[0.14, 0.35, 8]} />
           </mesh>
         </group>
       ))}
@@ -313,46 +276,122 @@ function Carts({ spots }: { spots: PropSpot[] }) {
   );
 }
 
-/** Market stall — striped cloth canopy over a post frame + counter crate. */
-const STALL_COLORS = ["#d4af37", "#c44a6a", "#2a9d8f", "#5daeff"];
-function Stalls({ spots }: { spots: PropSpot[] }) {
+const STALL_FABRICS = ["#e63946", "#457b9d", "#2a9d8f", "#e76f51", "#f4a261"];
+function MarketStalls({ spots }: { spots: PropSpot[] }) {
   return (
     <group>
       {spots.map((s, i) => {
-        const color = STALL_COLORS[i % STALL_COLORS.length];
+        const fabricColor = STALL_FABRICS[i % STALL_FABRICS.length];
         return (
           <group key={i} position={[s.x, heightAt(s.x, s.z), s.z]} rotation={[0, s.rot ?? 0, 0]}>
-            {/* Four corner posts */}
-            {[[-1, -0.8], [1, -0.8], [-1, 0.8], [1, 0.8]].map(([px, pz], j) => (
-              <mesh key={j} position={[px, 1.1, pz]} castShadow material={woodMatDark}>
-                <cylinderGeometry args={[0.06, 0.06, 2.2, 5]} />
+            {/* Counter */}
+            <mesh position={[0, 0.6, 0]} castShadow receiveShadow material={woodMid}>
+              <boxGeometry args={[2.4, 0.4, 1.2]} />
+            </mesh>
+            {/* 4 Corner Posts */}
+            {[[-1.1, -0.5], [1.1, -0.5], [-1.1, 0.5], [1.1, 0.5]].map(([px, pz], j) => (
+              <mesh key={j} position={[px, 1.25, pz]} castShadow material={woodDark}>
+                <cylinderGeometry args={[0.05, 0.05, 2.5, 6]} />
               </mesh>
             ))}
-            {/* Canopy */}
-            <mesh position={[0, 2.2, 0]} rotation={[-0.15, 0, 0]} castShadow>
-              <boxGeometry args={[2.4, 0.08, 2]} />
-              <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.2} roughness={0.7} />
+            {/* Fabric Canopy */}
+            <mesh position={[0, 2.45, 0]} rotation={[-0.12, 0, 0]} castShadow>
+              <boxGeometry args={[2.6, 0.08, 1.6]} />
+              <meshStandardMaterial color={fabricColor} emissive={fabricColor} emissiveIntensity={0.25} roughness={0.7} />
             </mesh>
-            {/* Counter */}
-            <mesh position={[0, 0.6, 0]} castShadow receiveShadow material={woodMatDark}>
-              <boxGeometry args={[2.2, 0.4, 1.4]} />
-            </mesh>
-            {/* Wares on counter (instanced spheres) */}
-            <mesh position={[-0.6, 0.9, 0]}>
-              <sphereGeometry args={[0.12, 6, 6]} />
-              <meshStandardMaterial color="#d4af37" emissive="#d4af37" emissiveIntensity={0.3} />
-            </mesh>
-            <mesh position={[0, 0.9, 0.2]}>
-              <sphereGeometry args={[0.12, 6, 6]} />
-              <meshStandardMaterial color="#c44a6a" emissive="#c44a6a" emissiveIntensity={0.2} />
-            </mesh>
-            <mesh position={[0.6, 0.9, -0.1]}>
-              <sphereGeometry args={[0.12, 6, 6]} />
-              <meshStandardMaterial color="#2a9d8f" emissive="#2a9d8f" emissiveIntensity={0.2} />
-            </mesh>
+            {/* Wares on counter */}
+            {[-0.6, 0, 0.6].map((wx, k) => (
+              <mesh key={k} position={[wx, 0.92, 0]}>
+                <sphereGeometry args={[0.14, 8, 8]} />
+                <meshStandardMaterial color={k === 0 ? "#ffd166" : k === 1 ? "#06d6a0" : "#ef476f"} emissiveIntensity={0.3} />
+              </mesh>
+            ))}
           </group>
         );
       })}
+    </group>
+  );
+}
+
+function MerchantCarts({ spots }: { spots: PropSpot[] }) {
+  return (
+    <group>
+      {spots.map((s, i) => (
+        <group key={i} position={[s.x, heightAt(s.x, s.z), s.z]} rotation={[0, s.rot ?? 0, 0]}>
+          {/* Cart Bed */}
+          <mesh position={[0, 0.6, 0]} castShadow material={woodMid}>
+            <boxGeometry args={[1.6, 0.4, 2.4]} />
+          </mesh>
+          {/* Spoked Wheels */}
+          {[-0.85, 0.85].map((wx) => (
+            <mesh key={wx} position={[wx, 0.45, 0]} rotation={[0, 0, Math.PI / 2]} castShadow material={woodDark}>
+              <torusGeometry args={[0.45, 0.08, 6, 12]} />
+            </mesh>
+          ))}
+          {/* Cargo Crate inside cart */}
+          <mesh position={[0, 1.0, 0]} castShadow material={woodLight}>
+            <boxGeometry args={[1.2, 0.7, 1.6]} />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  );
+}
+
+function NoticeBoards({ spots }: { spots: PropSpot[] }) {
+  return (
+    <group>
+      {spots.map((s, i) => (
+        <group key={i} position={[s.x, heightAt(s.x, s.z), s.z]} rotation={[0, s.rot ?? 0, 0]}>
+          {/* Timber Posts */}
+          {[-0.7, 0.7].map((px) => (
+            <mesh key={px} position={[px, 1.2, 0]} castShadow material={woodDark}>
+              <cylinderGeometry args={[0.08, 0.08, 2.4, 6]} />
+            </mesh>
+          ))}
+          {/* Wooden Board */}
+          <mesh position={[0, 1.4, 0]} castShadow material={woodMid}>
+            <boxGeometry args={[1.6, 1.2, 0.12]} />
+          </mesh>
+          {/* Pinned Parchments */}
+          {[-0.4, 0.3].map((px, j) => (
+            <mesh key={j} position={[px, 1.4 + j * 0.2, 0.07]}>
+              <planeGeometry args={[0.35, 0.45]} />
+              <meshStandardMaterial color="#f4ebd9" roughness={0.9} />
+            </mesh>
+          ))}
+        </group>
+      ))}
+    </group>
+  );
+}
+
+function WishingWells({ spots }: { spots: PropSpot[] }) {
+  return (
+    <group>
+      {spots.map((s, i) => (
+        <group key={i} position={[s.x, heightAt(s.x, s.z), s.z]} rotation={[0, s.rot ?? 0, 0]}>
+          {/* Stone Well Wall */}
+          <mesh position={[0, 0.6, 0]} castShadow receiveShadow material={stoneMat}>
+            <cylinderGeometry args={[1.2, 1.3, 1.2, 16]} />
+          </mesh>
+          {/* Water Surface inside */}
+          <mesh position={[0, 0.95, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <circleGeometry args={[0.95, 16]} />
+            <meshStandardMaterial color="#0077b6" emissive="#00b4d8" emissiveIntensity={0.4} metalness={0.8} roughness={0.1} />
+          </mesh>
+          {/* Two Timber Posts */}
+          {[-1.0, 1.0].map((px) => (
+            <mesh key={px} position={[px, 1.8, 0]} castShadow material={woodDark}>
+              <cylinderGeometry args={[0.09, 0.09, 1.6, 6]} />
+            </mesh>
+          ))}
+          {/* Conical Roof */}
+          <mesh position={[0, 2.9, 0]} castShadow material={woodMid}>
+            <coneGeometry args={[1.6, 0.9, 8]} />
+          </mesh>
+        </group>
+      ))}
     </group>
   );
 }

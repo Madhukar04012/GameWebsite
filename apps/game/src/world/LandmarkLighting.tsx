@@ -20,26 +20,36 @@ interface LightSpot {
 }
 
 const LIGHT_SPOTS: LightSpot[] = [
-  // South Gate Braziers
-  { x: -5, z: 22, yOffset: 4.5, color: "#ff8833", intensity: 12, distance: 22 },
-  { x: 5, z: 22, yOffset: 4.5, color: "#ff8833", intensity: 12, distance: 22 },
+  // South Gate Entrance Portals
+  { x: -4.5, z: -46, yOffset: 4.5, color: "#ff8833", intensity: 14, distance: 24 },
+  { x: 4.5, z: -46, yOffset: 4.5, color: "#ff8833", intensity: 14, distance: 24 },
 
-  // Market District Lanterns
-  { x: 22, z: 6, yOffset: 3.5, color: "#ffa044", intensity: 8, distance: 18 },
-  { x: 26, z: 12, yOffset: 3.5, color: "#ffa044", intensity: 8, distance: 18 },
+  // Central Royal Plaza Sunwell
+  { x: 0, z: -4, yOffset: 4.0, color: "#ffd166", intensity: 12, distance: 22 },
 
-  // Central Plaza Fountain & Monument
-  { x: 0, z: -4, yOffset: 4.0, color: "#d4af37", intensity: 10, distance: 20 },
+  // Royal High Palace Portico
+  { x: 0, z: -28, yOffset: 6.0, color: "#ffd700", intensity: 16, distance: 28 },
 
-  // Watchtower Corner Braziers
-  { x: -38, z: -38, yOffset: 8.0, color: "#ff7722", intensity: 15, distance: 25 },
-  { x: 38, z: -38, yOffset: 8.0, color: "#ff7722", intensity: 15, distance: 25 },
-  { x: -38, z: 38, yOffset: 8.0, color: "#ff7722", intensity: 15, distance: 25 },
-  { x: 38, z: 38, yOffset: 8.0, color: "#ff7722", intensity: 15, distance: 25 },
+  // Cathedral of Light Azure Rose Window
+  { x: 28, z: 15, yOffset: 12.0, color: "#00b4d8", intensity: 18, distance: 30 },
 
-  // Ancient Shrines Magic Glow
-  { x: -75, z: -40, yOffset: 3.0, color: "#00e5ff", intensity: 14, distance: 20 },
-  { x: 80, z: -60, yOffset: 3.0, color: "#00e5ff", intensity: 14, distance: 20 },
+  // Grand Market Bazaar
+  { x: 24, z: 4, yOffset: 3.8, color: "#ffaa44", intensity: 10, distance: 20 },
+
+  // Sleeping Giant Inn
+  { x: 36, z: 10, yOffset: 4.0, color: "#ff9f1c", intensity: 12, distance: 22 },
+
+  // Adventurer's Guildhall
+  { x: -30, z: -10, yOffset: 4.5, color: "#ffd166", intensity: 12, distance: 22 },
+
+  // Great Forge Hearth Molten Crucible
+  { x: -36, z: 26, yOffset: 3.5, color: "#ff4800", intensity: 20, distance: 26 },
+
+  // Defensive Corner Fortress Bastions
+  { x: -44, z: -44, yOffset: 14.0, color: "#ff7722", intensity: 16, distance: 28 },
+  { x: 44, z: -44, yOffset: 14.0, color: "#ff7722", intensity: 16, distance: 28 },
+  { x: -44, z: 44, yOffset: 14.0, color: "#ff7722", intensity: 16, distance: 28 },
+  { x: 44, z: 44, yOffset: 14.0, color: "#ff7722", intensity: 16, distance: 28 },
 ];
 
 export function LandmarkLighting() {

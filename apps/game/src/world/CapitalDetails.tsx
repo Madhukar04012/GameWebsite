@@ -1,15 +1,17 @@
 import { useMemo } from "react";
-import { CITY_LAYOUT } from "@legend/shared";
+import * as THREE from "three";
+import { CITY_LAYOUT, ROADS } from "@legend/shared";
 import { heightAt } from "@legend/engine";
 import { createFabricMaterial } from "../materials/createFabricMaterial";
 import { createMetalMaterial } from "../materials/createMetalMaterial";
 import { createStoneMaterial } from "../materials/createStoneMaterial";
 import { createWoodMaterial } from "../materials/createWoodMaterial";
 
-const gardenStone = createStoneMaterial({ stoneColor: "#d8cab6", roughness: 0.84, seed: [18, 7] });
+const gardenStone = createStoneMaterial({ stoneColor: "#e6dec8", roughness: 0.82, seed: [18, 7] });
 const gardenWood = createWoodMaterial({ woodColor: "#3b2418", roughness: 0.9 });
-const gardenLeaf = createStoneMaterial({ stoneColor: "#356044", roughness: 0.95, seed: [4, 12] });
-const gold = createMetalMaterial({ kind: "gold", emissive: "#d4af37", emissiveIntensity: 0.35 });
+const gardenLeaf = createStoneMaterial({ stoneColor: "#2d6a4f", roughness: 0.92, seed: [4, 12] });
+const gold = createMetalMaterial({ kind: "gold", emissive: "#d4af37", emissiveIntensity: 0.5 });
+const marble = createStoneMaterial({ stoneColor: "#ffffff", roughness: 0.4, seed: [5, 5] });
 
 const DISTRICT_COLORS: Record<string, string> = {
   castle: "#b9a77a",
@@ -23,83 +25,197 @@ const DISTRICT_COLORS: Record<string, string> = {
   harbor: "#5ca6b9",
 };
 
-/** High-signal Capital details: district thresholds, royal gardens, and skyline pennants. */
+/**
+ * CapitalDetails — high-signal environmental dressing:
+ * Royal Citadel Terraced Gardens, Street Gaslight Lanterns, District Threshold Monoliths,
+ * Plaza Balustrades, and Landscaped Tree Planters.
+ */
 export function CapitalDetails() {
   return (
     <group>
-      <RoyalGardens />
-      {CITY_LAYOUT.filter((district) => district.name !== "central_plaza").map((district) => (
-        <DistrictMarker key={district.name} district={district} />
+      {/* 1. Royal Citadel Terraced Gardens */}
+      <RoyalTerraceGardens />
+
+      {/* 2. District Threshold Heraldry Monoliths */}
+      {CITY_LAYOUT.filter((d) => d.name !== "central_plaza").map((district) => (
+        <DistrictHeraldryMonolith key={district.name} district={district} />
       ))}
+
+      {/* 3. Street Gaslight Lampposts along Main Avenues */}
+      <StreetGaslights />
+
+      {/* 4. Central Plaza Perimeter Balustrade */}
+      <PlazaBalustrade />
     </group>
   );
 }
 
-function DistrictMarker({ district }: { district: (typeof CITY_LAYOUT)[number] }) {
+/** District Boundary Heraldry Monolith */
+function DistrictHeraldryMonolith({ district }: { district: (typeof CITY_LAYOUT)[number] }) {
   const color = DISTRICT_COLORS[district.name] ?? district.color;
   const y = heightAt(district.center.x, district.center.z) + 0.04;
-  const banner = useMemo(
-    () => createFabricMaterial({ kind: "banner", color, roughness: 0.88, side: 2, seed: [district.center.x, district.center.z] }),
+  const bannerMat = useMemo(
+    () => createFabricMaterial({ kind: "banner", color, roughness: 0.85, side: 2, seed: [district.center.x, district.center.z] }),
     [color, district.center.x, district.center.z],
   );
 
   return (
     <group position={[district.center.x, y, district.center.z]}>
-      <mesh position={[0, 0.28, 0]} castShadow receiveShadow material={gardenStone}>
-        <cylinderGeometry args={[0.7, 0.82, 0.5, 8]} />
+      {/* Stone Pedestal */}
+      <mesh position={[0, 0.35, 0]} castShadow receiveShadow material={gardenStone}>
+        <cylinderGeometry args={[0.75, 0.9, 0.7, 8]} />
       </mesh>
-      <mesh position={[0, 1.65, 0]} castShadow material={gardenWood}>
-        <cylinderGeometry args={[0.07, 0.09, 2.5, 6]} />
+      {/* Polished Timber Pole */}
+      <mesh position={[0, 2.0, 0]} castShadow material={gardenWood}>
+        <cylinderGeometry args={[0.08, 0.1, 3.2, 8]} />
       </mesh>
-      <mesh position={[0.04, 2.15, 0]} rotation={[0, 0.04, 0]} material={banner}>
-        <planeGeometry args={[0.9, 1.1]} />
+      {/* Heraldic Banner */}
+      <mesh position={[0.04, 2.6, 0]} rotation={[0, 0.05, 0]} material={bannerMat}>
+        <planeGeometry args={[1.1, 1.6]} />
       </mesh>
-      <mesh position={[0, 2.72, 0]} castShadow material={gold}>
-        <octahedronGeometry args={[0.13, 0]} />
+      {/* Gold Octahedron Finial */}
+      <mesh position={[0, 3.65, 0]} castShadow material={gold}>
+        <octahedronGeometry args={[0.18, 0]} />
       </mesh>
     </group>
   );
 }
 
-function RoyalGardens() {
+/** Royal Citadel Terraced Gardens */
+function RoyalTerraceGardens() {
   const hedges = useMemo(
     () => [
-      [-24, -25, 12, 0.8], [24, -25, 12, 0.8],
-      [-24, -25, 0.8, 12], [24, -25, 0.8, 12],
-      [-17, -25, 0.8, 12], [17, -25, 0.8, 12],
+      [-22, -26, 12, 0.9], [22, -26, 12, 0.9],
+      [-22, -26, 0.9, 12], [22, -26, 0.9, 12],
+      [-16, -26, 0.9, 12], [16, -26, 0.9, 12],
     ] as [number, number, number, number][],
     [],
   );
-  const trees = useMemo(
-    () => [-20, -12, 12, 20].map((x, i) => ({ x, z: -22 + (i % 2) * 5, scale: 0.9 + (i % 3) * 0.15 })),
+
+  const gardenCypress = useMemo(
+    () => [
+      { x: -18, z: -22, s: 1.1 },
+      { x: 18, z: -22, s: 1.1 },
+      { x: -18, z: -30, s: 1.2 },
+      { x: 18, z: -30, s: 1.2 },
+    ],
     [],
   );
+
   return (
     <group>
-      <mesh position={[0, heightAt(0, -25) + 0.015, -25]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow material={gardenStone}>
-        <planeGeometry args={[52, 18]} />
+      {/* Garden Promenade Ground */}
+      <mesh position={[0, heightAt(0, -26) + 0.02, -26]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow material={gardenStone}>
+        <planeGeometry args={[48, 16]} />
       </mesh>
+
+      {/* Sculpted Boxwood Hedges */}
       {hedges.map(([x, z, w, d], i) => (
-        <mesh key={`hedge-${i}`} position={[x, heightAt(x, z) + 0.55, z]} castShadow receiveShadow material={gardenLeaf}>
-          <boxGeometry args={[w, 1.1, d]} />
+        <mesh key={`hedge-${i}`} position={[x, heightAt(x, z) + 0.6, z]} castShadow receiveShadow material={gardenLeaf}>
+          <boxGeometry args={[w, 1.2, d]} />
         </mesh>
       ))}
-      {trees.map((tree, i) => (
-        <group key={`garden-tree-${i}`} position={[tree.x, heightAt(tree.x, tree.z), tree.z]} scale={tree.scale}>
-          <mesh position={[0, 2.2, 0]} castShadow material={gardenWood}>
-            <cylinderGeometry args={[0.22, 0.34, 4.4, 8]} />
+
+      {/* Sculpted Cypress Trees */}
+      {gardenCypress.map((t, i) => (
+        <group key={`cypress-${i}`} position={[t.x, heightAt(t.x, t.z), t.z]} scale={t.s}>
+          <mesh position={[0, 1.2, 0]} castShadow material={gardenWood}>
+            <cylinderGeometry args={[0.15, 0.22, 2.4, 8]} />
           </mesh>
-          <mesh position={[0, 4.65, 0]} castShadow material={gardenLeaf}>
-            <icosahedronGeometry args={[1.5, 1]} />
+          <mesh position={[0, 3.8, 0]} castShadow material={gardenLeaf}>
+            <coneGeometry args={[1.1, 4.5, 8]} />
           </mesh>
         </group>
       ))}
-      <mesh position={[0, heightAt(0, -25) + 0.3, -25]} castShadow receiveShadow material={gardenStone}>
-        <cylinderGeometry args={[2.5, 2.8, 0.6, 12]} />
-      </mesh>
-      <mesh position={[0, heightAt(0, -25) + 0.66, -25]} castShadow material={gold}>
-        <cylinderGeometry args={[1.9, 1.9, 0.08, 24]} />
-      </mesh>
+
+      {/* Garden Reflecting Pool */}
+      <group position={[0, heightAt(0, -26), -26]}>
+        <mesh position={[0, 0.35, 0]} castShadow receiveShadow material={marble}>
+          <cylinderGeometry args={[3.2, 3.6, 0.7, 16]} />
+        </mesh>
+        <mesh position={[0, 0.72, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <circleGeometry args={[2.8, 16]} />
+          <meshStandardMaterial color="#0077b6" emissive="#00b4d8" emissiveIntensity={0.4} metalness={0.8} roughness={0.1} />
+        </mesh>
+        <mesh position={[0, 1.5, 0]} castShadow material={gold}>
+          <sphereGeometry args={[0.4, 12, 12]} />
+        </mesh>
+      </group>
+    </group>
+  );
+}
+
+/** Street Gaslight Lampposts along Main Avenues */
+function StreetGaslights() {
+  const lampSpots = useMemo(() => [
+    // South Imperial High Avenue
+    { x: -5, z: -40 }, { x: 5, z: -40 },
+    { x: -5, z: -28 }, { x: 5, z: -28 },
+    { x: -5, z: -16 }, { x: 5, z: -16 },
+    // Trans-Plaza Boulevard (East-West)
+    { x: -22, z: -6 }, { x: 22, z: -6 },
+    { x: -36, z: -6 }, { x: 36, z: -6 },
+    // North Avenue
+    { x: -5, z: 8 }, { x: 5, z: 8 },
+    { x: -5, z: 22 }, { x: 5, z: 22 },
+    { x: -5, z: 34 }, { x: 5, z: 34 },
+  ], []);
+
+  return (
+    <group>
+      {lampSpots.map((spot, i) => {
+        const y = heightAt(spot.x, spot.z);
+        return (
+          <group key={`lamp-${i}`} position={[spot.x, y, spot.z]}>
+            {/* Wrought Iron Post */}
+            <mesh position={[0, 1.4, 0]} castShadow material={gardenWood}>
+              <cylinderGeometry args={[0.08, 0.12, 2.8, 8]} />
+            </mesh>
+            {/* Lantern Bracket Arm */}
+            <mesh position={[0, 2.7, 0]} castShadow material={gold}>
+              <boxGeometry args={[0.4, 0.08, 0.08]} />
+            </mesh>
+            {/* Glass Lantern Housing */}
+            <mesh position={[0.2, 2.5, 0]} castShadow>
+              <cylinderGeometry args={[0.16, 0.12, 0.35, 6]} />
+              <meshStandardMaterial color="#ffd700" emissive="#ffb703" emissiveIntensity={1.8} />
+            </mesh>
+            {/* Warm Volumetric Point Light */}
+            <pointLight position={[0.2, 2.5, 0]} color="#ffb703" intensity={3.5} distance={7} decay={2} />
+          </group>
+        );
+      })}
+    </group>
+  );
+}
+
+/** Central Plaza Circular Balustrade */
+function PlazaBalustrade() {
+  const posts = useMemo(() => {
+    const arr: { x: number; z: number; rot: number }[] = [];
+    const r = 13.5;
+    const count = 16;
+    for (let i = 0; i < count; i++) {
+      // Leave gaps for the 4 cardinal road avenues
+      if (i % 4 === 0) continue;
+      const ang = (i / count) * Math.PI * 2;
+      arr.push({ x: Math.cos(ang) * r, z: -4 + Math.sin(ang) * r, rot: ang });
+    }
+    return arr;
+  }, []);
+
+  return (
+    <group>
+      {posts.map((p, i) => (
+        <group key={`plaza-post-${i}`} position={[p.x, heightAt(p.x, p.z), p.z]}>
+          <mesh position={[0, 0.45, 0]} castShadow material={marble}>
+            <cylinderGeometry args={[0.22, 0.26, 0.9, 8]} />
+          </mesh>
+          <mesh position={[0, 0.95, 0]} castShadow material={gold}>
+            <sphereGeometry args={[0.15, 8, 8]} />
+          </mesh>
+        </group>
+      ))}
     </group>
   );
 }

@@ -1,8 +1,8 @@
 import { useMemo, useRef } from "react";
-import { Instances, Instance, Sparkles, Text } from "@react-three/drei";
+import { Sparkles, Text } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { Group, Mesh, Vector3 } from "three";
+import { Mesh } from "three";
 import { heightAt } from "@legend/engine";
 import { createStoneMaterial } from "../materials/createStoneMaterial";
 import { createWoodMaterial } from "../materials/createWoodMaterial";
@@ -10,79 +10,124 @@ import { createMetalMaterial } from "../materials/createMetalMaterial";
 import { createGlassMaterial } from "../materials/createGlassMaterial";
 import { createFabricMaterial } from "../materials/createFabricMaterial";
 
-const stone = createStoneMaterial({ stoneColor: "#d8cab6", roughness: 0.86, seed: [12, 4] });
-const darkStone = createStoneMaterial({ stoneColor: "#4a4652", roughness: 0.92, seed: [2, 9] });
-const wood = createWoodMaterial({ woodColor: "#4a2e1c", roughness: 0.9 });
+const stone = createStoneMaterial({ stoneColor: "#f0e6d2", roughness: 0.85, seed: [12, 4] });
+const darkStone = createStoneMaterial({ stoneColor: "#3e3a46", roughness: 0.90, seed: [2, 9] });
+const marble = createStoneMaterial({ stoneColor: "#ffffff", roughness: 0.45, metalness: 0.1, seed: [15, 8] });
+const wood = createWoodMaterial({ woodColor: "#4a2e1c", roughness: 0.88 });
+const darkWood = createWoodMaterial({ woodColor: "#281810", roughness: 0.92 });
 const gold = createMetalMaterial({ kind: "gold", seed: [90, 1] });
-const silver = createMetalMaterial({ kind: "silver", seed: [90, 2] });
-const stainedGlass = createGlassMaterial({ kind: "stained", color: 0x8844aa, opacity: 0.8, seed: [90, 3] });
-const bannerCloth = createFabricMaterial({ kind: "banner", color: "#d4af37", seed: [90, 4] });
+const bronze = createMetalMaterial({ kind: "bronze", seed: [90, 2] });
+const bannerCloth = createFabricMaterial({ kind: "banner", color: "#b22222", seed: [90, 4] });
+const blueBannerCloth = createFabricMaterial({ kind: "banner", color: "#1a3b66", seed: [90, 5] });
 
 /**
- * CityLandmarks — hero silhouettes for screenshot recognition.
- * Sunwell fountain, Oathkeeper statue, Heartwood tree, Guild monument,
- * Royal arch, and gold-banner watchtowers.
+ * Flagship Capital Landmarks — iconic hero structures providing recognizable silhouettes
+ * and rich spatial anchors across the city.
  */
 export function CityLandmarks() {
   return (
     <group>
+      {/* 1. Sovereign Seat of Solaria */}
       <RoyalHighPalace position={[0, heightAt(0, -36), -36]} />
+
+      {/* 2. Gothic Cathedral */}
       <CathedralOfLight position={[28, heightAt(28, 15), 15]} />
+
+      {/* 3. Central Plaza Navigational Anchor */}
       <SunwellFountain position={[0, heightAt(0, -4), -4]} />
+
+      {/* 4. Oathkeeper Knight Monument */}
       <OathkeeperStatue position={[0, heightAt(0, -22), -22]} />
-      <HeartwoodTree position={[-25, heightAt(-25, 12), 12]} />
-      <GuildMonument position={[-32, heightAt(-32, -4), -4]} />
+
+      {/* 5. Heartwood Ancient Tree of Solaria */}
+      <HeartwoodTree position={[-26, heightAt(-26, -26), -26]} />
+
+      {/* 6. Adventurer's Guildhall Monument */}
+      <GuildhallMonument position={[-32, heightAt(-32, -4), -4]} />
+
+      {/* 7. Royal Arch of Triumph */}
       <RoyalArch position={[0, heightAt(0, -18), -18]} />
-      <Watchtowers />
+
+      {/* 8. Master Foundry Forge Hearth */}
+      <GreatForgeHearth position={[-42, heightAt(-42, 28), 28]} />
+
+      {/* 9. Defensive Corner Fortress Bastions */}
+      <FortressBastions />
     </group>
   );
 }
 
-/** Grand Royal High Palace — Central seat of the Capital Kingdom */
+/** Grand Royal High Palace — Sovereign seat of the Capital Kingdom */
 function RoyalHighPalace({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
+      {/* Palace Foundation Terrace */}
+      <mesh position={[0, 1.5, 0]} castShadow receiveShadow material={stone}>
+        <boxGeometry args={[32, 3, 26]} />
+      </mesh>
+
       {/* Main Palace Keep */}
-      <mesh position={[0, 9, 0]} castShadow receiveShadow material={stone}>
-        <boxGeometry args={[18, 18, 14]} />
+      <mesh position={[0, 11, 0]} castShadow receiveShadow material={marble}>
+        <boxGeometry args={[20, 16, 16]} />
       </mesh>
-      {/* Upper Royal Tier */}
-      <mesh position={[0, 21, 0]} castShadow receiveShadow material={stone}>
-        <boxGeometry args={[12, 6, 10]} />
+
+      {/* Upper Sovereign Royal Tier */}
+      <mesh position={[0, 22, 0]} castShadow receiveShadow material={marble}>
+        <boxGeometry args={[14, 8, 12]} />
       </mesh>
-      {/* Central Grand Spire */}
-      <mesh position={[0, 27, 0]} castShadow material={gold}>
-        <coneGeometry args={[4, 9, 8]} />
+
+      {/* Central Soaring Gilded Spire */}
+      <mesh position={[0, 29, 0]} castShadow material={gold}>
+        <coneGeometry args={[4.5, 12, 8]} />
       </mesh>
-      {/* 4 Corner Towers */}
-      {[-8.5, 8.5].flatMap((cx) =>
-        [-6.5, 6.5].map((cz, i) => (
+      <mesh position={[0, 35.5, 0]} castShadow>
+        <sphereGeometry args={[0.7, 12, 12]} />
+        <meshStandardMaterial color="#ffd700" emissive="#d4af37" emissiveIntensity={1.2} />
+      </mesh>
+
+      {/* 4 Corner Cylindrical Towers with Spired Turrets */}
+      {[-9.5, 9.5].flatMap((cx) =>
+        [-7.5, 7.5].map((cz) => (
           <group key={`ptower-${cx}-${cz}`} position={[cx, 0, cz]}>
-            <mesh position={[0, 12, 0]} castShadow receiveShadow material={darkStone}>
-              <cylinderGeometry args={[2.2, 2.5, 24, 8]} />
+            <mesh position={[0, 13, 0]} castShadow receiveShadow material={darkStone}>
+              <cylinderGeometry args={[2.5, 2.8, 26, 8]} />
             </mesh>
-            <mesh position={[0, 26, 0]} castShadow material={gold}>
-              <coneGeometry args={[2.5, 6, 8]} />
+            <mesh position={[0, 28, 0]} castShadow material={gold}>
+              <coneGeometry args={[2.9, 7, 8]} />
             </mesh>
           </group>
         ))
       )}
-      {/* Grand Entrance Portico */}
-      <mesh position={[0, 3.5, 7.5]} castShadow material={darkStone}>
-        <boxGeometry args={[8, 7, 3]} />
+
+      {/* Grand Arched Entrance Portico */}
+      <mesh position={[0, 5, 8.8]} castShadow material={darkStone}>
+        <boxGeometry args={[10, 8, 3.5]} />
       </mesh>
+      {/* Entrance Arch Portal */}
+      <mesh position={[0, 4.5, 10.6]} rotation={[0, 0, 0]}>
+        <planeGeometry args={[4, 6]} />
+        <meshStandardMaterial color="#0d0d18" />
+      </mesh>
+
       {/* Emissive Rose Window */}
-      <mesh position={[0, 14, 7.05]} material={new THREE.MeshStandardMaterial({ color: "#ffb703", emissive: "#fb8500", emissiveIntensity: 1.8 })}>
-        <circleGeometry args={[2.4, 16]} />
+      <mesh position={[0, 16, 8.08]} material={new THREE.MeshStandardMaterial({ color: "#ffb703", emissive: "#fb8500", emissiveIntensity: 2.2 })}>
+        <circleGeometry args={[2.8, 24]} />
       </mesh>
-      {/* Royal Red Banners */}
-      {[-3, 3].map((bx) => (
-        <mesh key={bx} position={[bx, 8, 7.2]} material={bannerCloth}>
-          <planeGeometry args={[1.6, 5]} />
+
+      {/* Royal Velvet Banners */}
+      {[-4, 4].map((bx) => (
+        <mesh key={bx} position={[bx, 9, 8.2]} material={bannerCloth}>
+          <planeGeometry args={[1.8, 6]} />
         </mesh>
       ))}
-      <Sparkles count={30} scale={[20, 25, 16]} position={[0, 15, 0]} size={3.5} speed={0.3} color="#ffd166" />
-      <Text position={[0, 33, 0]} fontSize={1.3} color="#f4a261" anchorX="center">ROYAL HIGH PALACE</Text>
+
+      {/* Golden Balcony Balustrade */}
+      <mesh position={[0, 19, 8.2]} castShadow material={gold}>
+        <boxGeometry args={[8, 0.9, 1.2]} />
+      </mesh>
+
+      <Sparkles count={40} scale={[24, 30, 20]} position={[0, 18, 0]} size={4} speed={0.4} color="#ffd166" />
+      <Text position={[0, 38, 0]} fontSize={1.4} color="#f4a261" anchorX="center">ROYAL HIGH PALACE OF SOLARIA</Text>
     </group>
   );
 }
@@ -92,210 +137,284 @@ function CathedralOfLight({ position }: { position: [number, number, number] }) 
   return (
     <group position={position} rotation={[0, -Math.PI / 4, 0]}>
       {/* Main Cathedral Nave */}
-      <mesh position={[0, 7, 0]} castShadow receiveShadow material={stone}>
-        <boxGeometry args={[10, 14, 20]} />
+      <mesh position={[0, 8, 0]} castShadow receiveShadow material={stone}>
+        <boxGeometry args={[12, 16, 24]} />
       </mesh>
-      {/* Vaulted Steep Roof */}
-      <mesh position={[0, 16, 0]} castShadow material={darkStone}>
-        <coneGeometry args={[7, 6, 4]} />
+
+      {/* Steep Slate Roof */}
+      <mesh position={[0, 18, 0]} rotation={[0, Math.PI / 4, 0]} castShadow material={darkStone}>
+        <coneGeometry args={[13, 8, 4]} />
       </mesh>
-      {/* Soaring Bell Tower */}
-      <mesh position={[0, 15, 9]} castShadow receiveShadow material={stone}>
-        <boxGeometry args={[5, 30, 5]} />
+
+      {/* Twin Soaring Bell Towers */}
+      {[-5, 5].map((tx) => (
+        <group key={`bell-tower-${tx}`} position={[tx, 0, 11]}>
+          <mesh position={[0, 17, 0]} castShadow receiveShadow material={stone}>
+            <boxGeometry args={[4.5, 34, 4.5]} />
+          </mesh>
+          <mesh position={[0, 37, 0]} castShadow material={gold}>
+            <coneGeometry args={[2.8, 9, 8]} />
+          </mesh>
+          {/* Bell Arch Openings */}
+          <mesh position={[0, 28, 2.3]} material={new THREE.MeshStandardMaterial({ color: "#0a0a14" })}>
+            <planeGeometry args={[1.8, 3.5]} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* Glowing Stained Glass Clerestory Rose Window */}
+      <mesh position={[0, 12, 12.08]} material={new THREE.MeshStandardMaterial({ color: "#00b4d8", emissive: "#0077b6", emissiveIntensity: 2.4 })}>
+        <circleGeometry args={[2.4, 24]} />
       </mesh>
-      <mesh position={[0, 33, 9]} castShadow material={gold}>
-        <coneGeometry args={[3.2, 8, 8]} />
-      </mesh>
-      {/* Glowing Stained Glass Clerestory Windows */}
-      <mesh position={[0, 9, 10.05]} material={new THREE.MeshStandardMaterial({ color: "#00b4d8", emissive: "#0077b6", emissiveIntensity: 2.0 })}>
-        <circleGeometry args={[1.8, 16]} />
-      </mesh>
-      {/* Flying Buttresses */}
-      {[-6, 6].map((bx) => (
+
+      {/* Flying Buttresses along the Nave */}
+      {[-7.5, 7.5].map((bx) => (
         <group key={bx} position={[bx, 0, 0]}>
-          {[-6, 0, 6].map((bz) => (
-            <mesh key={bz} position={[0, 6, bz]} rotation={[0, 0, bx > 0 ? 0.3 : -0.3]} castShadow material={stone}>
-              <boxGeometry args={[0.8, 12, 1]} />
+          {[-8, -2, 4].map((bz) => (
+            <mesh key={bz} position={[0, 8, bz]} rotation={[0, 0, bx > 0 ? 0.35 : -0.35]} castShadow material={stone}>
+              <boxGeometry args={[0.9, 15, 1.2]} />
             </mesh>
           ))}
         </group>
       ))}
-      <Sparkles count={25} scale={[12, 20, 20]} position={[0, 14, 0]} size={3.5} speed={0.4} color="#90e0ef" />
-      <Text position={[0, 38, 9]} fontSize={1.2} color="#90e0ef" anchorX="center">CATHEDRAL OF LIGHT</Text>
+
+      <Sparkles count={35} scale={[16, 24, 24]} position={[0, 16, 0]} size={4} speed={0.4} color="#90e0ef" />
+      <Text position={[0, 43, 11]} fontSize={1.3} color="#90e0ef" anchorX="center">GRAND CATHEDRAL OF LIGHT</Text>
     </group>
   );
 }
 
+/** The Sunwell & Central Plaza */
 function SunwellFountain({ position }: { position: [number, number, number] }) {
   const water = useRef<Mesh>(null);
   useFrame(({ clock }) => {
-    if (water.current) water.current.rotation.y = clock.elapsedTime * 0.3;
+    if (water.current) water.current.rotation.y = clock.elapsedTime * 0.35;
   });
+
   return (
     <group position={position}>
-      {/* Basin */}
-      <mesh position={[0, 0.25, 0]} castShadow receiveShadow material={stone}>
-        <cylinderGeometry args={[4.2, 4.6, 0.5, 32]} />
+      {/* Outer Stepped Marble Basin */}
+      <mesh position={[0, 0.3, 0]} castShadow receiveShadow material={marble}>
+        <cylinderGeometry args={[5.2, 5.8, 0.6, 32]} />
       </mesh>
-      {/* Water surface — animated rotation */}
-      <mesh position={[0, 0.54, 0]} ref={water}>
-        <cylinderGeometry args={[3.65, 3.65, 0.07, 32]} />
-        <meshStandardMaterial color="#257da7" emissive="#5daeff" emissiveIntensity={0.35} metalness={0.55} roughness={0.18} />
+      {/* Inner Tier Basin */}
+      <mesh position={[0, 0.8, 0]} castShadow receiveShadow material={marble}>
+        <cylinderGeometry args={[3.2, 3.6, 0.6, 24]} />
       </mesh>
-      {/* Central column */}
-      <mesh position={[0, 1.5, 0]} castShadow material={stone}>
-        <cylinderGeometry args={[0.7, 1.05, 2.1, 12]} />
+
+      {/* Rotating Water Surface */}
+      <mesh position={[0, 1.05, 0]} ref={water}>
+        <cylinderGeometry args={[3.0, 3.0, 0.08, 24]} />
+        <meshStandardMaterial color="#0077b6" emissive="#00b4d8" emissiveIntensity={0.5} metalness={0.8} roughness={0.15} />
       </mesh>
-      {/* Golden orb */}
-      <mesh position={[0, 2.8, 0]} castShadow>
-        <sphereGeometry args={[0.48, 12, 12]} />
-        <meshStandardMaterial color="#d4af37" metalness={0.75} roughness={0.25} emissive="#d4af37" emissiveIntensity={0.6} />
+
+      {/* Central Solar Column */}
+      <mesh position={[0, 2.2, 0]} castShadow material={marble}>
+        <cylinderGeometry args={[0.8, 1.2, 2.8, 12]} />
       </mesh>
-      {/* Water jets */}
+
+      {/* Golden Solar Sphere */}
+      <mesh position={[0, 4.0, 0]} castShadow>
+        <sphereGeometry args={[0.7, 16, 16]} />
+        <meshStandardMaterial color="#ffd700" emissive="#ffb703" emissiveIntensity={1.5} metalness={0.9} roughness={0.2} />
+      </mesh>
+
+      {/* Four Gilded Water Jets */}
       {[0, Math.PI / 2, Math.PI, Math.PI * 1.5].map((r) => (
-        <mesh key={r} position={[Math.sin(r) * 1.6, 2.1, Math.cos(r) * 1.6]} rotation={[0, r, 0]}>
-          <coneGeometry args={[0.1, 1.8, 6]} />
-          <meshBasicMaterial color="#8ed8ff" transparent opacity={0.55} />
+        <mesh key={r} position={[Math.sin(r) * 2.0, 2.6, Math.cos(r) * 2.0]} rotation={[0, r, 0]}>
+          <coneGeometry args={[0.12, 2.2, 6]} />
+          <meshBasicMaterial color="#90e0ef" transparent opacity={0.65} />
         </mesh>
       ))}
-      <Sparkles count={24} scale={[7, 4, 7]} size={3} speed={0.45} color="#d4af37" />
-      <Text position={[0, 4.2, 0]} fontSize={0.42} color="#d4af37" anchorX="center">THE SUNWELL</Text>
+
+      <Sparkles count={30} scale={[8, 5, 8]} size={3.5} speed={0.5} color="#ffd166" />
+      <Text position={[0, 5.6, 0]} fontSize={0.65} color="#ffd166" anchorX="center">THE SUNWELL FOUNTAIN</Text>
     </group>
   );
 }
 
+/** Oathkeeper Knight Hero Statue */
 function OathkeeperStatue({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
-      {/* Pedestal */}
-      <mesh position={[0, 0.6, 0]} castShadow material={darkStone}><cylinderGeometry args={[2, 2.5, 1.5, 12]} /></mesh>
-      <mesh position={[0, 1.5, 0]} castShadow material={stone}><cylinderGeometry args={[1.8, 2, 0.5, 12]} /></mesh>
-      {/* Figure body */}
-      <mesh position={[0, 3.2, 0]} castShadow material={stone}><cylinderGeometry args={[0.8, 1.1, 4.5, 12]} /></mesh>
-      {/* Head */}
-      <mesh position={[0, 5.7, 0]} castShadow material={stone}><sphereGeometry args={[0.9, 16, 10]} /></mesh>
-      {/* Sword */}
-      <mesh position={[1.0, 3.8, 0]} rotation={[0, 0, -0.25]} castShadow material={darkStone}><boxGeometry args={[0.4, 4.5, 0.4]} /></mesh>
-      {/* Shield on back */}
-      <mesh position={[-0.8, 4.5, -0.5]} rotation={[0, 0, 0.15]} castShadow material={gold}><boxGeometry args={[1.6, 2.2, 0.15]} /></mesh>
-      {/* Gold sword tip */}
-      <mesh position={[1.3, 6.0, 0]} rotation={[0, 0, Math.PI / 4]} castShadow><boxGeometry args={[1.5, 0.12, 0.12]} /><meshStandardMaterial color="#d4af37" emissive="#d4af37" emissiveIntensity={0.8} /></mesh>
-      {/* Inscription plaque */}
-      <mesh position={[0, 0.9, 2.55]} rotation={[-0.2, 0, 0]}>
-        <planeGeometry args={[1.5, 0.4]} />
-        <meshStandardMaterial color="#d4af37" emissive="#d4af37" emissiveIntensity={0.4} side={2} />
+      {/* Stepped Granite Pedestal */}
+      <mesh position={[0, 0.7, 0]} castShadow material={darkStone}>
+        <boxGeometry args={[3.2, 1.4, 3.2]} />
       </mesh>
+      <mesh position={[0, 1.8, 0]} castShadow material={stone}>
+        <boxGeometry args={[2.5, 1.0, 2.5]} />
+      </mesh>
+
+      {/* Knight Body Armor */}
+      <mesh position={[0, 3.8, 0]} castShadow material={darkStone}>
+        <cylinderGeometry args={[0.9, 1.2, 3.8, 10]} />
+      </mesh>
+
+      {/* Knight Helm */}
+      <mesh position={[0, 6.2, 0]} castShadow material={gold}>
+        <sphereGeometry args={[0.85, 14, 10]} />
+      </mesh>
+
+      {/* Giant Golden Greatsword */}
+      <mesh position={[1.1, 4.2, 0]} rotation={[0, 0, -0.22]} castShadow material={gold}>
+        <boxGeometry args={[0.35, 5.2, 0.35]} />
+      </mesh>
+
+      {/* Hero Shield on Left Arm */}
+      <mesh position={[-1.1, 4.2, 0]} rotation={[0, 0, 0.15]} castShadow material={gold}>
+        <boxGeometry args={[1.8, 2.6, 0.2]} />
+      </mesh>
+
+      {/* Inscription Plaque */}
+      <mesh position={[0, 1.2, 1.62]}>
+        <planeGeometry args={[1.8, 0.6]} />
+        <meshStandardMaterial color="#d4af37" emissive="#d4af37" emissiveIntensity={0.6} side={2} />
+      </mesh>
+
+      <Text position={[0, 7.8, 0]} fontSize={0.6} color="#d4af37" anchorX="center">OATHKEEPER MONUMENT</Text>
     </group>
   );
 }
 
+/** Heartwood Ancient Tree of Solaria */
 function HeartwoodTree({ position }: { position: [number, number, number] }) {
-  const leaves = useMemo(() => Array.from({ length: 48 }, (_, i) => {
+  const leaves = useMemo(() => Array.from({ length: 42 }, (_, i) => {
     const angle = i * 2.399;
-    const radius = 1.5 + (i % 5) * 0.4;
-    return { x: Math.cos(angle) * radius, y: 5.5 + (i % 7) * 0.5, z: Math.sin(angle) * radius, s: 0.8 + (i % 3) * 0.25 };
+    const radius = 1.8 + (i % 5) * 0.5;
+    return { x: Math.cos(angle) * radius, y: 6.0 + (i % 7) * 0.6, z: Math.sin(angle) * radius, s: 0.9 + (i % 3) * 0.3 };
   }), []);
+
   return (
     <group position={position}>
-      {/* Trunk with buttress roots */}
-      <mesh position={[0, 0.6, 0]} castShadow material={wood}><cylinderGeometry args={[1.2, 1.6, 1.2, 10]} /></mesh>
-      <mesh position={[0, 3.2, 0]} castShadow material={wood}><cylinderGeometry args={[0.6, 0.9, 5.5, 10]} /></mesh>
-      {/* Root buttresses */}
-      {[0, Math.PI/2, Math.PI, 3*Math.PI/2].map((r) => (
-        <mesh key={r} position={[Math.cos(r)*0.8, 0.3, Math.sin(r)*0.8]} rotation={[0, r, 0]} castShadow material={wood}>
-          <boxGeometry args={[0.8, 0.6, 0.25]} />
+      {/* Massive Ancient Trunk */}
+      <mesh position={[0, 3.5, 0]} castShadow material={wood}>
+        <cylinderGeometry args={[1.2, 2.0, 7, 10]} />
+      </mesh>
+      {/* Root Buttresses */}
+      {[0, Math.PI / 2, Math.PI, 1.5 * Math.PI].map((r) => (
+        <mesh key={r} position={[Math.cos(r) * 1.2, 0.6, Math.sin(r) * 1.2]} rotation={[0, r, 0]} castShadow material={wood}>
+          <boxGeometry args={[1.2, 1.2, 0.4]} />
         </mesh>
       ))}
-      {/* Canopy layers */}
-      {leaves.map((leaf, i) => <mesh key={i} position={[leaf.x, leaf.y, leaf.z]} scale={leaf.s} castShadow><icosahedronGeometry args={[1.1, 1]} /><meshStandardMaterial color="#3d7e45" emissive="#1a4d25" emissiveIntensity={0.2} flatShading /></mesh>)}
-      {/* Golden fruit/flowers */}
-      <Sparkles count={24} scale={[7, 9, 7]} size={2.8} speed={0.22} color="#d4af37" />
+      {/* Bioluminescent Canopy */}
+      {leaves.map((leaf, i) => (
+        <mesh key={i} position={[leaf.x, leaf.y, leaf.z]} scale={leaf.s} castShadow>
+          <icosahedronGeometry args={[1.4, 1]} />
+          <meshStandardMaterial color="#2d6a4f" emissive="#1b4332" emissiveIntensity={0.3} flatShading />
+        </mesh>
+      ))}
+      <Sparkles count={30} scale={[8, 10, 8]} size={3.5} speed={0.25} color="#52b788" />
+      <Text position={[0, 11.5, 0]} fontSize={0.6} color="#52b788" anchorX="center">HEARTWOOD OF SOLARIA</Text>
     </group>
   );
 }
 
-function GuildMonument({ position }: { position: [number, number, number] }) {
+/** Adventurer's Guildhall Monument */
+function GuildhallMonument({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
-      {/* Stepped base */}
-      <mesh position={[0, 0.5, 0]} castShadow material={darkStone}><cylinderGeometry args={[2.2, 2.8, 1.2, 8]} /></mesh>
-      <mesh position={[0, 1.2, 0]} castShadow material={stone}><cylinderGeometry args={[1.8, 2.2, 0.6, 8]} /></mesh>
-      {/* Obelisk shaft */}
-      <mesh position={[0, 3.5, 0]} castShadow material={stone}><boxGeometry args={[1.4, 5, 1.4]} /></mesh>
-      {/* Gold capstone */}
-      <mesh position={[0, 6.2, 0]} castShadow material={gold}><coneGeometry args={[1.1, 1.2, 4]} /></mesh>
-      {/* Guild sigil */}
-      <mesh position={[0, 3.8, 0.72]}><circleGeometry args={[0.55, 16]} /><meshStandardMaterial color="#d4af37" emissive="#d4af37" emissiveIntensity={1.4} /></mesh>
-      {/* Bronze plaques on sides */}
-      {[-1, 1].map((s) => (
-        <mesh key={s} position={[s * 0.72, 3.5, 0]}>
-          <planeGeometry args={[0.8, 1.2]} />
-          <meshStandardMaterial color="#8a5a2a" emissive="#8a5a2a" emissiveIntensity={0.2} side={2} />
-        </mesh>
-      ))}
+      <mesh position={[0, 0.6, 0]} castShadow material={darkStone}>
+        <cylinderGeometry args={[2.5, 3.0, 1.2, 8]} />
+      </mesh>
+      <mesh position={[0, 4.0, 0]} castShadow material={stone}>
+        <boxGeometry args={[1.6, 6, 1.6]} />
+      </mesh>
+      <mesh position={[0, 7.5, 0]} castShadow material={gold}>
+        <coneGeometry args={[1.4, 1.6, 4]} />
+      </mesh>
+      {/* Guild Sigil */}
+      <mesh position={[0, 4.5, 0.82]}>
+        <circleGeometry args={[0.7, 16]} />
+        <meshStandardMaterial color="#d4af37" emissive="#d4af37" emissiveIntensity={1.6} />
+      </mesh>
     </group>
   );
 }
 
+/** Royal Arch of Triumph */
 function RoyalArch({ position }: { position: [number, number, number] }) {
-  const archR = 5.5;
-  const archH = 8;
+  const archW = 6.0;
+  const archH = 9.0;
   return (
     <group position={position}>
-      {/* Arch piers */}
-      <mesh position={[-archR, archH / 2, 0]} castShadow receiveShadow material={stone}>
-        <boxGeometry args={[1.2, archH, 1.5]} />
+      {/* Left & Right Stone Piers */}
+      <mesh position={[-archW, archH / 2, 0]} castShadow receiveShadow material={stone}>
+        <boxGeometry args={[1.8, archH, 2.2]} />
       </mesh>
-      <mesh position={[archR, archH / 2, 0]} castShadow receiveShadow material={stone}>
-        <boxGeometry args={[1.2, archH, 1.5]} />
+      <mesh position={[archW, archH / 2, 0]} castShadow receiveShadow material={stone}>
+        <boxGeometry args={[1.8, archH, 2.2]} />
       </mesh>
-      {/* Arch voussoirs — segmented arc */}
-      {Array.from({ length: 11 }, (_, i) => {
-        const angle = -Math.PI / 2 + (i / 10) * Math.PI;
-        const x = Math.sin(angle) * archR;
-        const y = archH + Math.cos(angle) * archR;
-        return (
-          <mesh key={i} position={[x, y, 0]} rotation={[0, 0, -angle]} castShadow material={gold}>
-            <boxGeometry args={[0.4, 0.5, 1.6]} />
+
+      {/* Grand Arch Lintel Entablature */}
+      <mesh position={[0, archH + 0.8, 0]} castShadow receiveShadow material={stone}>
+        <boxGeometry args={[archW * 2 + 3.6, 1.8, 2.6]} />
+      </mesh>
+
+      {/* Gold Statues Atop Lintel */}
+      <mesh position={[0, archH + 2.4, 0]} castShadow material={gold}>
+        <boxGeometry args={[2.2, 1.4, 1.4]} />
+      </mesh>
+      <mesh position={[0, archH + 3.6, 0]} castShadow material={gold}>
+        <coneGeometry args={[0.6, 1.2, 8]} />
+      </mesh>
+
+      {/* Royal Arch Banners */}
+      <mesh position={[-archW + 0.9, archH - 1.5, 1.15]} material={bannerCloth}>
+        <planeGeometry args={[1.2, 4]} />
+      </mesh>
+      <mesh position={[archW - 0.9, archH - 1.5, 1.15]} material={bannerCloth}>
+        <planeGeometry args={[1.2, 4]} />
+      </mesh>
+    </group>
+  );
+}
+
+/** Great Forge Hearth & Foundry Smoke Stack */
+function GreatForgeHearth({ position }: { position: [number, number, number] }) {
+  return (
+    <group position={position}>
+      {/* Stone Blast Furnace Base */}
+      <mesh position={[0, 2.5, 0]} castShadow receiveShadow material={darkStone}>
+        <cylinderGeometry args={[2.5, 3.2, 5, 10]} />
+      </mesh>
+      {/* Glowing Molten Crucible Opening */}
+      <mesh position={[0, 1.8, 2.4]} material={new THREE.MeshStandardMaterial({ color: "#ff4800", emissive: "#ff5400", emissiveIntensity: 3.0 })}>
+        <circleGeometry args={[1.1, 16]} />
+      </mesh>
+      {/* Brick Smoke Stack */}
+      <mesh position={[0, 7.5, 0]} castShadow material={darkStone}>
+        <cylinderGeometry args={[1.2, 1.8, 6, 8]} />
+      </mesh>
+      <Sparkles count={30} scale={[4, 8, 4]} position={[0, 8, 0]} size={4} speed={0.8} color="#ff7b00" />
+    </group>
+  );
+}
+
+/** Defensive Corner Bastions */
+function FortressBastions() {
+  const towers: [number, number][] = [
+    [-44, -44],
+    [44, -44],
+    [-44, 44],
+    [44, 44],
+  ];
+
+  return (
+    <>
+      {towers.map(([x, z]) => (
+        <group key={`bastion-${x}-${z}`} position={[x, heightAt(x, z), z]}>
+          <mesh position={[0, 8, 0]} castShadow receiveShadow material={darkStone}>
+            <cylinderGeometry args={[3.2, 3.8, 16, 10]} />
           </mesh>
-        );
-      })}
-      {/* Keystone */}
-      <mesh position={[0, archH + archR - 0.25, 0]} castShadow material={gold}>
-        <boxGeometry args={[1.0, 0.7, 1.8]} />
-      </mesh>
-      {/* Statue atop arch */}
-      <mesh position={[0, archH + archR + 1.2, 0]} castShadow material={stone}>
-        <sphereGeometry args={[0.6, 12, 8]} />
-      </mesh>
-      <mesh position={[0, archH + archR + 2.0, 0]} castShadow material={gold}>
-        <coneGeometry args={[0.4, 1.2, 8]} />
-      </mesh>
-      <Sparkles count={12} scale={[8, 3, 8]} size={3} speed={0.3} color="#d4af37" />
-    </group>
+          <mesh position={[0, 17, 0]} castShadow material={darkStone}>
+            <coneGeometry args={[4.2, 4.0, 10]} />
+          </mesh>
+          {/* Watchtower Flag */}
+          <mesh position={[0, 19.5, 0]} castShadow material={gold}>
+            <cylinderGeometry args={[0.06, 0.06, 1.8, 4]} />
+          </mesh>
+        </group>
+      ))}
+    </>
   );
-}
-
-function Watchtowers() {
-  const towers: [number, number][] = [[-42, -42], [42, -42], [-42, 42], [42, 42]];
-  return <>{towers.map(([x, z]) => <Watchtower key={`${x}-${z}`} position={[x, heightAt(x, z), z]} />)}</>;
-}
-
-function Watchtower({ position }: { position: [number, number, number] }) {
-  return (
-    <group position={position}>
-      <mesh position={[0, 7, 0]} castShadow receiveShadow material={darkStone}><cylinderGeometry args={[2.5, 3, 14, 8]} /></mesh>
-      <mesh position={[0, 14.8, 0]} castShadow><coneGeometry args={[3.4, 3.2, 8]} /><meshStandardMaterial color="#7c3030" roughness={0.7} /></mesh>
-      <Banner position={[0, 11, 2.55]} />
-    </group>
-  );
-}
-
-function Banner({ position }: { position: [number, number, number] }) {
-  return <mesh position={position}><planeGeometry args={[2.2, 3]} /><meshStandardMaterial color="#d4af37" emissive="#d4af37" emissiveIntensity={0.25} side={2} /></mesh>;
-}
-
-function pyramidGeometry(args: [number, number, number]) {
-  // Placeholder for pyramid geometry - using cone with 4 sides
-  return null as any;
 }

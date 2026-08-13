@@ -126,12 +126,12 @@ function GrassField() {
 /** 2. Genshin-Style Collectible Flora */
 function CollectibleFlora() {
   const floraNodes = useMemo(() => [
-    { x: 14, z: -16, type: "sunblossom", color: "#fca311" },
-    { x: -16, z: -20, type: "windchime", color: "#00b4d8" },
-    { x: -24, z: 18, type: "starlight", color: "#7209b7" },
-    { x: 20, z: 24, type: "dandelion", color: "#fdf0d5" },
-    { x: -50, z: -40, type: "sunblossom", color: "#fca311" },
-    { x: -35, z: 30, type: "starlight", color: "#7209b7" },
+    { x: -18, z: -26, type: "sunblossom", color: "#fca311" }, // Royal Gardens
+    { x: 18, z: -26, type: "windchime", color: "#00b4d8" },  // Royal Gardens
+    { x: 28, z: 12, type: "dandelion", color: "#fdf0d5" },    // Cathedral Courtyard
+    { x: -28, z: -22, type: "sunblossom", color: "#fca311" }, // Noble Garden
+    { x: -36, z: 12, type: "starlight", color: "#7209b7" },   // Guild Herb Garden
+    { x: 0, z: -65, type: "sunblossom", color: "#fca311" },   // South Gate Meadow
   ], []);
 
   const stemMat = useMemo(() => new THREE.MeshStandardMaterial({ color: "#2d6a4f", roughness: 0.6 }), []);
