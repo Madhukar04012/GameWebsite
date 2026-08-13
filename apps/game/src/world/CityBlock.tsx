@@ -49,96 +49,99 @@ function getRoofs(family: ArchFamily): BuildingDef["roof"][] {
   return ["gable", "gable", "double-gable"];
 }
 
-export function CityBlock({ block, district, color }: CityBlockProps) {
-  const buildings = useMemo(() => {
-    const rnd = seededRandom(block.seed);
-    const bldgs: BuildingDef[] = [];
-    const props: any[] = [];
 
-    // Perimeter tracing
-    const cellSize = 4;
-    const cols = Math.floor(block.w / cellSize);
-    const rows = Math.floor(block.d / cellSize);
+export function generateBlockLayout(block: CityBlockDef, district: DistrictName) {
+  const rnd = seededRandom(block.seed);
+  const bldgs: BuildingDef[] = [];
+  const props: any[] = [];
 
-    for (let c = 0; c < cols; c++) {
-      for (let r = 0; r < rows; r++) {
-        const isPerimeter = c === 0 || c === cols - 1 || r === 0 || r === rows - 1;
-        const isCorner = (c === 0 && r === 0) || (c === 0 && r === rows - 1) || (c === cols - 1 && r === 0) || (c === cols - 1 && r === rows - 1);
-        
-        const bx = block.x - block.w / 2 + c * (block.w / cols) + (block.w / cols) / 2;
-        const bz = block.z - block.d / 2 + r * (block.d / rows) + (block.d / rows) / 2;
+  // Perimeter tracing
+  const cellSize = 4;
+  const cols = Math.floor(block.w / cellSize);
+  const rows = Math.floor(block.d / cellSize);
 
-        if (!isPerimeter) {
-          // Interior courtyard / props / small craft
-          if (rnd() > 0.7) {
-            props.push({ type: rnd() > 0.5 ? "crate" : "barrel", x: bx, z: bz, isProp: true });
-          } else if (rnd() > 0.9) {
-            bldgs.push({
-              x: bx, z: bz, w: 2.5, d: 2.5, h: 3, floors: 1, roof: "flat", family: "craft", facadeType: "timber", hasChimney: true
-            });
-          }
-          continue;
+  for (let c = 0; c < cols; c++) {
+    for (let r = 0; r < rows; r++) {
+      const isPerimeter = c === 0 || c === cols - 1 || r === 0 || r === rows - 1;
+      const isCorner = (c === 0 && r === 0) || (c === 0 && r === rows - 1) || (c === cols - 1 && r === 0) || (c === cols - 1 && r === rows - 1);
+      
+      const bx = block.x - block.w / 2 + c * (block.w / cols) + (block.w / cols) / 2;
+      const bz = block.z - block.d / 2 + r * (block.d / rows) + (block.d / rows) / 2;
+
+      if (!isPerimeter) {
+        // Interior courtyard / props / small craft
+        if (rnd() > 0.7) {
+          props.push({ type: rnd() > 0.5 ? "crate" : "barrel", x: bx, z: bz, isProp: true });
+        } else if (rnd() > 0.9) {
+          bldgs.push({
+            x: bx, z: bz, w: 2.5, d: 2.5, h: 3, floors: 1, roof: "flat", family: "craft", facadeType: "timber", hasChimney: true
+          });
         }
-
-        // Leave some gaps for alleys, except on corners
-        if (!isCorner && rnd() > 0.85) {
-          continue;
-        }
-
-        const family = getFamily(district, rnd());
-        const facadeType = getFacade(family, rnd());
-        const roofs = getRoofs(family);
-        let roof = roofs[Math.floor(rnd() * roofs.length)];
-
-        // Force tower/cone/mansard on corners for visual interest
-        if (isCorner && (family === "noble" || family === "commercial") && rnd() > 0.5) {
-          roof = rnd() > 0.5 ? "tower" : "mansard";
-        }
-
-        let w = 3.5 + rnd() * 1.5;
-        let d = 3.5 + rnd() * 1.5;
-        
-        if (isCorner) {
-          w = 4.5 + rnd();
-          d = 4.5 + rnd();
-        }
-
-        let minH = 4, maxH = 7, floors = 2;
-        if (family === "noble" || family === "civic") {
-          minH = 6; maxH = 10; floors = Math.floor(2 + rnd() * 3); // 2-4
-        } else if (family === "commercial") {
-          minH = 5; maxH = 8; floors = Math.floor(2 + rnd() * 2); // 2-3
-        } else if (family === "craft") {
-          minH = 3; maxH = 6; floors = Math.floor(1 + rnd() * 3); // 1-3
-        } else {
-          minH = 4; maxH = 6.5; floors = Math.floor(1 + rnd() * 3); // 1-3
-        }
-
-        if (isCorner) {
-          minH += 1;
-          maxH += 1.5;
-        }
-
-        const h = minH + rnd() * (maxH - minH);
-
-        bldgs.push({
-          x: bx,
-          z: bz,
-          w,
-          d,
-          h,
-          floors,
-          roof,
-          family,
-          facadeType,
-          isCorner,
-          hasChimney: rnd() > 0.3,
-          hasBalcony: family === "noble" ? rnd() > 0.3 : (family === "commercial" ? rnd() > 0.6 : rnd() > 0.8),
-        });
+        continue;
       }
+
+      // Leave some gaps for alleys, except on corners
+      if (!isCorner && rnd() > 0.85) {
+        continue;
+      }
+
+      const family = getFamily(district, rnd());
+      const facadeType = getFacade(family, rnd());
+      const roofs = getRoofs(family);
+      let roof = roofs[Math.floor(rnd() * roofs.length)];
+
+      // Force tower/cone/mansard on corners for visual interest
+      if (isCorner && (family === "noble" || family === "commercial") && rnd() > 0.5) {
+        roof = rnd() > 0.5 ? "tower" : "mansard";
+      }
+
+      let w = 3.5 + rnd() * 1.5;
+      let d = 3.5 + rnd() * 1.5;
+      
+      if (isCorner) {
+        w = 4.5 + rnd();
+        d = 4.5 + rnd();
+      }
+
+      let minH = 4, maxH = 7, floors = 2;
+      if (family === "noble" || family === "civic") {
+        minH = 6; maxH = 10; floors = Math.floor(2 + rnd() * 3); // 2-4
+      } else if (family === "commercial") {
+        minH = 5; maxH = 8; floors = Math.floor(2 + rnd() * 2); // 2-3
+      } else if (family === "craft") {
+        minH = 3; maxH = 6; floors = Math.floor(1 + rnd() * 3); // 1-3
+      } else {
+        minH = 4; maxH = 6.5; floors = Math.floor(1 + rnd() * 3); // 1-3
+      }
+
+      if (isCorner) {
+        minH += 1;
+        maxH += 1.5;
+      }
+
+      const h = minH + rnd() * (maxH - minH);
+
+      bldgs.push({
+        x: bx,
+        z: bz,
+        w,
+        d,
+        h,
+        floors,
+        roof,
+        family,
+        facadeType,
+        isCorner,
+        hasChimney: rnd() > 0.3,
+        hasBalcony: family === "noble" ? rnd() > 0.3 : (family === "commercial" ? rnd() > 0.6 : rnd() > 0.8),
+      });
     }
-    return { bldgs, props };
-  }, [block, district]);
+  }
+  return { bldgs, props };
+}
+
+export function CityBlock({ block, district, color }: CityBlockProps) {
+  const buildings = useMemo(() => generateBlockLayout(block, district), [block, district]);
 
   return (
     <group>

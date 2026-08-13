@@ -180,3 +180,4 @@ export function getDistrictMaterials(districtName: string): DistrictMaterialSet 
   districtMaterialCache.set(districtName, materials);
   return materials;
 }
+export function getAllDistrictMaterials() { return Array.from(districtMaterialCache.values()); }

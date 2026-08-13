@@ -1,8 +1,10 @@
+import { useWorldStore } from "../store/worldStore";
+import { useFrame } from "@react-three/fiber";
 import { useMemo } from "react";
 import * as THREE from "three";
 import { heightAt } from "@legend/engine";
 import type { BuildingDef, ArchFamily } from "@legend/shared";
-import { getDistrictMaterials, DistrictMaterialSet } from "../materials/createDistrictMaterials";
+import { getDistrictMaterials, DistrictMaterialSet, getAllDistrictMaterials } from "../materials/createDistrictMaterials";
 
 interface CityBuildingProps {
   def: BuildingDef;
@@ -452,4 +454,27 @@ function BuildingShopSign({ sign, d, woodMat, metalMat }: any) {
       </mesh>
     </group>
   );
+}
+
+export function NightLightingUpdater() {
+  const timeOfDay = useWorldStore(s => s.timeOfDay);
+  const isNight = timeOfDay >= 18 || timeOfDay <= 6;
+  useFrame(() => {
+    const target = isNight ? 1 : 0;
+    const mats = getAllDistrictMaterials();
+    for (const mat of mats) {
+      if (mat.glass) {
+        if (!mat.glass.userData.baseEmissive) {
+           mat.glass.userData.baseEmissive = mat.glass.color.clone();
+        }
+        mat.glass.emissive.copy(mat.glass.userData.baseEmissive).multiplyScalar(0.8);
+        mat.glass.emissiveIntensity = THREE.MathUtils.lerp(
+          mat.glass.emissiveIntensity,
+          target,
+          0.05
+        );
+      }
+    }
+  });
+  return null;
 }

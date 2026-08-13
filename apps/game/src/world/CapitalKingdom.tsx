@@ -6,6 +6,7 @@ import { Props } from "./Props";
 import { CityLandmarks } from "./CityLandmarks";
 import { CapitalDetails } from "./CapitalDetails";
 import { createCobbleMaterial } from "../materials/createCobbleMaterial";
+import { NightLightingUpdater } from "./CityBuilding";
 
 /**
  * Capital Kingdom — walled city blockout.
@@ -25,6 +26,7 @@ export function CapitalKingdom({ showLabels = false }: { showLabels?: boolean })
         <planeGeometry args={[WORLD_BOUNDS.citySize, WORLD_BOUNDS.citySize]} />
       </mesh>
 
+      <NightLightingUpdater />
       <Roads />
       <Walls />
 
