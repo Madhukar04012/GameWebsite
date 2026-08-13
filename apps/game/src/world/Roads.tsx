@@ -91,14 +91,26 @@ function RoadStrip({ seg }: StripProps) {
         </>
       )}
 
-      {/* Grass verge outside curbs */}
+      {/* Paved Sidewalks outside curbs */}
+      {seg.type !== "dirt" && (
+        <>
+          <mesh position={[-width / 2 - 1.2, 0.04, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow material={ROAD_MATS.district}>
+            <planeGeometry args={[2.0, length]} />
+          </mesh>
+          <mesh position={[width / 2 + 1.2, 0.04, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow material={ROAD_MATS.district}>
+            <planeGeometry args={[2.0, length]} />
+          </mesh>
+        </>
+      )}
+
+      {/* Grass verge outside sidewalks */}
       {hasVerge && (
         <>
-          <mesh position={[-width / 2 - 0.65, 0.015, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow material={VERGE_MAT}>
-            <planeGeometry args={[0.9, length]} />
+          <mesh position={[-width / 2 - 2.8, 0.015, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow material={VERGE_MAT}>
+            <planeGeometry args={[1.2, length]} />
           </mesh>
-          <mesh position={[width / 2 + 0.65, 0.015, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow material={VERGE_MAT}>
-            <planeGeometry args={[0.9, length]} />
+          <mesh position={[width / 2 + 2.8, 0.015, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow material={VERGE_MAT}>
+            <planeGeometry args={[1.2, length]} />
           </mesh>
         </>
       )}
