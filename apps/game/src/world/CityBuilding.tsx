@@ -15,7 +15,6 @@ interface CityBuildingProps {
 export function CityBuilding({ def, color = "#cccccc", district = "residential" }: CityBuildingProps) {
   const { x, z, w, d, h, roof = "gable", floors = 2, family = "residential", isCorner = false, facadeType = "timber", hasBalcony = false, hasChimney = false, shopSign } = def;
   const roofH = Math.max(1.2, h * 0.32);
-  const baseY = useMemo(() => heightAt(x, z), [x, z]);
 
   const mats = useMemo(() => getDistrictMaterials(district), [district]);
   const { wall, plaster, brick, roof: roofMat, wood, glass, metal, accent, banner } = mats;
@@ -32,17 +31,49 @@ export function CityBuilding({ def, color = "#cccccc", district = "residential" 
     [-w / 2, -d / 2], [w / 2, -d / 2], [-w / 2, d / 2], [w / 2, d / 2],
   ];
 
+  const { baseY, minH, doorTerrainY } = useMemo(() => {
+    let maxH = -Infinity;
+    let minH = Infinity;
+    const pts = [[0, 0], ...corners];
+    for (const [cx, cz] of pts) {
+      const h = heightAt(x + cx, z + cz);
+      if (h > maxH) maxH = h;
+      if (h < minH) minH = h;
+    }
+    const baseY = maxH + 0.1;
+    const doorTerrainY = heightAt(x, z + d / 2);
+    return { baseY, minH, doorTerrainY };
+  }, [x, z, w, d]);
+
+  const fndHeight = baseY - minH + 1.2;
+  const fndCenterY = 0.7 - fndHeight / 2;
+
   const storyH = h / floors;
+  
+  // Calculate stairs if door is above terrain
+  const stairDrop = baseY - doorTerrainY;
+  const stairSteps = stairDrop > 0.2 ? Math.ceil(stairDrop / 0.2) : 0;
 
   return (
     <group position={[x, baseY, z]}>
       {/* 1. Foundation */}
-      <mesh position={[0, 0.25, 0]} castShadow receiveShadow material={baseMat}>
-        <boxGeometry args={[w + 0.5, 0.9, d + 0.5]} />
+      <mesh position={[0, fndCenterY, 0]} castShadow receiveShadow material={baseMat}>
+        <boxGeometry args={[w + 0.5, fndHeight, d + 0.5]} />
       </mesh>
       <mesh position={[0, 0.7, 0]} castShadow receiveShadow material={wood}>
         <boxGeometry args={[w + 0.25, 0.12, d + 0.25]} />
       </mesh>
+      
+      {/* Procedural Stairs to Street Level */}
+      {stairSteps > 0 && Array.from({ length: stairSteps }).map((_, i) => {
+        const stepY = -0.1 - i * 0.2;
+        const stepZ = d / 2 + 0.25 + i * 0.3;
+        return (
+          <mesh key={`stair-${i}`} position={[0, stepY, stepZ]} castShadow receiveShadow material={baseMat}>
+            <boxGeometry args={[1.8, 0.2, 0.3]} />
+          </mesh>
+        );
+      })}
 
       {/* 2. Main Wall */}
       <mesh position={[0, storyH / 2 + 0.3, 0]} castShadow receiveShadow material={baseMat}>
