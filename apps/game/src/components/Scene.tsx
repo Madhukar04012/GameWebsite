@@ -78,10 +78,10 @@ export function Scene() {
 
       {/* DayNightCycle — dynamic sky, sun, stars, fog, and lighting driven by
           in-game time (worldStore). Replaces the static Environment + SceneLighting. */}
-      <DayNightCycle />
+      {debug.perfLights ? <DayNightCycle /> : <ambientLight intensity={1.5} />}
 
       {/* Time-of-day reactive light sources for lanterns, braziers, and shrines */}
-      <LandmarkLighting />
+      {debug.perfLights && <LandmarkLighting />}
 
       {/* Debug grid + spawn markers (dev only). */}
       {debug.grid && <gridHelper args={[WORLD_SIZE, 80, "#d4af37", "#1a3b66"]} />}
@@ -156,7 +156,7 @@ export function Scene() {
       )}
 
       {/* Post Processing for Stylized AAA Look */}
-      {!debug.physics && settings.postProcessing && (() => {
+      {!debug.physics && settings.postProcessing && debug.perfPostFX && (() => {
         const children = [];
         if (settings.ssao) children.push(<SSAO key="ssao" radius={12} intensity={3.0} distanceFalloff={0.25} color={new THREE.Color("#1a1a2e")} />);
         if (settings.bloom) children.push(<Bloom key="bloom" luminanceThreshold={0.8} luminanceSmoothing={0.6} intensity={1.2} mipmapBlur />);

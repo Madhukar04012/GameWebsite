@@ -11,7 +11,10 @@ import { NPCSimulationManager } from "../systems/npc/NPCSimulationManager";
 import { NPCRenderer } from "../systems/npc/NPCRenderer";
 import { useEffect } from "react";
 import { useNPCStore } from "../store/npcStore";
-import { generateCapitalPopulation } from "@legend/shared";
+import { generateCapitalPopulation, globalNavGraph, buildCityNavGraph } from "@legend/shared";
+import { heightAt } from "@legend/engine";
+
+import { NavGraphDebug } from "../systems/npc/NavGraphDebug";
 
 /**
  * Capital Kingdom — walled city blockout.
@@ -23,11 +26,19 @@ import { generateCapitalPopulation } from "@legend/shared";
 // Dark cobblestone plaza across the walled area — procedural stones + gold grout.
 const plazaMat = createCobbleMaterial({ kind: "plaza", scale: 2.0, seed: [7.7, 2.2] });
 
+import { useDebugStore } from "../store/debugStore";
+
 export function CapitalKingdom({ showLabels = false }: { showLabels?: boolean }) {
+  const debug = useDebugStore();
+
   useEffect(() => {
     // Seed test NPCs for Milestone 5.3.2 deterministic population
     const store = useNPCStore.getState();
     if (store.npcs.length > 0) return; // already seeded
+
+    // Initialize Navigation Graph using physical world data
+    buildCityNavGraph(globalNavGraph, heightAt);
+    console.log(`[NavGraph] Built with ${globalNavGraph.nodes.size} nodes.`);
 
     // Generate the deterministic population for Solaria
     // Using a fixed world seed so population is reproducible
@@ -63,8 +74,13 @@ export function CapitalKingdom({ showLabels = false }: { showLabels?: boolean })
       <Props />
       <CityLandmarks />
       <CapitalDetails />
-      <NPCSimulationManager />
-      <NPCRenderer />
+      {debug.perfNpcs && (
+        <>
+          <NPCSimulationManager />
+          <NPCRenderer />
+        </>
+      )}
+      <NavGraphDebug visible={showLabels} />
     </group>
   );
 }

@@ -1,14 +1,35 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import { globalNavGraph } from '@legend/shared';
 import { useNPCStore } from '../store/npcStore';
+import { useDebugStore } from '../store/debugStore';
 import * as THREE from 'three';
 
 export function PerformanceHUD() {
   const { gl, scene } = useThree();
   const npcs = useNPCStore(state => state.npcs);
+  const debug = useDebugStore();
   
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'F8') {
+        e.preventDefault();
+        debug.toggle('perfNpcs');
+      }
+      if (e.key === 'F9') {
+        e.preventDefault();
+        debug.toggle('perfPostFX');
+      }
+      if (e.key === 'F10') {
+        e.preventDefault();
+        debug.toggle('perfLights');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [debug]);
+
   const [metrics, setMetrics] = useState({
     fps: 0,
     frameTime: 0,
@@ -115,22 +136,19 @@ export function PerformanceHUD() {
         Draw Calls: {metrics.drawCalls}<br/>
         Triangles: {(metrics.triangles / 1000000).toFixed(2)}M<br/>
         <br/>
+        <span style={{color: debug.perfNpcs ? 'lime' : 'red'}}>[F8] NPCs: {debug.perfNpcs ? 'ON' : 'OFF'}</span><br/>
         Total NPCs: {metrics.npcTotal}<br/>
-        Tier 0: {metrics.npcTiers.t0}<br/>
-        Tier 1: {metrics.npcTiers.t1}<br/>
-        Tier 2: {metrics.npcTiers.t2}<br/>
-        Tier 3: {metrics.npcTiers.t3}<br/>
-        <br/>
-        Navigation Nodes: {metrics.navNodes}<br/>
-        Navigation Edges: {metrics.navEdges}<br/>
+        Tier 0: {metrics.npcTiers.t0} | Tier 1: {metrics.npcTiers.t1}<br/>
+        Tier 2: {metrics.npcTiers.t2} | Tier 3: {metrics.npcTiers.t3}<br/>
         <br/>
         A* req/s: {metrics.aStarReqs}<br/>
         Average A*: {metrics.aStarAvgTime}ms<br/>
         Maximum A*: {metrics.aStarMaxTime}ms<br/>
         <br/>
-        Active PointLights: {metrics.pointLights}<br/>
-        Active SpotLights: {metrics.spotLights}<br/>
-        DirectionalLights: {metrics.dirLights}<br/>
+        <span style={{color: debug.perfPostFX ? 'lime' : 'red'}}>[F9] Post FX: {debug.perfPostFX ? 'ON' : 'OFF'}</span><br/>
+        <br/>
+        <span style={{color: debug.perfLights ? 'lime' : 'red'}}>[F10] Dynamic Lights: {debug.perfLights ? 'ON' : 'OFF'}</span><br/>
+        Lights: {metrics.activeLights} (P:{metrics.pointLights} S:{metrics.spotLights} D:{metrics.dirLights})<br/>
       </div>
     </Html>
   );
