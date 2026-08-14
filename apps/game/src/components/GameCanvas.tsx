@@ -13,6 +13,7 @@ import { ZoneTransition } from "../systems/ZoneTransition";
 import { CharacterSelectScreen } from "../systems/CharacterSelectScreen";
 import { DebugTools } from "../systems/DebugTools";
 import { DebugWorldMap } from "../systems/DebugWorldMap";
+import { PerformanceHUD } from "./PerformanceHUD";
 
 export function GameCanvas() {
   const phase = useGameStore((s) => s.phase);
@@ -52,6 +53,7 @@ export function GameCanvas() {
           {(showGame || showCinematic) && <Scene />}
           {showCinematic && <IntroCinematic />}
         </Suspense>
+        <PerformanceHUD />
       </Canvas>
 
       <LoadingScreen />
