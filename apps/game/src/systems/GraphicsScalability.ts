@@ -22,13 +22,15 @@ import { create } from "zustand";
 
 export enum GraphicsTier {
   LOW = 0,
-  MEDIUM = 1,
-  HIGH = 2,
-  ULTRA = 3,
+  PERFORMANCE = 1,
+  MEDIUM = 2,
+  HIGH = 3,
+  ULTRA = 4,
 }
 
 export const TIER_LABELS: Record<GraphicsTier, string> = {
   [GraphicsTier.LOW]: "Low",
+  [GraphicsTier.PERFORMANCE]: "Performance",
   [GraphicsTier.MEDIUM]: "Medium",
   [GraphicsTier.HIGH]: "High",
   [GraphicsTier.ULTRA]: "Ultra",
@@ -74,6 +76,23 @@ const TIER_SETTINGS: Record<GraphicsTier, QualitySettings> = {
     fog: false,
     reflections: 0,
     emissiveGlow: false,
+    dynamicShadows: false,
+  },
+  [GraphicsTier.PERFORMANCE]: {
+    maxDpr: 1,
+    shadowMapSize: 512,
+    shadowMapType: "basic",
+    postProcessing: true,
+    ssao: false,
+    bloom: false,
+    vignette: false,
+    multisampling: 0,
+    particleScale: 0.5,
+    geometrySegments: 16,
+    maxMonsters: 3,
+    fog: true,
+    reflections: 0,
+    emissiveGlow: true,
     dynamicShadows: false,
   },
   [GraphicsTier.MEDIUM]: {
@@ -167,10 +186,11 @@ function classifyTier(gpu: GPUInfo | null): GraphicsTier {
   // NVIDIA
   if (/nvidia/.test(v) || /nvidia/.test(r)) {
     if (/rtx\s*4090|rtx\s*4080|rtx\s*3090/.test(r)) return GraphicsTier.ULTRA;
+    if (/rtx\s*3050/.test(r)) return GraphicsTier.PERFORMANCE;
     if (/rtx/.test(r)) return GraphicsTier.HIGH;
-    if (/gtx\s*1[06]|gtx\s*9|gtx\s*16/.test(r)) return GraphicsTier.HIGH;
-    if (/gtx/.test(r)) return GraphicsTier.MEDIUM;
-    return GraphicsTier.HIGH;
+    if (/gtx\s*1[06]|gtx\s*9|gtx\s*16/.test(r)) return GraphicsTier.MEDIUM;
+    if (/gtx/.test(r)) return GraphicsTier.PERFORMANCE;
+    return GraphicsTier.MEDIUM;
   }
 
   // AMD

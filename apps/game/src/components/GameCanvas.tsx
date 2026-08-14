@@ -33,7 +33,7 @@ export function GameCanvas() {
         gl={{
           antialias: false,
           toneMapping: ACESFilmicToneMapping,
-          toneMappingExposure: 1.15,
+          toneMappingExposure: 1.0,
           outputColorSpace: SRGBColorSpace,
           logarithmicDepthBuffer: false,
         }}
@@ -43,7 +43,7 @@ export function GameCanvas() {
           const gfx = useGraphicsStore.getState();
           gl.shadowMap.type = resolveShadowMapType(gfx.settings.shadowMapType);
           gl.shadowMap.enabled = shadows;
-          gl.toneMappingExposure = 1.15;
+          gl.toneMappingExposure = 1.0;
         }}
       >
         <Suspense fallback={null}>
