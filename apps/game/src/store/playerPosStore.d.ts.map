@@ -1,0 +1,1 @@
+{"version":3,"file":"playerPosStore.d.ts","sourceRoot":"","sources":["playerPosStore.ts"],"names":[],"mappings":"AAAA;;;GAGG;AAEH,MAAM,MAAM,KAAK,GAAG;IAAE,CAAC,EAAE,MAAM,CAAC;IAAC,CAAC,EAAE,MAAM,CAAA;CAAE,CAAC;AAK7C,eAAO,MAAM,SAAS;WACb,KAAK;aACH,KAAK;kBAIA,CAAC,GAAG,EAAE,KAAK,KAAK,IAAI;CAInC,CAAC"}

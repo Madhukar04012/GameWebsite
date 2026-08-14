@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import * as THREE from "three";
+import { Instances, Instance } from "@react-three/drei";
 import { CITY_LAYOUT, ROADS } from "@legend/shared";
 import { heightAt } from "@legend/engine";
 import { createFabricMaterial } from "../materials/createFabricMaterial";
@@ -118,16 +119,24 @@ function RoyalTerraceGardens() {
       ))}
 
       {/* Sculpted Cypress Trees */}
-      {gardenCypress.map((t, i) => (
-        <group key={`cypress-${i}`} position={[t.x, heightAt(t.x, t.z), t.z]} scale={t.s}>
-          <mesh position={[0, 1.2, 0]} castShadow material={gardenWood}>
-            <cylinderGeometry args={[0.15, 0.22, 2.4, 8]} />
-          </mesh>
-          <mesh position={[0, 3.8, 0]} castShadow material={gardenLeaf}>
-            <coneGeometry args={[1.1, 4.5, 8]} />
-          </mesh>
-        </group>
-      ))}
+      <Instances limit={gardenCypress.length} castShadow>
+        <cylinderGeometry args={[0.15, 0.22, 2.4, 8]} />
+        <primitive object={gardenWood} attach="material" />
+        {gardenCypress.map((t, i) => (
+          <group key={`cypress-wood-${i}`} position={[t.x, heightAt(t.x, t.z), t.z]} scale={t.s}>
+            <Instance position={[0, 1.2, 0]} />
+          </group>
+        ))}
+      </Instances>
+      <Instances limit={gardenCypress.length} castShadow>
+        <coneGeometry args={[1.1, 4.5, 8]} />
+        <primitive object={gardenLeaf} attach="material" />
+        {gardenCypress.map((t, i) => (
+          <group key={`cypress-leaf-${i}`} position={[t.x, heightAt(t.x, t.z), t.z]} scale={t.s}>
+            <Instance position={[0, 3.8, 0]} />
+          </group>
+        ))}
+      </Instances>
 
       {/* Garden Reflecting Pool */}
       <group position={[0, heightAt(0, -26), -26]}>
@@ -163,32 +172,39 @@ function StreetGaslights() {
     { x: -5, z: 34 }, { x: 5, z: 34 },
   ], []);
 
+  const limit = Math.max(1, lampSpots.length);
+
   return (
     <group>
-      {lampSpots.map((spot, i) => {
-        const y = heightAt(spot.x, spot.z);
-        return (
-          <group key={`lamp-${i}`} position={[spot.x, y, spot.z]}>
-            {/* Wrought Iron Post */}
-            <mesh position={[0, 1.4, 0]} castShadow material={gardenWood}>
-              <cylinderGeometry args={[0.08, 0.12, 2.8, 8]} />
-            </mesh>
-            {/* Lantern Bracket Arm */}
-            <mesh position={[0, 2.7, 0]} castShadow material={gold}>
-              <boxGeometry args={[0.4, 0.08, 0.08]} />
-            </mesh>
-            {/* Glass Lantern Housing */}
-            <mesh position={[0.2, 2.5, 0]} castShadow>
-              <cylinderGeometry args={[0.16, 0.12, 0.35, 6]} />
-              <meshStandardMaterial color="#ffd700" emissive="#ffb703" emissiveIntensity={isNight ? 1.8 : 0.2} />
-            </mesh>
-            {/* Warm Volumetric Point Light — night only */}
-            {isNight && (
-              <pointLight position={[0.2, 2.5, 0]} color="#ffb703" intensity={3.5} distance={7} decay={2} />
-            )}
+      <Instances limit={limit} castShadow>
+        <cylinderGeometry args={[0.08, 0.12, 2.8, 8]} />
+        <primitive object={gardenWood} attach="material" />
+        {lampSpots.map((spot, i) => (
+          <group key={`lamp-wood-${i}`} position={[spot.x, heightAt(spot.x, spot.z), spot.z]}>
+            <Instance position={[0, 1.4, 0]} />
           </group>
-        );
-      })}
+        ))}
+      </Instances>
+      
+      <Instances limit={limit} castShadow>
+        <boxGeometry args={[0.4, 0.08, 0.08]} />
+        <primitive object={gold} attach="material" />
+        {lampSpots.map((spot, i) => (
+          <group key={`lamp-gold-${i}`} position={[spot.x, heightAt(spot.x, spot.z), spot.z]}>
+            <Instance position={[0, 2.7, 0]} />
+          </group>
+        ))}
+      </Instances>
+      
+      <Instances limit={limit} castShadow>
+        <cylinderGeometry args={[0.16, 0.12, 0.35, 6]} />
+        <meshStandardMaterial color="#ffd700" emissive="#ffb703" emissiveIntensity={isNight ? 5.0 : 0.2} />
+        {lampSpots.map((spot, i) => (
+          <group key={`lamp-glass-${i}`} position={[spot.x, heightAt(spot.x, spot.z), spot.z]}>
+            <Instance position={[0.2, 2.5, 0]} />
+          </group>
+        ))}
+      </Instances>
     </group>
   );
 }
@@ -208,18 +224,27 @@ function PlazaBalustrade() {
     return arr;
   }, []);
 
+  const limit = Math.max(1, posts.length);
   return (
     <group>
-      {posts.map((p, i) => (
-        <group key={`plaza-post-${i}`} position={[p.x, heightAt(p.x, p.z), p.z]}>
-          <mesh position={[0, 0.45, 0]} castShadow material={marble}>
-            <cylinderGeometry args={[0.22, 0.26, 0.9, 8]} />
-          </mesh>
-          <mesh position={[0, 0.95, 0]} castShadow material={gold}>
-            <sphereGeometry args={[0.15, 8, 8]} />
-          </mesh>
-        </group>
-      ))}
+      <Instances limit={limit} castShadow>
+        <cylinderGeometry args={[0.22, 0.26, 0.9, 8]} />
+        <primitive object={marble} attach="material" />
+        {posts.map((p, i) => (
+          <group key={`plaza-post-marble-${i}`} position={[p.x, heightAt(p.x, p.z), p.z]}>
+            <Instance position={[0, 0.45, 0]} />
+          </group>
+        ))}
+      </Instances>
+      <Instances limit={limit} castShadow>
+        <sphereGeometry args={[0.15, 8, 8]} />
+        <primitive object={gold} attach="material" />
+        {posts.map((p, i) => (
+          <group key={`plaza-post-gold-${i}`} position={[p.x, heightAt(p.x, p.z), p.z]}>
+            <Instance position={[0, 0.95, 0]} />
+          </group>
+        ))}
+      </Instances>
     </group>
   );
 }

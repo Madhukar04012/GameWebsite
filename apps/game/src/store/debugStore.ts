@@ -38,9 +38,9 @@ export const useDebugStore = create<DebugState>((set, get) => ({
   roads: true,
   physics: false,
   worldMap: false,
-  perfNpcs: true,
-  perfPostFX: true,
-  perfLights: true,
+  perfNpcs: false,
+  perfPostFX: false,
+  perfLights: false,
   set: (key, value) => set({ [key]: value } as Partial<DebugState>),
   toggle: (key) => set({ [key]: !get()[key] } as Partial<DebugState>),
 }));

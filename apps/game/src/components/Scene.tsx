@@ -7,18 +7,10 @@ import { PlayerEntity } from "../systems/PlayerEntity";
 import { ThirdPersonCamera } from "../systems/ThirdPersonCamera";
 import { RemotePlayers } from "../systems/RemotePlayers";
 import { CapitalKingdom } from "../world/CapitalKingdom";
-import { FlowerFields } from "../world/FlowerFields";
-import { Harbor } from "../world/Harbor";
 import { Terrain } from "../world/Terrain";
 import { DayNightCycle } from "../world/DayNightCycle";
 import { River } from "../world/River";
-import { WeatherController } from "../world/WeatherController";
-import { Vegetation } from "../world/Vegetation";
-import { DustMotes } from "../world/DustMotes";
-import { Biomes } from "../world/Biomes";
-import { FireflySwarm } from "../world/FireflySwarm";
-import { GroundMist } from "../world/GroundMist";
-import { EffectComposer, Bloom, Vignette, Noise, ToneMapping, BrightnessContrast, HueSaturation, ChromaticAberration, SSAO } from "@react-three/postprocessing";
+import { EffectComposer, Bloom, Vignette, ToneMapping, BrightnessContrast, HueSaturation, SSAO } from "@react-three/postprocessing";
 import { PlayerSpawn } from "../world/PlayerSpawn";
 import type { PlayerAPI } from "../systems/PlayerEntity";
 import { useDebugStore } from "../store/debugStore";
@@ -26,31 +18,24 @@ import { useQualitySettings } from "../systems/GraphicsScalability";
 import { EffectPlayer } from "../systems/EffectPlayer";
 import { AudioController } from "../systems/AudioController";
 import { PLAYER_SPAWN, SOUTH_GATE_POSITION, WORLD_SIZE } from "@legend/shared";
-import { StorytellingVignettes } from "../world/StorytellingVignettes";
 import { LandmarkLighting } from "../world/LandmarkLighting";
-import { ExplorationLandmarks } from "../world/ExplorationLandmarks";
-import { Waterfall } from "../world/Waterfall";
-import { DenseGrass } from "../world/DenseGrass";
-import { AmbientWildlife } from "../world/AmbientWildlife";
-import { WorldWaypoints } from "../world/WorldWaypoints";
 
-/**
- * Scene — world composition.
- *
- * Layout mirrors the roadmap's World tree:
- *   Environment → Terrain → Roads/Walls/Districts/Vegetation → Player/Camera.
- *
- * Architectural note: the R3F scene consumes engine state (heightAt, player
- * state via PlayerEntity apiRef) rather than owning it; gameplay systems live
- * in packages/engine.
- */
+// Components temporarily disabled for Emergency Performance Recovery:
+// import { FlowerFields } from "../world/FlowerFields";
+// import { Harbor } from "../world/Harbor";
+// import { WeatherController } from "../world/WeatherController";
+// import { Vegetation } from "../world/Vegetation";
+// import { DustMotes } from "../world/DustMotes";
+// import { Biomes } from "../world/Biomes";
+// import { FireflySwarm } from "../world/FireflySwarm";
+// import { GroundMist } from "../world/GroundMist";
+// import { StorytellingVignettes } from "../world/StorytellingVignettes";
+// import { ExplorationLandmarks } from "../world/ExplorationLandmarks";
+// import { Waterfall } from "../world/Waterfall";
+// import { DenseGrass } from "../world/DenseGrass";
+// import { AmbientWildlife } from "../world/AmbientWildlife";
+// import { WorldWaypoints } from "../world/WorldWaypoints";
 
-/**
- * Offline grounded IBL — RoomEnvironment renders an interior probe in-memory
- * via PMREMGenerator (no network fetch, respects the offline constraint). PBR
- * materials (water fresnel, castle stone, gold accents) pick it up for
- * believable ambient reflection without an external HDR.
- */
 function GroundedEnvironment() {
   const gl = useThree((s) => s.gl);
   const scene = useThree((s) => s.scene);
@@ -92,6 +77,10 @@ export function Scene() {
       <River />
 
       <CapitalKingdom showLabels={debug.labels} />
+
+      {/* ====================================================
+          EMERGENCY PERFORMANCE RECOVERY - TEMPORARILY DISABLED 
+          ====================================================
       <StorytellingVignettes />
       <FlowerFields />
       <Vegetation />
@@ -99,19 +88,14 @@ export function Scene() {
       <DustMotes />
       <GroundMist />
       <FireflySwarm position={[0, 2, 0]} count={80} radius={30} color="#2a9d8f" />
-
-      {/* Biomes — four distinctive surrounding regions compass-anchored around
-          the Capital Kingdom. Self-contained: ground, instanced props, and
-          atmospheric effects. Rendered last so they overlay base terrain. */}
       <Biomes />
       <Waterfall />
       <ExplorationLandmarks />
       <DenseGrass />
       <AmbientWildlife />
       <WorldWaypoints />
-
-      {/* Weather effects (rain / lightning / fog / wind) driven by worldStore. */}
       <WeatherController />
+      ====================================================== */}
 
       {/* Pooled particle effects + procedural ambient audio, mounted once. */}
       <EffectPlayer />
@@ -159,12 +143,14 @@ export function Scene() {
       {!debug.physics && settings.postProcessing && debug.perfPostFX && (() => {
         const children = [];
         if (settings.ssao) children.push(<SSAO key="ssao" radius={12} intensity={3.0} distanceFalloff={0.25} color={new THREE.Color("#1a1a2e")} />);
-        if (settings.bloom) children.push(<Bloom key="bloom" luminanceThreshold={0.8} luminanceSmoothing={0.6} intensity={1.2} mipmapBlur />);
+        if (settings.bloom) children.push(<Bloom key="bloom" luminanceThreshold={0.8} luminanceSmoothing={0.6} intensity={0.6} mipmapBlur />); // lowered bloom
         if (settings.vignette) children.push(<Vignette key="vignette" eskil={false} offset={0.15} darkness={0.45} />);
-        if (settings.ssao) children.push(<Noise key="noise" intensity={0.08} size={1} opacity={0.3} />);
-        if (settings.ssao) children.push(<ChromaticAberration key="ca" offset={[0.0006, 0.001]} />);
-        children.push(<ToneMapping key="tm" mode={THREE.ACESFilmicToneMapping} exposure={1.15} />);
-        children.push(<BrightnessContrast key="bc" brightness={0.01} contrast={0.08} />);
+        
+        // NOISE AND CHROMATIC ABERRATION REMOVED FOR CLEAN IMAGE
+        
+        // ToneMapping exposure lowered to 1.0 (from 1.15) to fix overexposure
+        children.push(<ToneMapping key="tm" mode={THREE.ACESFilmicToneMapping} exposure={1.0} />);
+        children.push(<BrightnessContrast key="bc" brightness={0} contrast={0.05} />); // flattened brightness
         children.push(<HueSaturation key="hs" saturation={0.14} />);
         return <EffectComposer enableNormalPass={false} multisampling={settings.multisampling} frameBufferType={THREE.HalfFloatType}>{children}</EffectComposer>;
       })()}

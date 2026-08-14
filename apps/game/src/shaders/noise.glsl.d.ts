@@ -1,0 +1,27 @@
+/**
+ * Shared GLSL noise — string chunks injected into patched MeshStandardMaterial
+ * shaders via onBeforeCompile. Single source for all procedural materials.
+ *
+ * Value-noise + fBm (fast, deterministic, no textures). Ridged variant for
+ * crack/vein lines. All world-space so UVs aren't needed for terrain/stone.
+ */
+/** Deterministic hash of a 2D point → [0,1). */
+export declare const GLSL_HASH = "\nfloat hash21(vec2 p) {\n  p = fract(p * vec2(123.34, 456.21));\n  p += dot(p, p + 45.32);\n  return fract(p.x * p.y);\n}\n";
+/** Smooth value noise on a 2D grid (bilinear between hashed lattice points). */
+export declare const GLSL_VALUE_NOISE = "\nfloat valueNoise2D(vec2 p) {\n  vec2 i = floor(p);\n  vec2 f = fract(p);\n  // Smoothstep fade for C0 continuity.\n  vec2 u = f * f * (3.0 - 2.0 * f);\n  float a = hash21(i);\n  float b = hash21(i + vec2(1.0, 0.0));\n  float c = hash21(i + vec2(0.0, 1.0));\n  float d = hash21(i + vec2(1.0, 1.0));\n  return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);\n}\n";
+/** fBm: summed octaves of value noise → roughness/marble/terrain detail. */
+export declare const GLSL_FBM = "\nfloat fbm(vec2 p) {\n  float total = 0.0;\n  float amp = 0.5;\n  float freq = 1.0;\n  for (int i = 0; i < 5; i++) {\n    total += valueNoise2D(p * freq) * amp;\n    freq *= 2.0;\n    amp *= 0.5;\n  }\n  return total; // ~[0,1]\n}\n\nfloat fbm6(vec2 p) {\n  // Higher-octave variant for fine surface detail.\n  float total = 0.0;\n  float amp = 0.5;\n  float freq = 1.0;\n  for (int i = 0; i < 6; i++) {\n    total += valueNoise2D(p * freq) * amp;\n    freq *= 2.07;\n    amp *= 0.5;\n  }\n  return total;\n}\n";
+/** Ridged noise: abs(0.5 - value) gives vein/crack lines. */
+export declare const GLSL_RIDGED = "\nfloat ridged(vec2 p) {\n  return 1.0 - abs(fbm(p) - 0.5) * 2.0; // [0,1], peaks at the veins\n}\n";
+/** Voronoi-ish cell id for cobblestone stones. Returns vec2(id, edge). */
+export declare const GLSL_VORONOI = "\nvec2 voronoiCells(vec2 p, out vec2 cellUV) {\n  vec2 i = floor(p);\n  vec2 f = fract(p);\n  float minDist = 8.0;\n  vec2 closest = vec2(0.0);\n  for (int y = -1; y <= 1; y++) {\n    for (int x = -1; x <= 1; x++) {\n      vec2 nb = vec2(float(x), float(y));\n      vec2 cellPoint = nb + vec2(hash21(i + nb), hash21(i + nb + 17.0));\n      vec2 diff = nb + cellPoint - f;\n      float d = dot(diff, diff);\n      if (d < minDist) {\n        minDist = d;\n        closest = i + nb;\n      }\n    }\n  }\n  cellUV = f;\n  float edge = clamp(minDist * 8.0, 0.0, 1.0); // 0 at center, 1 at edge\n  return closest; // the owning cell's integer id\n}\n";
+/** Full noise library, concatenated for easy injection. */
+export declare const GLSL_NOISE_LIB: string;
+/**
+ * Terrain-style palette helpers (mirrors groundTypeAt logic on GPU).
+ * Returns a per-region albedo + roughness based on world height + slope +
+ * noise. Used by the terrain material; kept here so stone props can reuse
+ * the moss/slope tint.
+ */
+export declare const GLSL_GROUND_BLEND = "\n// World-space ground blend \u2014 stylized AAA fantasy grass / dirt / stone / sand / rock.\nvec3 groundAlbedo(vec3 worldPos, vec3 geomNormal, float seed) {\n  vec2 wp = worldPos.xz + seed;\n  float h = worldPos.y;\n  float slope = 1.0 - clamp(geomNormal.y, 0.0, 1.0); // 0 flat, 1 vertical\n  float n = fbm(wp * 0.08);\n  float detail = fbm(wp * 0.4);\n\n  // Painterly stylized grass palette (lush emerald with warm golden highlights)\n  vec3 grassDeep = vec3(0.16, 0.38, 0.14);\n  vec3 grassMid  = vec3(0.26, 0.56, 0.20);\n  vec3 grassSun  = vec3(0.38, 0.68, 0.24);\n  vec3 grass = mix(grassDeep, grassMid, n);\n  grass = mix(grass, grassSun, smoothstep(0.4, 0.8, detail));\n\n  // Rich warm earth & trail loam\n  vec3 dirt = mix(vec3(0.36, 0.24, 0.14), vec3(0.48, 0.34, 0.20), n);\n  \n  // Warm royal city paving stone\n  vec3 stone = mix(vec3(0.58, 0.54, 0.48), vec3(0.70, 0.66, 0.60), n);\n\n  // Soft golden coastal sand\n  vec3 sand = mix(vec3(0.78, 0.68, 0.48), vec3(0.88, 0.78, 0.58), n);\n\n  // Mountain cliff rock with mossy top-facing blending\n  vec3 rockBase = mix(vec3(0.38, 0.40, 0.42), vec3(0.50, 0.52, 0.55), n);\n  vec3 rockMoss = mix(rockBase, vec3(0.24, 0.42, 0.18), clamp((1.0 - slope * 1.5), 0.0, 0.5));\n  vec3 rock = rockMoss;\n\n  vec3 col = grass;\n  // Dirt ring just past the city radius (~60..72)\n  float cityR = 60.0;\n  float distR = length(worldPos.xz);\n  col = mix(col, dirt, smoothstep(cityR, cityR + 12.0, distR) * (0.6 + 0.4 * n));\n\n  // City interior paving stone\n  col = mix(col, stone, (1.0 - smoothstep(cityR - 6.0, cityR, distR)));\n\n  // High ground & cliffs\n  col = mix(col, rock, smoothstep(3.5, 6.0, h));\n  col = mix(col, rock, smoothstep(0.32, 0.58, slope));\n\n  // Far-south beach sand\n  col = mix(col, sand, smoothstep(-150.0, -135.0, worldPos.z) * (1.0 - smoothstep(0.0, 1.5, abs(h))));\n\n  // Subtle painterly micro-texture variation\n  col *= 0.94 + 0.12 * fbm(wp * 0.8);\n  return col;\n}\n\nfloat groundRoughness(vec3 worldPos, vec3 geomNormal) {\n  float slope = 1.0 - clamp(geomNormal.y, 0.0, 1.0);\n  float base = 0.90;\n  base = mix(base, 0.72, smoothstep(0.32, 0.58, slope)); // rock faces catch specular sheen\n  base += (fbm(worldPos.xz * 0.3) - 0.5) * 0.1;\n  return clamp(base, 0.55, 1.0);\n}\n";
+//# sourceMappingURL=noise.glsl.d.ts.map

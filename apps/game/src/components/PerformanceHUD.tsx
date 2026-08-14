@@ -4,10 +4,9 @@ import { Html } from '@react-three/drei';
 import { globalNavGraph } from '@legend/shared';
 import { useNPCStore } from '../store/npcStore';
 import { useDebugStore } from '../store/debugStore';
-import * as THREE from 'three';
 
 export function PerformanceHUD() {
-  const { gl, scene } = useThree();
+  const { gl } = useThree();
   const npcs = useNPCStore(state => state.npcs);
   const debug = useDebugStore();
   
@@ -37,11 +36,6 @@ export function PerformanceHUD() {
     triangles: 0,
     geometries: 0,
     textures: 0,
-    meshCount: 0,
-    instancedMeshCount: 0,
-    object3dCount: 0,
-    materialCount: 0,
-    lightCount: 0,
     npcActive: 0,
     npcTotal: 0,
     npcTiers: { t0: 0, t1: 0, t2: 0, t3: 0 },
@@ -81,26 +75,6 @@ export function PerformanceHUD() {
       const aStarAvgTime = aStarReqs > 0 ? (timeDiff / aStarReqs).toFixed(2) : 0;
       const aStarMax = state.current.aStarMaxTime.toFixed(2);
       
-      // Scene Counts
-      let meshes = 0, instanced = 0, objects = 0, lights = 0;
-      const materials = new Set<string>();
-      
-      scene.traverse((obj: any) => {
-        objects++;
-        if (obj.isMesh) {
-          meshes++;
-          if (obj.isInstancedMesh) instanced++;
-          if (obj.material) {
-            if (Array.isArray(obj.material)) {
-              obj.material.forEach((m: any) => materials.add(m.uuid));
-            } else {
-              materials.add(obj.material.uuid);
-            }
-          }
-        }
-        if (obj.isLight) lights++;
-      });
-      
       // Count NPC tiers
       let t0 = 0, t1 = 0, t2 = 0, t3 = 0;
       npcs.forEach(n => {
@@ -118,11 +92,6 @@ export function PerformanceHUD() {
         triangles: gl.info.render.triangles,
         geometries: gl.info.memory.geometries,
         textures: gl.info.memory.textures,
-        meshCount: meshes,
-        instancedMeshCount: instanced,
-        object3dCount: objects,
-        materialCount: materials.size,
-        lightCount: lights,
         npcTotal: npcs.length,
         npcActive: t0 + t1, 
         npcTiers: { t0, t1, t2, t3 },
@@ -147,12 +116,6 @@ export function PerformanceHUD() {
         FPS: {metrics.fps} | Frame: {metrics.frameTime}ms<br/>
         Draw Calls: {metrics.drawCalls} | Tris: {(metrics.triangles / 1000000).toFixed(2)}M<br/>
         Geoms: {metrics.geometries} | Tex: {metrics.textures}<br/>
-        <br/>
-        <b>SCENE COUNTS</b><br/>
-        Object3D: {metrics.object3dCount}<br/>
-        Mesh: {metrics.meshCount} (Instanced: {metrics.instancedMeshCount})<br/>
-        Materials: {metrics.materialCount}<br/>
-        Lights: {metrics.lightCount}<br/>
         <br/>
         <span style={{color: debug.perfNpcs ? 'lime' : 'red'}}>[F8] NPCs: {debug.perfNpcs ? 'ON' : 'OFF'}</span><br/>
         Total: {metrics.npcTotal} | Rendered(Active): {metrics.npcActive}<br/>

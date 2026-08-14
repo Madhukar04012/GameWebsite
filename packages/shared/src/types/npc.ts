@@ -23,6 +23,8 @@ export interface NPCSimState {
   position: { x: number; y: number; z: number };
   targetDestination: { x: number; z: number } | null;
   velocity: number;
+  currentPath?: { x: number; y: number; z: number }[];
+  pathIndex?: number;
 }
 
 export interface Household {
