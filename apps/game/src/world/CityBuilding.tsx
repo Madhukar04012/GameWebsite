@@ -1,395 +1,279 @@
+import * as THREE from "three";
+import { heightAt } from "@legend/engine";
+import type { BuildingDef } from "@legend/shared";
+import { GeometryBuilder } from "./GeometryBuilder";
+import { INTERIOR_REGISTRY } from "./interiors/InteriorRegistry";
 import { useWorldStore } from "../store/worldStore";
 import { useFrame } from "@react-three/fiber";
 import { useMemo } from "react";
-import * as THREE from "three";
-import { heightAt } from "@legend/engine";
-import type { BuildingDef, ArchFamily } from "@legend/shared";
-import { getDistrictMaterials, DistrictMaterialSet, getAllDistrictMaterials } from "../materials/createDistrictMaterials";
-import { INTERIOR_REGISTRY } from "./interiors/InteriorRegistry";
-import { createStoneMaterial } from "../materials/createStoneMaterial";
-import { createWoodMaterial } from "../materials/createWoodMaterial";
-import { createMetalMaterial } from "../materials/createMetalMaterial";
+import { getAllDistrictMaterials } from "../materials/createDistrictMaterials";
 
-const shopSignGoldMat = new THREE.MeshStandardMaterial({ color: "#d4af37", roughness: 0.4, metalness: 0.8 });
-
-interface CityBuildingProps {
-  def: BuildingDef;
-  color?: string;
-  district?: string;
-}
-
-export function CityBuilding({ def, color = "#cccccc", district = "residential" }: CityBuildingProps) {
+export function buildCityBuildingGeometry(def: BuildingDef, builder: GeometryBuilder, district = "residential") {
   const { x, z, w, d, h, roof = "gable", floors = 2, family = "residential", isCorner = false, facadeType = "timber", hasBalcony = false, hasChimney = false, shopSign } = def;
   const roofH = Math.max(1.2, h * 0.32);
 
-  const mats = useMemo(() => getDistrictMaterials(district), [district]);
-  const { wall, plaster, brick, roof: roofMat, wood, glass, metal, accent, banner } = mats;
-
-  let baseMat = wall;
-  let upperMat = wall;
-  if (facadeType === "plaster") { baseMat = plaster; upperMat = plaster; }
-  else if (facadeType === "brick") { baseMat = brick; upperMat = brick; }
-  else if (facadeType === "mixed") { baseMat = wall; upperMat = plaster; }
-  else if (facadeType === "timber") { baseMat = plaster; upperMat = plaster; }
+  let baseMat = "wall";
+  let upperMat = "wall";
+  if (facadeType === "plaster") { baseMat = "plaster"; upperMat = "plaster"; }
+  else if (facadeType === "brick") { baseMat = "brick"; upperMat = "brick"; }
+  else if (facadeType === "mixed") { baseMat = "wall"; upperMat = "plaster"; }
+  else if (facadeType === "timber") { baseMat = "plaster"; upperMat = "plaster"; }
 
   const beamW = 0.18;
   const corners = [
     [-w / 2, -d / 2], [w / 2, -d / 2], [-w / 2, d / 2], [w / 2, d / 2],
   ];
 
-  const { baseY, minH, doorTerrainY } = useMemo(() => {
-    let maxH = -Infinity;
-    let minH = Infinity;
-    const pts = [[0, 0], ...corners];
-    for (const [cx, cz] of pts) {
-      const h = heightAt(x + cx, z + cz);
-      if (h > maxH) maxH = h;
-      if (h < minH) minH = h;
-    }
-    const baseY = maxH + 0.1;
-    const doorTerrainY = heightAt(x, z + d / 2);
-    return { baseY, minH, doorTerrainY };
-  }, [x, z, w, d]);
+  let maxH = -Infinity;
+  let minH = Infinity;
+  const pts = [[0, 0], ...corners];
+  for (const [cx, cz] of pts) {
+    const hh = heightAt(x + cx, z + cz);
+    if (hh > maxH) maxH = hh;
+    if (hh < minH) minH = hh;
+  }
+  const baseY = maxH + 0.1;
+  const doorTerrainY = heightAt(x, z + d / 2);
 
   const fndHeight = baseY - minH + 1.2;
   const fndCenterY = 0.7 - fndHeight / 2;
-
   const storyH = h / floors;
   
-  // Calculate stairs if door is above terrain
   const stairDrop = baseY - doorTerrainY;
   const stairSteps = stairDrop > 0.2 ? Math.ceil(stairDrop / 0.2) : 0;
 
   const interiorDef = def.label ? INTERIOR_REGISTRY[def.label] : undefined;
 
-  return (
-    <group position={[x, baseY, z]} userData={{ isBuilding: true }}>
-      {/* 1. Foundation */}
-      <mesh position={[0, fndCenterY, 0]} castShadow receiveShadow material={baseMat}>
-        <boxGeometry args={[w + 0.5, fndHeight, d + 0.5]} />
-      </mesh>
-      <mesh position={[0, 0.7, 0]} castShadow receiveShadow material={wood}>
-        <boxGeometry args={[w + 0.25, 0.12, d + 0.25]} />
-      </mesh>
-      
-      {/* Procedural Stairs to Street Level */}
-      {stairSteps > 0 && Array.from({ length: stairSteps }).map((_, i) => {
-        const stepY = -0.1 - i * 0.2;
-        const stepZ = d / 2 + 0.25 + i * 0.3;
-        return (
-          <mesh key={`stair-${i}`} position={[0, stepY, stepZ]} castShadow receiveShadow material={baseMat}>
-            <boxGeometry args={[1.8, 0.2, 0.3]} />
-          </mesh>
-        );
-      })}
+  const buildingMat = new THREE.Matrix4().setPosition(x, baseY, z);
+  builder.pushMatrix(buildingMat);
 
-      {/* 2. Main Wall */}
-      {interiorDef ? (
-        <group position={[0, storyH / 2 + 0.3, 0]}>
-          <mesh position={[0, 0, -d/2 + 0.1]} castShadow receiveShadow material={baseMat}>
-            <boxGeometry args={[w, storyH, 0.2]} />
-          </mesh>
-          <mesh position={[-w/2 + 0.1, 0, 0]} castShadow receiveShadow material={baseMat}>
-            <boxGeometry args={[0.2, storyH, d]} />
-          </mesh>
-          <mesh position={[w/2 - 0.1, 0, 0]} castShadow receiveShadow material={baseMat}>
-            <boxGeometry args={[0.2, storyH, d]} />
-          </mesh>
-          <mesh position={[-w/4 - 0.3, 0, d/2 - 0.1]} castShadow receiveShadow material={baseMat}>
-            <boxGeometry args={[w/2 - 0.6, storyH, 0.2]} />
-          </mesh>
-          <mesh position={[w/4 + 0.3, 0, d/2 - 0.1]} castShadow receiveShadow material={baseMat}>
-            <boxGeometry args={[w/2 - 0.6, storyH, 0.2]} />
-          </mesh>
-          {storyH > 2.4 && (
-            <mesh position={[0, 1.2, d/2 - 0.1]} castShadow receiveShadow material={baseMat}>
-              <boxGeometry args={[1.2, storyH - 2.4, 0.2]} />
-            </mesh>
-          )}
-        </group>
-      ) : (
-        <mesh position={[0, storyH / 2 + 0.3, 0]} castShadow receiveShadow material={baseMat}>
-          <boxGeometry args={[w, storyH, d]} />
-        </mesh>
-      )}
-      
-      {floors > 1 && (
-        <mesh position={[0, storyH + (h - storyH) / 2 + 0.3, 0]} castShadow receiveShadow material={upperMat}>
-          <boxGeometry args={[w, h - storyH, d]} />
-        </mesh>
-      )}
+  // 1. Foundation
+  builder.addBox(baseMat, w + 0.5, fndHeight, d + 0.5, [0, fndCenterY, 0]);
+  builder.addBox("wood", w + 0.25, 0.12, d + 0.25, [0, 0.7, 0]);
+  
+  // Procedural Stairs
+  if (stairSteps > 0) {
+    for (let i = 0; i < stairSteps; i++) {
+      const stepY = -0.1 - i * 0.2;
+      const stepZ = d / 2 + 0.25 + i * 0.3;
+      builder.addBox(baseMat, 1.8, 0.2, 0.3, [0, stepY, stepZ]);
+    }
+  }
 
-      {/* 3. Timber Framing */}
-      {facadeType === "timber" && corners.map((c, i) => (
-        <mesh key={`corner-${i}`} position={[c[0], h / 2 + 0.3, c[1]]} castShadow receiveShadow material={wood}>
-          <boxGeometry args={[beamW, h + 0.1, beamW]} />
-        </mesh>
-      ))}
+  // 2. Main Wall
+  if (interiorDef) {
+    const wallMat = new THREE.Matrix4().setPosition(0, storyH / 2 + 0.3, 0);
+    builder.pushMatrix(wallMat);
+    builder.addBox(baseMat, w, storyH, 0.2, [0, 0, -d/2 + 0.1]);
+    builder.addBox(baseMat, 0.2, storyH, d, [-w/2 + 0.1, 0, 0]);
+    builder.addBox(baseMat, 0.2, storyH, d, [w/2 - 0.1, 0, 0]);
+    builder.addBox(baseMat, w/2 - 0.6, storyH, 0.2, [-w/4 - 0.3, 0, d/2 - 0.1]);
+    builder.addBox(baseMat, w/2 - 0.6, storyH, 0.2, [w/4 + 0.3, 0, d/2 - 0.1]);
+    if (storyH > 2.4) {
+      builder.addBox(baseMat, 1.2, storyH - 2.4, 0.2, [0, 1.2, d/2 - 0.1]);
+    }
+    builder.popMatrix();
+  } else {
+    builder.addBox(baseMat, w, storyH, d, [0, storyH / 2 + 0.3, 0]);
+  }
+  
+  if (floors > 1) {
+    builder.addBox(upperMat, w, h - storyH, d, [0, storyH + (h - storyH) / 2 + 0.3, 0]);
+  }
 
-      {/* 4. Jettying & Beams */}
-      {Array.from({ length: floors }).map((_, f) => {
-        const floorY = (f + 1) * storyH + 0.3;
-        if (floorY >= h + 0.2) return null;
-        return (
-          <group key={`floor-beam-${f}`} position={[0, floorY, 0]}>
-            <mesh castShadow receiveShadow material={wood}>
-              <boxGeometry args={[w + 0.22, 0.2, d + 0.22]} />
-            </mesh>
-            {[-w / 2 + 0.4, w / 2 - 0.4].map((bx) => (
-              <mesh key={`corbel-${bx}`} position={[bx, -0.15, d / 2 + 0.1]} castShadow material={wood}>
-                <boxGeometry args={[0.2, 0.3, 0.25]} />
-              </mesh>
-            ))}
-          </group>
-        );
-      })}
+  // 3. Timber Framing
+  if (facadeType === "timber") {
+    for (let i = 0; i < corners.length; i++) {
+      const c = corners[i];
+      builder.addBox("wood", beamW, h + 0.1, beamW, [c[0], h / 2 + 0.3, c[1]]);
+    }
+  }
 
-      <mesh position={[0, h + 0.35, 0]} castShadow material={accent ?? wood}>
-        <boxGeometry args={[w * 1.04, 0.16, d * 1.04]} />
-      </mesh>
+  // 4. Jettying & Beams
+  for (let f = 0; f < floors; f++) {
+    const floorY = (f + 1) * storyH + 0.3;
+    if (floorY >= h + 0.2) continue;
+    
+    const floorMat = new THREE.Matrix4().setPosition(0, floorY, 0);
+    builder.pushMatrix(floorMat);
+    builder.addBox("wood", w + 0.22, 0.2, d + 0.22);
+    builder.addBox("wood", 0.2, 0.3, 0.25, [-w / 2 + 0.4, -0.15, d / 2 + 0.1]);
+    builder.addBox("wood", 0.2, 0.3, 0.25, [w / 2 - 0.4, -0.15, d / 2 + 0.1]);
+    builder.popMatrix();
+  }
 
-      {/* Roof */}
-      <BuildingRoof kind={roof} w={w} d={d} h={h + 0.35} roofH={roofH} material={roofMat} accent={accent} isCorner={isCorner} wood={wood} />
+  builder.addBox("accent", w * 1.04, 0.16, d * 1.04, [0, h + 0.35, 0]);
 
-      {interiorDef && (
-        <group position={[0, 0.3, 0]}>
-           <interiorDef.component w={w} d={d} storyH={storyH} />
-        </group>
-      )}
+  // Roof
+  buildRoof(builder, roof, w, d, h + 0.35, roofH, isCorner);
 
-      {/* Doors & Ground Floor */}
-      <BuildingDoor family={family} w={w} d={d} storyH={storyH} woodMat={wood} metalMat={metal} glassMat={glass} isOpen={!!interiorDef} />
+  // Doors
+  buildDoor(builder, family, w, d, storyH, !!interiorDef);
 
-      {/* Windows & Awnings */}
-      <BuildingWindows family={family} w={w} d={d} h={h} floors={floors} storyH={storyH} woodMat={wood} glassMat={glass} bannerMat={banner} isCorner={isCorner} />
+  // Windows
+  buildWindows(builder, family, w, d, h, floors, storyH, isCorner);
 
-      {/* Balconies */}
-      {hasBalcony && floors >= 2 && (
-        <BuildingBalcony family={family} w={Math.min(3.2, w * 0.6)} d={d} floorY={storyH + 0.4} woodMat={wood} stoneMat={wall} metalMat={metal} />
-      )}
+  // Balconies
+  if (hasBalcony && floors >= 2) {
+    buildBalcony(builder, family, Math.min(3.2, w * 0.6), d, storyH + 0.4);
+  }
 
-      {/* Craft External Storage / Piles */}
-      {family === "craft" && (
-        <BuildingCraftProps w={w} d={d} woodMat={wood} metalMat={metal} />
-      )}
+  // Craft Props
+  if (family === "craft") {
+    buildCraftProps(builder, w, d);
+  }
 
-      {/* Chimney */}
-      {hasChimney && (
-        <BuildingChimney w={w} d={d} totalH={h + roofH * (roof === "flat" ? 0.2 : 0.8)} wallMat={brick} />
-      )}
+  // Chimney
+  if (hasChimney) {
+    buildChimney(builder, w, d, h + roofH * (roof === "flat" ? 0.2 : 0.8));
+  }
 
-      {/* Shop Sign */}
-      {shopSign && (
-        <BuildingShopSign sign={shopSign} d={d} woodMat={wood} metalMat={metal} />
-      )}
-    </group>
-  );
+  // Shop Sign
+  if (shopSign) {
+    buildShopSign(builder, d);
+  }
+
+  builder.popMatrix(); // buildingMat
+  
+  return { interiorDef, x, baseY, z, w, d, storyH };
 }
 
-function BuildingRoof({ kind, w, d, h, roofH, material, accent, isCorner, wood }: any) {
+function buildRoof(builder: GeometryBuilder, kind: string, w: number, d: number, h: number, roofH: number, isCorner: boolean) {
+  const m = new THREE.Matrix4();
   switch (kind) {
     case "flat":
-      return (
-        <group position={[0, h, 0]}>
-          <mesh position={[0, 0.12, 0]} castShadow receiveShadow material={material}>
-            <boxGeometry args={[w * 1.02, 0.24, d * 1.02]} />
-          </mesh>
-          {[-d / 2, d / 2].map((pz, zi) => (
-            <mesh key={`parapet-z-${zi}`} position={[0, 0.45, pz]} castShadow material={material}>
-              <boxGeometry args={[w * 0.98, 0.5, 0.28]} />
-            </mesh>
-          ))}
-          {[-w / 2, w / 2].map((px, xi) => (
-            <mesh key={`parapet-x-${xi}`} position={[px, 0.45, 0]} castShadow material={material}>
-              <boxGeometry args={[0.28, 0.5, d * 0.98]} />
-            </mesh>
-          ))}
-        </group>
-      );
+      m.setPosition(0, h, 0);
+      builder.pushMatrix(m);
+      builder.addBox("roof", w * 1.02, 0.24, d * 1.02, [0, 0.12, 0]);
+      builder.addBox("roof", w * 0.98, 0.5, 0.28, [0, 0.45, -d / 2]);
+      builder.addBox("roof", w * 0.98, 0.5, 0.28, [0, 0.45, d / 2]);
+      builder.addBox("roof", 0.28, 0.5, d * 0.98, [-w / 2, 0.45, 0]);
+      builder.addBox("roof", 0.28, 0.5, d * 0.98, [w / 2, 0.45, 0]);
+      builder.popMatrix();
+      break;
     case "shallow":
-      return (
-        <group position={[0, h, 0]}>
-          <mesh position={[0, 0.2, 0]} rotation={[0.1, 0, 0]} castShadow material={material}>
-            <boxGeometry args={[w * 1.1, 0.2, d * 1.1]} />
-          </mesh>
-        </group>
-      );
+      m.setPosition(0, h, 0);
+      builder.pushMatrix(m);
+      builder.addBox("roof", w * 1.1, 0.2, d * 1.1, [0, 0.2, 0], [0.1, 0, 0]);
+      builder.popMatrix();
+      break;
     case "hip":
-      return (
-        <group position={[0, h + roofH / 2, 0]}>
-          <mesh rotation={[0, Math.PI / 4, 0]} castShadow material={material}>
-             <cylinderGeometry args={[0, Math.max(w, d) * 0.8, roofH * 1.2, 4]} />
-          </mesh>
-        </group>
-      );
+      m.setPosition(0, h + roofH / 2, 0);
+      builder.pushMatrix(m);
+      builder.addCylinder("roof", 0, Math.max(w, d) * 0.8, roofH * 1.2, 4, undefined, [0, Math.PI / 4, 0]);
+      builder.popMatrix();
+      break;
     case "mansard":
-      return (
-        <group position={[0, h + roofH / 2, 0]}>
-          <mesh castShadow material={material}>
-            <cylinderGeometry args={[Math.min(w, d) * 0.4, Math.min(w, d) * 0.6, roofH * 1.2, 4]} />
-          </mesh>
-          {/* Iron Cresting */}
-          <mesh position={[0, roofH * 0.6 + 0.1, 0]} material={accent ?? wood}>
-             <boxGeometry args={[Math.min(w, d) * 0.7, 0.2, Math.min(w, d) * 0.7]} />
-          </mesh>
-        </group>
-      );
+      m.setPosition(0, h + roofH / 2, 0);
+      builder.pushMatrix(m);
+      builder.addCylinder("roof", Math.min(w, d) * 0.4, Math.min(w, d) * 0.6, roofH * 1.2, 4);
+      builder.addBox("accent", Math.min(w, d) * 0.7, 0.2, Math.min(w, d) * 0.7, [0, roofH * 0.6 + 0.1, 0]);
+      builder.popMatrix();
+      break;
     case "double-gable":
-      return (
-        <group position={[0, h + roofH / 2, 0]}>
-           {[-w * 0.25, w * 0.25].map((wx, i) => (
-             <mesh key={`gable-${i}`} position={[wx, 0, 0]} rotation={[0, Math.PI / 4, 0]} castShadow material={material}>
-               <coneGeometry args={[Math.min(w, d) * 0.5, roofH * 1.4, 4]} />
-             </mesh>
-           ))}
-        </group>
-      );
+      m.setPosition(0, h + roofH / 2, 0);
+      builder.pushMatrix(m);
+      builder.addCone("roof", Math.min(w, d) * 0.5, roofH * 1.4, 4, [-w * 0.25, 0, 0], [0, Math.PI / 4, 0]);
+      builder.addCone("roof", Math.min(w, d) * 0.5, roofH * 1.4, 4, [w * 0.25, 0, 0], [0, Math.PI / 4, 0]);
+      builder.popMatrix();
+      break;
     case "tower":
-      return (
-        <group position={[0, h, 0]}>
-          <mesh position={[0, 0.2, 0]} castShadow material={material}>
-            <cylinderGeometry args={[Math.min(w, d) * 0.72, Math.min(w, d) * 0.76, 0.4, 8]} />
-          </mesh>
-          <mesh position={[0, roofH * 0.7, 0]} castShadow material={material}>
-            <coneGeometry args={[Math.min(w, d) * 0.7, roofH * 1.4, 8]} />
-          </mesh>
-        </group>
-      );
+      m.setPosition(0, h, 0);
+      builder.pushMatrix(m);
+      builder.addCylinder("roof", Math.min(w, d) * 0.72, Math.min(w, d) * 0.76, 0.4, 8, [0, 0.2, 0]);
+      builder.addCone("roof", Math.min(w, d) * 0.7, roofH * 1.4, 8, [0, roofH * 0.7, 0]);
+      builder.popMatrix();
+      break;
     case "cone":
-      return (
-        <group position={[0, h, 0]}>
-          <mesh position={[0, roofH / 2, 0]} castShadow material={material}>
-            <coneGeometry args={[Math.max(w, d) * 0.72, roofH * 1.3, 8]} />
-          </mesh>
-        </group>
-      );
+      m.setPosition(0, h, 0);
+      builder.pushMatrix(m);
+      builder.addCone("roof", Math.max(w, d) * 0.72, roofH * 1.3, 8, [0, roofH / 2, 0]);
+      builder.popMatrix();
+      break;
     case "dome":
-      return (
-        <group position={[0, h, 0]}>
-          <mesh position={[0, 0, 0]} castShadow material={material}>
-            <sphereGeometry args={[Math.min(w, d) * 0.58, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
-          </mesh>
-        </group>
-      );
+      m.setPosition(0, h, 0);
+      builder.pushMatrix(m);
+      builder.addSphere("roof", Math.min(w, d) * 0.58, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2, [0, 0, 0]);
+      builder.popMatrix();
+      break;
     case "gable":
     default:
-      return (
-        <group position={[0, h + roofH / 2, 0]}>
-          <mesh rotation={[0, Math.PI / 4, 0]} castShadow material={material}>
-            <coneGeometry args={[Math.max(w, d) * 1.06, roofH * 1.4, 4]} />
-          </mesh>
-          {w > 4 && d > 4 && !isCorner && (
-            <>
-              {[-w * 0.25, w * 0.25].map((dx, i) => (
-                <group key={`dormer-${i}`} position={[dx, roofH * 0.1, d * 0.35]}>
-                  <mesh castShadow material={wood}>
-                    <boxGeometry args={[0.8, 1.2, 0.8]} />
-                  </mesh>
-                  <mesh position={[0, 0.7, 0]} rotation={[0, Math.PI / 4, 0]} castShadow material={material}>
-                    <coneGeometry args={[0.8, 0.6, 4]} />
-                  </mesh>
-                </group>
-              ))}
-            </>
-          )}
-        </group>
-      );
+      m.setPosition(0, h + roofH / 2, 0);
+      builder.pushMatrix(m);
+      builder.addCone("roof", Math.max(w, d) * 1.06, roofH * 1.4, 4, undefined, [0, Math.PI / 4, 0]);
+      if (w > 4 && d > 4 && !isCorner) {
+        [-w * 0.25, w * 0.25].forEach((dx) => {
+          const rm = new THREE.Matrix4().setPosition(dx, roofH * 0.1, d * 0.35);
+          builder.pushMatrix(rm);
+          builder.addBox("wood", 0.8, 1.2, 0.8);
+          builder.addCone("roof", 0.8, 0.6, 4, [0, 0.7, 0], [0, Math.PI / 4, 0]);
+          builder.popMatrix();
+        });
+      }
+      builder.popMatrix();
+      break;
   }
 }
 
-function BuildingDoor({ family, w, d, storyH, woodMat, metalMat, glassMat, isOpen = false }: any) {
+function buildDoor(builder: GeometryBuilder, family: string, w: number, d: number, storyH: number, isOpen: boolean) {
+  const m = new THREE.Matrix4().setPosition(0, 0, d / 2 + 0.02);
+  builder.pushMatrix(m);
   if (family === "commercial") {
-    // Grand double doors for shops
-    return (
-      <group position={[0, 0, d / 2 + 0.02]}>
-        <mesh position={[0, 1.3, 0.02]} castShadow receiveShadow material={woodMat}>
-          <boxGeometry args={[1.8, 2.6, 0.14]} />
-        </mesh>
-        {!isOpen && (
-          <>
-            <mesh position={[-0.45, 1.25, 0.06]} castShadow material={woodMat}>
-              <boxGeometry args={[0.7, 2.3, 0.06]} />
-            </mesh>
-            <mesh position={[0.45, 1.25, 0.06]} castShadow material={woodMat}>
-              <boxGeometry args={[0.7, 2.3, 0.06]} />
-            </mesh>
-            {/* Glass panels */}
-            <mesh position={[-0.45, 1.7, 0.1]} material={glassMat}>
-              <planeGeometry args={[0.4, 0.8]} />
-            </mesh>
-            <mesh position={[0.45, 1.7, 0.1]} material={glassMat}>
-              <planeGeometry args={[0.4, 0.8]} />
-            </mesh>
-          </>
-        )}
-      </group>
-    );
+    builder.addBox("wood", 1.8, 2.6, 0.14, [0, 1.3, 0.02]);
+    if (!isOpen) {
+      builder.addBox("wood", 0.7, 2.3, 0.06, [-0.45, 1.25, 0.06]);
+      builder.addBox("wood", 0.7, 2.3, 0.06, [0.45, 1.25, 0.06]);
+      builder.addPlane("glass", 0.4, 0.8, [-0.45, 1.7, 0.1]);
+      builder.addPlane("glass", 0.4, 0.8, [0.45, 1.7, 0.1]);
+    }
+  } else if (family === "craft") {
+    builder.addBox("wood", 2.4, 2.6, 0.1, [0, 1.4, 0.06]);
+    if (!isOpen) {
+      builder.addBox("metal", 0.8, 0.1, 0.04, [-0.6, 1.4, 0.12]);
+      builder.addBox("metal", 0.8, 0.1, 0.04, [0.6, 1.4, 0.12]);
+    }
+  } else if (family === "noble") {
+    builder.addBox("wood", 1.6, 2.6, 0.4, [0, 1.4, 0.15]);
+    if (!isOpen) {
+      builder.addBox("wood", 1.2, 2.4, 0.1, [0, 1.3, 0.06]);
+    }
+  } else {
+    builder.addBox("wood", 1.2, 2.3, 0.14, [0, 1.15, 0.02]);
+    if (!isOpen) {
+      builder.addBox("wood", 0.48, 2.0, 0.06, [-0.26, 1.1, 0.06]);
+      builder.addBox("wood", 0.48, 2.0, 0.06, [0.26, 1.1, 0.06]);
+    }
   }
-  if (family === "craft") {
-    // Large double workshop doors
-    return (
-      <group position={[0, 0, d / 2 + 0.02]}>
-        <mesh position={[0, 1.4, 0.06]} castShadow material={woodMat}>
-          <boxGeometry args={[2.4, 2.6, 0.1]} />
-        </mesh>
-        {!isOpen && [-0.6, 0.6].map(hx => (
-          <mesh key={`hinge-${hx}`} position={[hx, 1.4, 0.12]} material={metalMat}>
-            <boxGeometry args={[0.8, 0.1, 0.04]} />
-          </mesh>
-        ))}
-      </group>
-    );
-  }
-  if (family === "noble") {
-    // Ornate stone portal + heavy door
-    return (
-      <group position={[0, 0, d / 2 + 0.02]}>
-        <mesh position={[0, 1.4, 0.15]} castShadow material={woodMat}>
-           <boxGeometry args={[1.6, 2.6, 0.4]} />
-        </mesh>
-        {!isOpen && (
-          <mesh position={[0, 1.3, 0.06]} castShadow material={woodMat}>
-            <boxGeometry args={[1.2, 2.4, 0.1]} />
-          </mesh>
-        )}
-      </group>
-    );
-  }
-  // Standard residential
-  return (
-    <group position={[0, 0, d / 2 + 0.02]}>
-      <mesh position={[0, 1.15, 0.02]} castShadow receiveShadow material={woodMat}>
-        <boxGeometry args={[1.2, 2.3, 0.14]} />
-      </mesh>
-      {!isOpen && (
-        <>
-          <mesh position={[-0.26, 1.1, 0.06]} castShadow material={woodMat}>
-            <boxGeometry args={[0.48, 2.0, 0.06]} />
-          </mesh>
-          <mesh position={[0.26, 1.1, 0.06]} castShadow material={woodMat}>
-            <boxGeometry args={[0.48, 2.0, 0.06]} />
-          </mesh>
-        </>
-      )}
-    </group>
-  );
+  builder.popMatrix();
 }
 
-function BuildingWindows({ family, w, d, h, floors, storyH, woodMat, glassMat, bannerMat, isCorner }: any) {
-  const positions: any[] = [];
+function buildWindows(builder: GeometryBuilder, family: string, w: number, d: number, h: number, floors: number, storyH: number, isCorner: boolean) {
   const colsX = Math.max(1, Math.floor(w / 2.2));
   const spacingX = w / (colsX + 1);
+
+  if (family === "commercial") {
+    builder.addBox("banner", w * 0.9, 0.05, 1.2, [0, storyH * 0.9, d / 2 + 0.4], [-0.4, 0, 0]);
+  }
 
   for (let f = 1; f <= floors; f++) {
     const wy = (f - 0.45) * storyH;
     for (let col = 1; col <= colsX; col++) {
       if (f === 1 && colsX > 1 && col === Math.ceil(colsX / 2)) continue;
-      if (f === 1 && family === "commercial") continue; // Ground floor commercial handled by doors
-      if (f === 1 && family === "craft") continue; // Ground floor craft handled by double doors
+      if (f === 1 && family === "commercial") continue;
+      if (f === 1 && family === "craft") continue;
       const wx = -w / 2 + col * spacingX;
-      positions.push({ pos: [wx, wy, d / 2 + 0.04], rotY: 0, f });
+      
+      const p1 = new THREE.Matrix4().setPosition(wx, wy, d / 2 + 0.04);
+      builder.pushMatrix(p1);
+      buildWindowStyle(builder, family);
+      builder.popMatrix();
+
       if (!isCorner) {
-        positions.push({ pos: [wx, wy, -d / 2 - 0.04], rotY: Math.PI, f });
+        const p2 = new THREE.Matrix4().makeRotationY(Math.PI);
+        p2.setPosition(wx, wy, -d / 2 - 0.04);
+        builder.pushMatrix(p2);
+        buildWindowStyle(builder, family);
+        builder.popMatrix();
       }
     }
     if (d >= 4) {
@@ -397,150 +281,83 @@ function BuildingWindows({ family, w, d, h, floors, storyH, woodMat, glassMat, b
       const spacingZ = d / (colsZ + 1);
       for (let col = 1; col <= colsZ; col++) {
         const wz = -d / 2 + col * spacingZ;
-        positions.push({ pos: [-w / 2 - 0.04, wy, wz], rotY: -Math.PI / 2, f });
+        
+        const p1 = new THREE.Matrix4().makeRotationY(-Math.PI / 2);
+        p1.setPosition(-w / 2 - 0.04, wy, wz);
+        builder.pushMatrix(p1);
+        buildWindowStyle(builder, family);
+        builder.popMatrix();
+        
         if (!isCorner) {
-           positions.push({ pos: [w / 2 + 0.04, wy, wz], rotY: Math.PI / 2, f });
+          const p2 = new THREE.Matrix4().makeRotationY(Math.PI / 2);
+          p2.setPosition(w / 2 + 0.04, wy, wz);
+          builder.pushMatrix(p2);
+          buildWindowStyle(builder, family);
+          builder.popMatrix();
         }
       }
     }
   }
-
-  return (
-    <group>
-      {/* Commercial Awning */}
-      {family === "commercial" && (
-        <mesh position={[0, storyH * 0.9, d / 2 + 0.4]} rotation={[-0.4, 0, 0]} material={bannerMat}>
-           <boxGeometry args={[w * 0.9, 0.05, 1.2]} />
-        </mesh>
-      )}
-      
-      {positions.map(({ pos, rotY, f }, i) => (
-        <group key={`win-${i}`} position={pos} rotation={[0, rotY, 0]}>
-           {family === "noble" ? (
-             // Tall ornate window
-             <group>
-               <mesh position={[0, 0.2, 0]} castShadow receiveShadow material={woodMat}>
-                 <boxGeometry args={[0.8, 1.4, 0.08]} />
-               </mesh>
-               <mesh position={[0, 0.2, 0.02]} material={glassMat}>
-                 <planeGeometry args={[0.65, 1.2]} />
-               </mesh>
-             </group>
-           ) : family === "craft" ? (
-             // Small workshop vent/window
-             <group>
-               <mesh castShadow receiveShadow material={woodMat}>
-                 <boxGeometry args={[0.6, 0.5, 0.08]} />
-               </mesh>
-               <mesh position={[0, 0, 0.02]} material={glassMat}>
-                 <planeGeometry args={[0.4, 0.3]} />
-               </mesh>
-             </group>
-           ) : (
-             // Standard residential/commercial upper window
-             <group>
-               <mesh castShadow receiveShadow material={woodMat}>
-                 <boxGeometry args={[0.7, 0.85, 0.08]} />
-               </mesh>
-               <mesh position={[0, 0, 0.02]} material={glassMat}>
-                 <planeGeometry args={[0.55, 0.7]} />
-               </mesh>
-               <mesh position={[-0.42, 0, 0.03]} rotation={[0, 0.35, 0]} castShadow material={woodMat}>
-                 <boxGeometry args={[0.26, 0.75, 0.03]} />
-               </mesh>
-               <mesh position={[0.42, 0, 0.03]} rotation={[0, -0.35, 0]} castShadow material={woodMat}>
-                 <boxGeometry args={[0.26, 0.75, 0.03]} />
-               </mesh>
-             </group>
-           )}
-        </group>
-      ))}
-    </group>
-  );
 }
 
-function BuildingBalcony({ family, w, d, floorY, woodMat, stoneMat, metalMat }: any) {
+function buildWindowStyle(builder: GeometryBuilder, family: string) {
   if (family === "noble") {
-    return (
-      <group position={[0, floorY, d / 2 + 0.5]}>
-        <mesh castShadow material={stoneMat}>
-          <boxGeometry args={[w, 0.2, 1.2]} />
-        </mesh>
-        <mesh position={[0, 0.45, 0.55]} material={stoneMat}>
-          <boxGeometry args={[w, 0.15, 0.15]} />
-        </mesh>
-        {/* Stone pillars */}
-        {[-w/2+0.1, 0, w/2-0.1].map(x => (
-          <mesh key={`pillar-${x}`} position={[x, 0.25, 0.55]} material={stoneMat}>
-            <cylinderGeometry args={[0.05, 0.05, 0.4]} />
-          </mesh>
-        ))}
-      </group>
-    );
+    builder.addBox("wood", 0.8, 1.4, 0.08, [0, 0.2, 0]);
+    builder.addPlane("glass", 0.65, 1.2, [0, 0.2, 0.02]);
+  } else if (family === "craft") {
+    builder.addBox("wood", 0.6, 0.5, 0.08);
+    builder.addPlane("glass", 0.4, 0.3, [0, 0, 0.02]);
+  } else {
+    builder.addBox("wood", 0.7, 0.85, 0.08);
+    builder.addPlane("glass", 0.55, 0.7, [0, 0, 0.02]);
+    builder.addBox("wood", 0.26, 0.75, 0.03, [-0.42, 0, 0.03], [0, 0.35, 0]);
+    builder.addBox("wood", 0.26, 0.75, 0.03, [0.42, 0, 0.03], [0, -0.35, 0]);
   }
-  return (
-    <group position={[0, floorY, d / 2 + 0.5]}>
-      <mesh castShadow receiveShadow material={woodMat}>
-        <boxGeometry args={[w, 0.12, 1.0]} />
-      </mesh>
-      {[-w / 2 + 0.3, w / 2 - 0.3].map((bx) => (
-        <mesh key={`brace-${bx}`} position={[bx, -0.4, -0.2]} rotation={[0.45, 0, 0]} castShadow material={woodMat}>
-          <boxGeometry args={[0.12, 0.8, 0.12]} />
-        </mesh>
-      ))}
-      <mesh position={[0, 0.45, 0.45]} castShadow material={woodMat}>
-        <boxGeometry args={[w, 0.08, 0.08]} />
-      </mesh>
-    </group>
-  );
 }
 
-function BuildingCraftProps({ w, d, woodMat, metalMat }: any) {
-  return (
-    <group position={[-w / 2 - 0.4, 0.4, 0]}>
-      <mesh castShadow material={woodMat}>
-        <boxGeometry args={[0.8, 0.8, 0.8]} />
-      </mesh>
-      <mesh position={[0, 0.6, 0]} castShadow material={metalMat}>
-         <cylinderGeometry args={[0.2, 0.2, 0.4]} />
-      </mesh>
-    </group>
-  );
+function buildBalcony(builder: GeometryBuilder, family: string, w: number, d: number, floorY: number) {
+  const m = new THREE.Matrix4().setPosition(0, floorY, d / 2 + 0.5);
+  builder.pushMatrix(m);
+  if (family === "noble") {
+    builder.addBox("wall", w, 0.2, 1.2); // mapped to "wall" because stoneMat was "wall"
+    builder.addBox("wall", w, 0.15, 0.15, [0, 0.45, 0.55]);
+    [-w/2+0.1, 0, w/2-0.1].forEach(x => {
+      builder.addCylinder("wall", 0.05, 0.05, 0.4, 8, [x, 0.25, 0.55]);
+    });
+  } else {
+    builder.addBox("wood", w, 0.12, 1.0);
+    builder.addBox("wood", 0.12, 0.8, 0.12, [-w / 2 + 0.3, -0.4, -0.2], [0.45, 0, 0]);
+    builder.addBox("wood", 0.12, 0.8, 0.12, [w / 2 - 0.3, -0.4, -0.2], [0.45, 0, 0]);
+    builder.addBox("wood", w, 0.08, 0.08, [0, 0.45, 0.45]);
+  }
+  builder.popMatrix();
 }
 
-function BuildingChimney({ w, d, totalH, wallMat }: any) {
-  return (
-    <group position={[-w * 0.32, totalH * 0.6, d * 0.28]}>
-      <mesh castShadow receiveShadow material={wallMat}>
-        <boxGeometry args={[0.7, totalH * 0.8, 0.7]} />
-      </mesh>
-      <mesh position={[0, totalH * 0.4 + 0.1, 0]} castShadow material={wallMat}>
-        <boxGeometry args={[0.9, 0.15, 0.9]} />
-      </mesh>
-      <mesh position={[0, totalH * 0.4 + 0.3, 0]} castShadow material={wallMat}>
-        <cylinderGeometry args={[0.18, 0.22, 0.35, 8]} />
-      </mesh>
-    </group>
-  );
+function buildCraftProps(builder: GeometryBuilder, w: number, d: number) {
+  const m = new THREE.Matrix4().setPosition(-w / 2 - 0.4, 0.4, 0);
+  builder.pushMatrix(m);
+  builder.addBox("wood", 0.8, 0.8, 0.8);
+  builder.addCylinder("metal", 0.2, 0.2, 0.4, 8, [0, 0.6, 0]);
+  builder.popMatrix();
 }
 
-function BuildingShopSign({ sign, d, woodMat, metalMat }: any) {
-  return (
-    <group position={[1.4, 2.2, d / 2 + 0.05]}>
-      <mesh position={[0, 0, 0.35]} material={metalMat}>
-        <boxGeometry args={[0.05, 0.05, 0.7]} />
-      </mesh>
-      <mesh position={[0, -0.2, 0.2]} rotation={[0.6, 0, 0]} material={metalMat}>
-        <boxGeometry args={[0.04, 0.5, 0.04]} />
-      </mesh>
-      <mesh position={[0, -0.3, 0.55]} castShadow material={woodMat}>
-        <boxGeometry args={[0.06, 0.5, 0.5]} />
-      </mesh>
-      <mesh position={[0.04, -0.3, 0.55]} rotation={[0, Math.PI / 2, 0]} material={shopSignGoldMat}>
-        <circleGeometry args={[0.16, 8]} />
-      </mesh>
-    </group>
-  );
+function buildChimney(builder: GeometryBuilder, w: number, d: number, totalH: number) {
+  const m = new THREE.Matrix4().setPosition(-w * 0.32, totalH * 0.6, d * 0.28);
+  builder.pushMatrix(m);
+  builder.addBox("brick", 0.7, totalH * 0.8, 0.7);
+  builder.addBox("brick", 0.9, 0.15, 0.9, [0, totalH * 0.4 + 0.1, 0]);
+  builder.addCylinder("brick", 0.18, 0.22, 0.35, 8, [0, totalH * 0.4 + 0.3, 0]);
+  builder.popMatrix();
+}
+
+function buildShopSign(builder: GeometryBuilder, d: number) {
+  const m = new THREE.Matrix4().setPosition(1.4, 2.2, d / 2 + 0.05);
+  builder.pushMatrix(m);
+  builder.addBox("metal", 0.05, 0.05, 0.7, [0, 0, 0.35]);
+  builder.addBox("metal", 0.04, 0.5, 0.04, [0, -0.2, 0.2], [0.6, 0, 0]);
+  builder.addBox("wood", 0.06, 0.5, 0.5, [0, -0.3, 0.55]);
+  builder.addCylinder("shopSignGold", 0.16, 0.16, 0.02, 8, [0.04, -0.3, 0.55], [0, 0, Math.PI / 2]); 
+  builder.popMatrix();
 }
 
 export function NightLightingUpdater() {

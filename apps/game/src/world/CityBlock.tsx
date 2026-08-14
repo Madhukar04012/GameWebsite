@@ -1,10 +1,14 @@
 import { useMemo } from "react";
 import type { CityBlockDef, DistrictName, BuildingDef, ArchFamily } from "@legend/shared";
-import { CityBuilding } from "./CityBuilding";
+import { buildCityBuildingGeometry } from "./CityBuilding";
+import { GeometryBuilder } from "./GeometryBuilder";
+import { getDistrictMaterials } from "../materials/createDistrictMaterials";
+import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import * as THREE from "three";
 
 const courtyardMat = new THREE.MeshStandardMaterial({ color: "#3a3832", roughness: 0.9 });
 const blockPropMat = new THREE.MeshStandardMaterial({ color: "#8b5a2b", roughness: 0.9 });
+const shopSignGoldMat = new THREE.MeshStandardMaterial({ color: "#d4af37", roughness: 0.4, metalness: 0.8 });
 
 interface CityBlockProps {
   block: CityBlockDef;
@@ -147,6 +151,42 @@ export function generateBlockLayout(block: CityBlockDef, district: DistrictName)
 export function CityBlock({ block, district, color }: CityBlockProps) {
   const buildings = useMemo(() => generateBlockLayout(block, district), [block, district]);
 
+  const { geometries, interiors } = useMemo(() => {
+    const builder = new GeometryBuilder();
+    const interiors: any[] = [];
+    for (const b of buildings.bldgs) {
+      const res = buildCityBuildingGeometry(b, builder, district);
+      if (res.interiorDef) {
+        interiors.push(res);
+      }
+    }
+    
+    const merged: Record<string, THREE.BufferGeometry> = {};
+    for (const matKey in builder.geos) {
+      if (builder.geos[matKey].length > 0) {
+        merged[matKey] = BufferGeometryUtils.mergeGeometries(builder.geos[matKey]);
+      }
+    }
+    return { geometries: merged, interiors };
+  }, [buildings, district]);
+
+  const propGeos = useMemo(() => {
+    const builder = new GeometryBuilder();
+    for (const p of buildings.props) {
+       const m = new THREE.Matrix4().setPosition(p.x, 0.4, p.z);
+       builder.pushMatrix(m);
+       if (p.type === "barrel") {
+          builder.addCylinder("prop", 0.3, 0.3, 0.8, 8);
+       } else {
+          builder.addBox("prop", 0.8, 0.8, 0.8);
+       }
+       builder.popMatrix();
+    }
+    return builder.geos["prop"] ? BufferGeometryUtils.mergeGeometries(builder.geos["prop"]) : null;
+  }, [buildings]);
+
+  const mats = useMemo(() => getDistrictMaterials(district), [district]);
+
   return (
     <group>
       {/* Courtyard base */}
@@ -154,20 +194,38 @@ export function CityBlock({ block, district, color }: CityBlockProps) {
         <planeGeometry args={[block.w - 0.2, block.d - 0.2]} />
       </mesh>
 
-      {buildings.props.map((p, i) => (
-        <mesh key={`block-${block.seed}-prop-${i}`} position={[p.x, 0.4, p.z]} castShadow receiveShadow material={blockPropMat}>
-          {p.type === "barrel" ? <cylinderGeometry args={[0.3, 0.3, 0.8, 8]} /> : <boxGeometry args={[0.8, 0.8, 0.8]} />}
-        </mesh>
-      ))}
+      {propGeos && (
+        <mesh castShadow receiveShadow material={blockPropMat} geometry={propGeos} />
+      )}
 
-      {buildings.bldgs.map((b, i) => (
-        <CityBuilding
-          key={`block-${block.seed}-bldg-${i}`}
-          def={b}
-          color={color}
-          district={district}
-        />
-      ))}
+      {Object.entries(geometries).map(([matKey, geo]) => {
+         let mat;
+         if (matKey === "wall") mat = mats.wall;
+         else if (matKey === "plaster") mat = mats.plaster;
+         else if (matKey === "brick") mat = mats.brick;
+         else if (matKey === "wood") mat = mats.wood;
+         else if (matKey === "glass") mat = mats.glass;
+         else if (matKey === "metal") mat = mats.metal;
+         else if (matKey === "accent") mat = mats.accent;
+         else if (matKey === "banner") mat = mats.banner;
+         else if (matKey === "roof") mat = mats.roof;
+         else if (matKey === "shopSignGold") mat = shopSignGoldMat;
+         
+         return (
+           <mesh key={`block-${block.seed}-mat-${matKey}`} castShadow receiveShadow material={mat} geometry={geo} />
+         );
+      })}
+
+      {interiors.map((res, i) => {
+         const { interiorDef, x, baseY, z, w, d, storyH } = res;
+         return (
+           <group key={`interior-${i}`} position={[x, baseY, z]}>
+             <group position={[0, 0.3, 0]}>
+                <interiorDef.component w={w} d={d} storyH={storyH} />
+             </group>
+           </group>
+         );
+      })}
     </group>
   );
 }
