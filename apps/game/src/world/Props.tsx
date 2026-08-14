@@ -14,7 +14,7 @@ export function Props({ visible = true }: { visible?: boolean }) {
   if (!visible) return null;
 
   return (
-    <group>
+    <group userData={{ isProp: true }}>
       <InstancedBarrels spots={dressing.barrels} />
       <InstancedCrates spots={dressing.crates} />
       <PlazaBenches spots={dressing.benches} />

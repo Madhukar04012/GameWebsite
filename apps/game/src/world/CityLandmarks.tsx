@@ -30,7 +30,7 @@ const forgeMoltenMat = new THREE.MeshStandardMaterial({ color: "#ff4800", emissi
  */
 export function CityLandmarks() {
   return (
-    <group>
+    <group userData={{ isLandmark: true }}>
       {/* 1. Sovereign Seat of Solaria */}
       <RoyalHighPalace position={[0, heightAt(0, -36), -36]} />
 

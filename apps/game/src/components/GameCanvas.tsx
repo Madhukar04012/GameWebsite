@@ -2,7 +2,7 @@ import { Canvas } from "@react-three/fiber";
 import { ACESFilmicToneMapping, PCFShadowMap, PCFSoftShadowMap, BasicShadowMap, SRGBColorSpace } from "three";
 import { Scene } from "./Scene";
 import { useGameStore } from "../store/gameStore";
-import { useGraphicsStore } from "../store/graphicsStore";
+import { useGraphicsStore, resolveShadowMapType } from "../systems/GraphicsScalability";
 import { GamePhase } from "@legend/engine";
 import { Suspense } from "react";
 import { LoadingScreen } from "../systems/LoadingScreen";
@@ -17,10 +17,9 @@ import { PerformanceHUD } from "./PerformanceHUD";
 
 export function GameCanvas() {
   const phase = useGameStore((s) => s.phase);
-  const dpr = useGraphicsStore((s) => s.dpr);
-  const antialias = useGraphicsStore((s) => s.antialias);
-  const quality = useGraphicsStore((s) => s.quality);
-  const shadows = quality !== "low";
+  const settings = useGraphicsStore((s) => s.settings);
+  const activeTier = useGraphicsStore((s) => s.activeTier);
+  const shadows = settings.dynamicShadows;
   const showGame = phase === GamePhase.PLAYING || phase === GamePhase.SPAWNING;
   const showCinematic = phase === GamePhase.CINEMATIC;
 
@@ -32,19 +31,17 @@ export function GameCanvas() {
         camera={{ position: [0, 5, 10], fov: 60 }}
         style={{ width: "100%", height: "100%", display: "block" }}
         gl={{
-          antialias,
+          antialias: false,
           toneMapping: ACESFilmicToneMapping,
           toneMappingExposure: 1.15,
           outputColorSpace: SRGBColorSpace,
           logarithmicDepthBuffer: false,
         }}
-        dpr={dpr}
+        dpr={settings.maxDpr}
         onCreated={({ gl }) => {
           /* Read store outside hook context via getState() */
           const gfx = useGraphicsStore.getState();
-          const shadowType = gfx.quality === "ultra" || gfx.quality === "high" ? PCFSoftShadowMap :
-                             gfx.quality === "medium" ? PCFShadowMap : BasicShadowMap;
-          gl.shadowMap.type = shadowType;
+          gl.shadowMap.type = resolveShadowMapType(gfx.settings.shadowMapType);
           gl.shadowMap.enabled = shadows;
           gl.toneMappingExposure = 1.15;
         }}

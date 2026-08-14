@@ -4,6 +4,7 @@ import { Html } from '@react-three/drei';
 import { globalNavGraph } from '@legend/shared';
 import { useNPCStore } from '../store/npcStore';
 import { useDebugStore } from '../store/debugStore';
+import { CapitalProfilerHUD } from './CapitalProfilerHUD';
 
 export function PerformanceHUD() {
   const { gl } = useThree();
@@ -13,6 +14,10 @@ export function PerformanceHUD() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'F8') {
+        e.preventDefault();
+        debug.toggle('devProfile');
+      }
+      if (e.key === 'F11') {
         e.preventDefault();
         debug.toggle('perfNpcs');
       }
@@ -110,6 +115,7 @@ export function PerformanceHUD() {
   });
 
   return (
+    <>
     <Html center style={{ position: 'absolute', top: '-45vh', left: '-45vw', pointerEvents: 'none', width: '350px', zIndex: 9999 }}>
       <div style={{ background: 'rgba(0,0,0,0.85)', color: 'lime', padding: '15px', fontFamily: 'monospace', fontSize: '13px', borderRadius: '5px', whiteSpace: 'pre', userSelect: 'text', pointerEvents: 'auto' }}>
         <h3 style={{ margin: '0 0 10px 0', color: 'white' }}>PERF DIAGNOSTICS</h3>
@@ -117,7 +123,7 @@ export function PerformanceHUD() {
         Draw Calls: {metrics.drawCalls} | Tris: {(metrics.triangles / 1000000).toFixed(2)}M<br/>
         Geoms: {metrics.geometries} | Tex: {metrics.textures}<br/>
         <br/>
-        <span style={{color: debug.perfNpcs ? 'lime' : 'red'}}>[F8] NPCs: {debug.perfNpcs ? 'ON' : 'OFF'}</span><br/>
+        <span style={{color: debug.perfNpcs ? 'lime' : 'red'}}>[F11] NPCs: {debug.perfNpcs ? 'ON' : 'OFF'}</span><br/>
         Total: {metrics.npcTotal} | Rendered(Active): {metrics.npcActive}<br/>
         Tier 0: {metrics.npcTiers.t0} | Tier 1: {metrics.npcTiers.t1}<br/>
         A* req/s: {metrics.aStarReqs} | Avg A*: {metrics.aStarAvgTime}ms<br/>
@@ -126,5 +132,7 @@ export function PerformanceHUD() {
         <span style={{color: debug.perfLights ? 'lime' : 'red'}}>[F10] Dynamic Lights: {debug.perfLights ? 'ON' : 'OFF'}</span><br/>
       </div>
     </Html>
+    <CapitalProfilerHUD />
+    </>
   );
 }

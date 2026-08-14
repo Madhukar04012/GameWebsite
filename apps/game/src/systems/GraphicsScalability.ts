@@ -77,14 +77,14 @@ const TIER_SETTINGS: Record<GraphicsTier, QualitySettings> = {
     dynamicShadows: false,
   },
   [GraphicsTier.MEDIUM]: {
-    maxDpr: 1.5,
+    maxDpr: 1,
     shadowMapSize: 1024,
     shadowMapType: "pcfsoft",
     postProcessing: true,
     ssao: true,
     bloom: true,
     vignette: true,
-    multisampling: 2,
+    multisampling: 0,
     particleScale: 0.8,
     geometrySegments: 24,
     maxMonsters: 4,
@@ -94,14 +94,14 @@ const TIER_SETTINGS: Record<GraphicsTier, QualitySettings> = {
     dynamicShadows: true,
   },
   [GraphicsTier.HIGH]: {
-    maxDpr: 2,
+    maxDpr: 1,
     shadowMapSize: 1024,
     shadowMapType: "pcfsoft",
     postProcessing: true,
     ssao: true,
     bloom: true,
     vignette: true,
-    multisampling: 4,
+    multisampling: 0,
     particleScale: 1,
     geometrySegments: 32,
     maxMonsters: 6,
@@ -111,14 +111,14 @@ const TIER_SETTINGS: Record<GraphicsTier, QualitySettings> = {
     dynamicShadows: true,
   },
   [GraphicsTier.ULTRA]: {
-    maxDpr: 2,
+    maxDpr: 1.5,
     shadowMapSize: 2048,
     shadowMapType: "pcfsoft",
     postProcessing: true,
     ssao: true,
     bloom: true,
     vignette: true,
-    multisampling: 4,
+    multisampling: 0,
     particleScale: 1.5,
     geometrySegments: 48,
     maxMonsters: 10,
@@ -166,7 +166,8 @@ function classifyTier(gpu: GPUInfo | null): GraphicsTier {
 
   // NVIDIA
   if (/nvidia/.test(v) || /nvidia/.test(r)) {
-    if (/rtx/.test(r)) return GraphicsTier.ULTRA;
+    if (/rtx\s*4090|rtx\s*4080|rtx\s*3090/.test(r)) return GraphicsTier.ULTRA;
+    if (/rtx/.test(r)) return GraphicsTier.HIGH;
     if (/gtx\s*1[06]|gtx\s*9|gtx\s*16/.test(r)) return GraphicsTier.HIGH;
     if (/gtx/.test(r)) return GraphicsTier.MEDIUM;
     return GraphicsTier.HIGH;

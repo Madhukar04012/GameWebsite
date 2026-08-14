@@ -12,7 +12,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { Sky, Stars, Cloud, Clouds, Sparkles } from "@react-three/drei";
 import { useWorldStore } from "../store/worldStore";
-import { useGraphicsStore } from "../store/graphicsStore";
+import { useQualitySettings, useTierLabel } from "../systems/GraphicsScalability";
 
 /**
  * Compute 3D position on a sphere from altitude/azimuth angles at a given radius.
@@ -38,8 +38,9 @@ function moonBrightness(phase: number): number {
 export function DayNightCycle() {
   const advanceTime = useWorldStore((s) => s.advanceTime);
   const timeScale = useWorldStore((s) => s.timeScale);
-  const shadowMapSize = useGraphicsStore((s) => s.shadowMapSize);
-  const quality = useGraphicsStore((s) => s.quality);
+  const settings = useQualitySettings();
+  const shadowMapSize = settings.shadowMapSize;
+  const quality = useTierLabel().toLowerCase();
   const { scene, invalidate } = useThree();
 
   // Refs to 3D objects we mutate each frame (no re-render cost)

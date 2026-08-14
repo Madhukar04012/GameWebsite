@@ -26,6 +26,7 @@ export interface DebugState {
   perfNpcs: boolean;
   perfPostFX: boolean;
   perfLights: boolean;
+  devProfile: boolean;
   set: (key: keyof DebugState, value: boolean) => void;
   toggle: (key: keyof DebugState) => void;
 }
@@ -41,6 +42,7 @@ export const useDebugStore = create<DebugState>((set, get) => ({
   perfNpcs: false,
   perfPostFX: false,
   perfLights: false,
+  devProfile: false,
   set: (key, value) => set({ [key]: value } as Partial<DebugState>),
   toggle: (key) => set({ [key]: !get()[key] } as Partial<DebugState>),
 }));

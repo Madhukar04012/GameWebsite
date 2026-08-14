@@ -57,7 +57,7 @@ export function CapitalKingdom({ showLabels = false }: { showLabels?: boolean })
   }, []);
 
   return (
-    <group>
+    <group name="CapitalKingdom">
       {/* City stone ground — grand dark cobble plaza across the walled area. */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow material={plazaMat}>
         <planeGeometry args={[WORLD_BOUNDS.citySize, WORLD_BOUNDS.citySize]} />

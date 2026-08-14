@@ -63,7 +63,7 @@ export function CityBuilding({ def, color = "#cccccc", district = "residential" 
   const interiorDef = def.label ? INTERIOR_REGISTRY[def.label] : undefined;
 
   return (
-    <group position={[x, baseY, z]}>
+    <group position={[x, baseY, z]} userData={{ isBuilding: true }}>
       {/* 1. Foundation */}
       <mesh position={[0, fndCenterY, 0]} castShadow receiveShadow material={baseMat}>
         <boxGeometry args={[w + 0.5, fndHeight, d + 0.5]} />
